@@ -14,6 +14,7 @@ import { FaUserCheck } from "react-icons/fa";
 import { HiUserGroup } from "react-icons/hi";
 import { BsIntersect } from "react-icons/bs";
 import { LuListChecks } from "react-icons/lu";
+import { GoSignOut } from "react-icons/go";
 
 export const LANDING_NAV_LINKS = [
   { title: "Communities", href: "/communities" },
@@ -1552,6 +1553,11 @@ export const DASHBOARD_NAV_LINKS = [
         title: "Help & Support",
         href: "/dashboard/help",
         icon: IoIosHelpCircle,
+      },
+      {
+        title: "Log Out",
+        href: "/",
+        icon: GoSignOut,
       },
     ],
   },

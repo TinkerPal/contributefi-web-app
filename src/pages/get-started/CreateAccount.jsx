@@ -6,14 +6,62 @@ import { IoEye } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
 import { PiPlugsConnectedFill } from "react-icons/pi";
 import { useNavigate } from "react-router";
+import { SignUpSchema } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { setItemInLocalStorage } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import { createAccount } from "@/services";
+import { toast } from "react-toastify";
+import { useAuth } from "@/hooks/useAuth";
 
 function CreateAccount() {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [revealPassword, setRevealPassword] = useState(false);
 
   const handleRevealPassword = () => {
     setRevealPassword((revealPassword) => !revealPassword);
   };
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: zodResolver(SignUpSchema),
+  });
+
+  const { mutate: createAccountMutation, isPending: createAccountPending } =
+    useMutation({
+      mutationFn: (data) => createAccount(data),
+      onSuccess: async (data, variable) => {
+        console.log({ data });
+        if (data.status === 201) {
+          setItemInLocalStorage("user", data.data.content);
+          login({
+            token: data.data.content.accessToken.token,
+            user: null,
+            email: variable.email,
+          });
+          navigate("/get-started/verify-email");
+          toast.success("OTP sent successfully");
+          reset();
+        } else {
+          console.toast.error("Something went wrong");
+        }
+      },
+      onError: (error) => {
+        console.error("Error:", error.response.data.message);
+        toast.error(error.response.data.message);
+      },
+    });
+
+  const onSubmit = (data) => {
+    createAccountMutation(data);
+  };
+
   return (
     <div>
       <div className="mb-8 space-y-[8px]">
@@ -28,15 +76,6 @@ function CreateAccount() {
       <div className="space-y-[32px]">
         <div className="space-y-[16px]">
           <Button
-            className="w-full border-none bg-[#F7F9FD] text-[#09032A]"
-            variant="outline"
-            size="lg"
-          >
-            <FcGoogle />
-            Use Google
-          </Button>
-
-          <Button
             className="group w-full border-none bg-[#F7F9FD] text-[#09032A]"
             variant="outline"
             size="lg"
@@ -44,18 +83,29 @@ function CreateAccount() {
             <PiPlugsConnectedFill className="text-[#2F0FD1] group-hover:text-white" />
             Connect Wallet
           </Button>
+
+          <Button
+            className="w-full border-none bg-[#F7F9FD] text-[#09032A]"
+            variant="outline"
+            size="lg"
+          >
+            <FcGoogle />
+            Use Google
+          </Button>
         </div>
 
         <p className="relative flex items-center text-[14px] text-[#525866] before:mr-4 before:flex-1 before:border-t before:border-gray-300 after:ml-4 after:flex-1 after:border-t after:border-gray-300 sm:text-base">
           Or Sign Up with Email
         </p>
 
-        <form className="space-y-[32px]">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-[32px]">
           <CustomInput
             className="h-[48px]"
             label="Email Address"
             placeholder="Enter Email Address"
             type="email"
+            error={errors.email?.message}
+            {...register("email")}
           />
 
           <CustomInput
@@ -65,6 +115,8 @@ function CreateAccount() {
             type={revealPassword ? "text" : "password"}
             icon={revealPassword ? <IoMdEyeOff /> : <IoEye />}
             handleRevealPassword={handleRevealPassword}
+            error={errors.password?.message}
+            {...register("password")}
           />
 
           <div className="flex flex-col gap-2">
@@ -72,10 +124,10 @@ function CreateAccount() {
               className="w-full"
               variant="secondary"
               size="lg"
-              type="button"
-              onClick={() => navigate("/get-started/verify-email")}
+              type="submit"
+              disabled={createAccountPending}
             >
-              Continue
+              {createAccountPending ? "Processing..." : "Continue"}
             </Button>
 
             <Button
@@ -83,6 +135,7 @@ function CreateAccount() {
               variant="outline"
               size="lg"
               type="button"
+              disabled={createAccountPending}
               onClick={() => navigate("/login")}
             >
               Login

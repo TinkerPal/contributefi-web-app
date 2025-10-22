@@ -1,9 +1,91 @@
 import CustomInput from "@/components/CustomInput";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { maskEmail } from "@/lib/utils";
+import { VerifyEmailSchema } from "@/schemas";
+import { resendOTP, verifyEmail } from "@/services";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 
 function VerifyEmail() {
+  const { login, token, email } = useAuth();
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!email) {
+      navigate("/get-started");
+    }
+  }, [navigate, email]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: zodResolver(VerifyEmailSchema),
+  });
+
+  const { mutate: verifyEmailMutation, isPending: verifyEmailPending } =
+    useMutation({
+      mutationFn: (data) => verifyEmail(data),
+      onSuccess: async (data, variable) => {
+        console.log({ data });
+        if (data.status === 200) {
+          login({
+            token: token,
+            user: null,
+            email: email,
+            otp: variable.otp,
+          });
+          navigate("/get-started/username");
+          toast.success("Email verified successfully");
+          reset();
+        } else {
+          console.toast.error("Something went wrong");
+        }
+      },
+      onError: (error) => {
+        console.error("Error:", error.response.data.message);
+        toast.error(error.response.data.message);
+      },
+    });
+
+  const { mutate: resendOTPMutation, isPending: resendOTPPending } =
+    useMutation({
+      mutationFn: (data) => resendOTP(data),
+      onSuccess: async (data) => {
+        console.log({ data });
+        if (data.status === 200) {
+          toast.success("OTP sent successfully");
+        } else {
+          console.toast.error("Something went wrong");
+        }
+      },
+      onError: (error) => {
+        console.error("Error:", error.response.data.message);
+        toast.error(error.response.data.message);
+      },
+    });
+
+  const handleResendOTP = () => {
+    const data = { email };
+    resendOTPMutation(data);
+  };
+
+  const onSubmit = (data) => {
+    verifyEmailMutation(data);
+  };
+
+  if (!email) {
+    return null;
+  }
+
   return (
     <div>
       <div className="mb-8 space-y-[8px]">
@@ -11,16 +93,32 @@ function VerifyEmail() {
           Check Your Email
         </h2>
         <p className="text-base font-light text-[#525866] md:text-[18px]">
-          A six-digit code has been sent to john***@gmail.com.
+          A six-digit code has been sent to {maskEmail(email)}
         </p>
       </div>
 
-      <form className="space-y-[32px]">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-[32px]">
         <CustomInput
           className="h-[48px]"
           label="Provide OTP"
           placeholder="Enter OTP"
           type="text"
+          inputMode="numeric"
+          pattern="\d*"
+          error={errors.otp?.message}
+          {...register("otp")}
+          maxLength={6}
+          onKeyDown={(e) => {
+            if (
+              !/[0-9]/.test(e.key) &&
+              e.key !== "Backspace" &&
+              e.key !== "Tab" &&
+              e.key !== "ArrowLeft" &&
+              e.key !== "ArrowRight"
+            ) {
+              e.preventDefault();
+            }
+          }}
         />
 
         <div className="flex flex-col gap-2">
@@ -28,24 +126,21 @@ function VerifyEmail() {
             className="w-full"
             variant="secondary"
             size="lg"
-            type="button"
-            onClick={() => navigate("/get-started/username")}
+            type="submit"
+            disabled={verifyEmailPending}
           >
-            Submit OTP
+            {verifyEmailPending ? "Processing" : "Submit OTP"}
           </Button>
 
-          {/* <Button
-            className="w-full border-none bg-white shadow-none"
-            variant="outline"
-            size="lg"
-            type="button"
-          >
-            Login
-          </Button> */}
           <div className="text-base text-[#09032A]">
             <span>You missed it? </span>
-            <button type="button" className="cursor-pointer text-[#2F0FD1]">
-              Resend OTP
+            <button
+              onClick={handleResendOTP}
+              disabled={resendOTPPending}
+              type="button"
+              className="cursor-pointer text-[#2F0FD1] disabled:cursor-not-allowed disabled:text-[#2F0FD150]"
+            >
+              {resendOTPPending ? "Resending OTP..." : "Resend OTP"}
             </button>
           </div>
         </div>

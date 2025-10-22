@@ -1,15 +1,17 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaPlus, FaUserLarge } from "react-icons/fa6";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { PiGithubLogoFill } from "react-icons/pi";
 import { FaDiscord } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { FaTelegram } from "react-icons/fa";
 import { PiPlugsConnectedFill } from "react-icons/pi";
 import { Button } from "@/components/ui/button";
+import { getItemFromLocalStorage } from "@/lib/utils";
+import { FaEnvelope } from "react-icons/fa";
 
 const ACCOUNTS_TO_LINK = [
   {
@@ -35,6 +37,15 @@ const ACCOUNTS_TO_LINK = [
 ];
 
 function AccountConfiguration() {
+  const [username] = useState(getItemFromLocalStorage("username"));
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!username) {
+      navigate("/get-started/username");
+    }
+  }, [navigate, username]);
+
   const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleImageSelect = (e) => {
@@ -55,7 +66,7 @@ function AccountConfiguration() {
           Connect your other profiles for maximum access to tasks and engagement
         </p>
         <Link
-          to="/login"
+          to="/dashboard"
           className="absolute top-5 right-10 text-base font-medium text-[#2F0FD1] sm:top-10"
         >
           Skip till Later &gt;&gt;
@@ -100,9 +111,21 @@ function AccountConfiguration() {
               className="flex items-center justify-between rounded-[12px] bg-[#F7F9FD] px-4 py-3"
             >
               <div className="flex items-center gap-2">
-                {account.icon}
+                {account.title === "Wallet" ? (
+                  getItemFromLocalStorage("email") ? (
+                    account.icon
+                  ) : (
+                    <FaEnvelope className="text-[27px] text-[#2F0FD1]" />
+                  )
+                ) : (
+                  account.icon
+                )}
                 <span className="text-base font-normal text-[#09032A]">
-                  {account.title}
+                  {account.title === "Wallet"
+                    ? getItemFromLocalStorage("email")
+                      ? "Wallet"
+                      : "Email"
+                    : account.title}
                 </span>
               </div>
 

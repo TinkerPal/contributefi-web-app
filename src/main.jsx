@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 
-import { createBrowserRouter, Outlet } from "react-router";
+import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import HomePage from "./pages/HomePage";
 import RootLayout from "./components/RootLayout";
@@ -20,55 +20,84 @@ import Username from "./pages/get-started/Username";
 import Login from "./pages/login/Login";
 import AccountConfiguration from "./pages/get-started/AccountConfiguration";
 import Dashboard from "./pages/dashboard/Dashboard";
+import { ToastContainer } from "react-toastify";
+import ReactQueryProviders from "./components/providers";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./contexts/AuthContext";
+import PublicRoute from "./components/PublicRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    Component: RootLayout,
+    element: <PublicRoute />,
     children: [
-      { index: true, Component: HomePage },
       {
-        path: "learn-more",
-        element: (
-          <div className="flex h-screen items-center justify-center font-extrabold">
-            In Development...
-          </div>
-        ),
+        path: "",
+        Component: RootLayout,
+        children: [
+          { index: true, Component: HomePage },
+          {
+            path: "learn-more",
+            element: (
+              <div className="flex h-screen items-center justify-center font-extrabold">
+                In Development...
+              </div>
+            ),
+          },
+          { path: "tasks", Component: TaskPage },
+          { path: "communities", Component: CommunitiesPage },
+          { path: "*", Component: NotFound },
+        ],
       },
-      { path: "tasks", Component: TaskPage },
-      { path: "communities", Component: CommunitiesPage },
-      { path: "*", Component: NotFound },
     ],
   },
   {
     path: "/get-started",
-    Component: GetStartedLayout,
+    element: <PublicRoute />,
     children: [
-      { index: true, Component: CreateAccount },
-      { path: "verify-email", Component: VerifyEmail },
-      { path: "username", Component: Username },
-      { path: "account-configuration", Component: AccountConfiguration },
+      {
+        path: "",
+        Component: GetStartedLayout,
+        children: [
+          { index: true, Component: CreateAccount },
+          { path: "verify-email", Component: VerifyEmail },
+          { path: "username", Component: Username },
+          { path: "account-configuration", Component: AccountConfiguration },
+        ],
+      },
     ],
   },
   {
     path: "/login",
-    Component: GetStartedLayout,
-    children: [{ index: true, Component: Login }],
+    element: <PublicRoute />,
+    children: [
+      {
+        path: "",
+        Component: GetStartedLayout,
+        children: [{ index: true, Component: Login }],
+      },
+    ],
   },
   {
     path: "/dashboard",
-    Component: DashboardLayout,
+    element: <ProtectedRoute />,
     children: [
-      { index: true, Component: Dashboard },
-      { path: "overview", Component: Overview },
-      { path: "communities", Component: Communities },
-      { path: "tasks", Component: Tasks },
-      { path: "earnings", element: <></> },
-      { path: "analytics", element: <></> },
-      { path: "profile", element: <></> },
-      { path: "notifications", element: <></> },
-      { path: "help", element: <></> },
-      { path: "*", Component: NotFound },
+      {
+        path: "",
+        Component: DashboardLayout,
+        children: [
+          { index: true, Component: Dashboard },
+          { path: "overview", Component: Overview },
+          { path: "communities", Component: Communities },
+          { path: "tasks", Component: Tasks },
+          { path: "earnings", element: <></> },
+          { path: "analytics", element: <></> },
+          { path: "profile", element: <></> },
+          { path: "notifications", element: <></> },
+          { path: "help", element: <></> },
+          { path: "*", Component: NotFound },
+        ],
+      },
     ],
   },
   {
@@ -79,6 +108,11 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ReactQueryProviders>
+      <AuthProvider>
+        <RouterProvider router={router} />
+        <ToastContainer />
+      </AuthProvider>
+    </ReactQueryProviders>
   </StrictMode>,
 );

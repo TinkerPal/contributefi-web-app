@@ -9,6 +9,7 @@ export default function CustomInput({
   className = "",
   icon,
   handleRevealPassword,
+  error,
   ...props
 }) {
   return (
@@ -54,6 +55,8 @@ export default function CustomInput({
           </div>
         </>
       )}
+
+      {error && <span className="text-xs text-red-500">{error}</span>}
     </Label>
   );
 }

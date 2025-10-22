@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { DASHBOARD_NAV_LINKS } from "@/lib/constants";
 import { NavLink } from "react-router";
 
@@ -5,6 +6,7 @@ function DashboardNavigation({
   setSheetIsOpen,
   platform = "mobile" | "desktop",
 }) {
+  const { logout } = useAuth();
   return (
     <div
       className={`h-full space-y-4 px-4 ${platform === "mobile" ? "pt-8" : "pt-4"}`}
@@ -20,6 +22,11 @@ function DashboardNavigation({
               <li key={idx}>
                 <NavLink
                   onClick={() => {
+                    console.log(link);
+                    if (link.title === "Log Out") {
+                      logout()
+                      return;
+                    }
                     setSheetIsOpen(false);
                     window.scrollTo({
                       top: 0,
