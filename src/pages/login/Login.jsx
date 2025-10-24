@@ -8,7 +8,6 @@ import { useNavigate } from "react-router";
 import { LoginSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { setItemInLocalStorage } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { loginUser } from "@/services";
@@ -38,18 +37,37 @@ function Login() {
       console.log({ data });
       if (data.status === 201) {
         if (!data.data.content.isVerified) {
-          setItemInLocalStorage("email", variable.email);
+          login({
+            token: data.data.content.accessToken.token,
+            email: variable.email,
+            user: null,
+            otp: null,
+            username: null,
+          });
           navigate("/get-started/verify-email");
           toast.error("Kindly verify for email address");
-          return;
+        } else if (!data.data.content.username) {
+          login({
+            token: data.data.content.accessToken.token,
+            email: variable.email,
+            user: null,
+            otp: "123456",
+            username: null,
+          });
+          navigate("/get-started/username");
+          toast.error("Kindly select a username");
+        } else {
+          login({
+            token: data.data.content.accessToken.token,
+            email: null,
+            user: data.data.content,
+            otp: variable.otp,
+            username: null,
+          });
+          navigate("/dashboard");
+          toast.success("Login successful");
+          reset();
         }
-        login({
-          token: data.data.content.accessToken.token,
-          user: data.data.content,
-        });
-        navigate("/dashboard");
-        toast.success("Login successful");
-        reset();
       } else {
         console.toast.error("Something went wrong");
       }
