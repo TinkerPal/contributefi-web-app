@@ -22,10 +22,11 @@ import CustomSearch from "@/components/Search";
 import Sort from "@/components/Sort";
 import TasksCard from "@/components/TasksCard";
 import CreateCommunityForm from "@/components/CreateCommunityForm";
-import { useQuery } from "@tanstack/react-query";
-import { getCommunities, getCommunity } from "@/services";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getCommunities, getCommunity, joinCommunity } from "@/services";
 import Loader from "@/components/Loader";
 import Error from "@/components/Error";
+import { toast } from "react-toastify";
 
 const TASKS_PER_PAGE = 15;
 
@@ -96,6 +97,27 @@ function Communities() {
 
   console.log({ community });
 
+  const { mutate: joinCommunityMutation, isPending: joinCommunityPending } =
+    useMutation({
+      mutationFn: () => joinCommunity(communityId),
+      onSuccess: async (data) => {
+        console.log({ data });
+        if (data.status === 201) {
+          toast.success("Login successful");
+        } else {
+          toast.error("Something went wrong");
+        }
+      },
+      onError: (error) => {
+        console.error("Error:", error.response.data.message);
+        toast.error(error.response.data.message);
+      },
+    });
+
+  const handleJoinCommunity = () => {
+    joinCommunityMutation(communityId);
+  };
+
   return (
     <>
       {communityId ? (
@@ -142,7 +164,9 @@ function Communities() {
                       ))}
                     </div>
                     <p className="font-normal text-[#09032A] md:text-[18px]">
-                      {community.communityDescription}
+                      {community.communityDescription
+                        ? community.communityDescription
+                        : "Add a description"}
                     </p>
                   </div>
 
@@ -187,8 +211,12 @@ function Communities() {
                       })}
                     </div>
 
-                    <Button className="cursor-pointer rounded-md bg-[#2F0FD1] px-8 py-5 hover:bg-[#2F0FD1]/70">
-                      Join
+                    <Button
+                      onClick={handleJoinCommunity}
+                      disabled={joinCommunityPending}
+                      className="cursor-pointer rounded-md bg-[#2F0FD1] px-8 py-5 hover:bg-[#2F0FD1]/70"
+                    >
+                      {joinCommunityPending ? "Joining..." : "Join"}
                     </Button>
                   </div>
 

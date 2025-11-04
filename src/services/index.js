@@ -155,3 +155,22 @@ export const getCommunity = async (communityId) => {
 
   return data.content;
 };
+
+export function joinCommunity(communityId) {
+  const requestPayload = {
+    communityId,
+  };
+
+  const accessToken = getItemFromLocalStorage("accessToken");
+
+  return axios.post(
+    `${import.meta.env.VITE_BASE_URL}/members/join`,
+    requestPayload,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+}
