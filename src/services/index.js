@@ -146,6 +146,8 @@ export const getCommunities = async ({
     `${import.meta.env.VITE_BASE_URL}/communities?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}&${communityOwnerId !== "" && `communityOwnerId=${communityOwnerId}`}`,
   );
 
+  console.log({ data });
+
   return data.content;
 };
 
