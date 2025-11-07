@@ -7,7 +7,7 @@ function CommunitiesCard({ community, tag }) {
 
   const handleJoin = () => {
     if (tag === "home-page" || tag === "communities-page") {
-      toast.error("Kindly login or register to join");
+      toast.error("Kindly login or register");
       return;
     }
     if (tag === "overview") {
