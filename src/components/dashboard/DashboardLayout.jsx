@@ -82,9 +82,11 @@ function DashboardLayout() {
                 <CustomSearch placeholder="Search community" />
               </div>
 
-              <div>
-                <CreateCommunityForm />
-              </div>
+              {isAuthenticated && (
+                <div>
+                  <CreateCommunityForm />
+                </div>
+              )}
             </div>
           )}
 

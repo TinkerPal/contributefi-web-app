@@ -64,7 +64,7 @@ function Login() {
             otp: variable.otp,
             username: null,
           });
-          navigate("/dashboard");
+          navigate("/");
           toast.success("Login successful");
           reset();
         }
