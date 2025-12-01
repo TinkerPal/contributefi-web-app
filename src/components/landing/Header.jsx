@@ -1,12 +1,16 @@
 import { LANDING_NAV_LINKS } from "@/lib/constants";
 import { useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import AuthButtons from "../AuthButtons";
 import MobileNavigation from "../MobileNavigation";
 import Logo from "../Logo";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "../ui/button";
 
 function Header() {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="mx-auto flex w-full max-w-[1200px] items-center justify-between rounded-[360px] bg-[#F0F4FD] px-6 py-4 lg:py-6">
@@ -41,7 +45,18 @@ function Header() {
         </ul>
       </nav>
 
-      <AuthButtons device="desktop" />
+      {isAuthenticated ? (
+        <Button
+          className="hidden md:flex"
+          onClick={() => navigate("/dashboard")}
+          variant="secondary"
+          size="lg"
+        >
+          Go to Dashboard
+        </Button>
+      ) : (
+        <AuthButtons device="desktop" />
+      )}
 
       {/* MOBILE NAV */}
       <MobileNavigation
@@ -81,7 +96,17 @@ function Header() {
             </ul>
           </nav>
 
-          <AuthButtons device="mobile" />
+          {isAuthenticated ? (
+            <Button
+              onClick={() => navigate("/dashboard")}
+              variant="secondary"
+              size="lg"
+            >
+              Go to Dashboard
+            </Button>
+          ) : (
+            <AuthButtons device="mobile" />
+          )}
         </div>
       </MobileNavigation>
     </header>

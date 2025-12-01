@@ -6,12 +6,17 @@ function DashboardNavigation({
   setSheetIsOpen,
   platform = "mobile" | "desktop",
 }) {
-  const { logout } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
+
+  const navLinksToRender = isAuthenticated
+    ? DASHBOARD_NAV_LINKS
+    : DASHBOARD_NAV_LINKS.filter((section) => section.heading === "MAIN MENU");
+
   return (
     <div
       className={`h-full space-y-4 px-4 ${platform === "mobile" ? "pt-8" : "pt-4"}`}
     >
-      {DASHBOARD_NAV_LINKS.map((section, index) => (
+      {navLinksToRender.map((section, index) => (
         <div key={index} className="space-y-3">
           <div className="pl-6 text-[14px] font-medium text-[#525866]">
             {section.heading}
@@ -24,7 +29,7 @@ function DashboardNavigation({
                   onClick={() => {
                     console.log(link);
                     if (link.title === "Log Out") {
-                      logout()
+                      logout();
                       return;
                     }
                     setSheetIsOpen(false);
@@ -48,7 +53,10 @@ function DashboardNavigation({
             ))}
           </ul>
 
-          {index !== DASHBOARD_NAV_LINKS.length - 1 && <hr className="my-2" />}
+          {/* {index !== DASHBOARD_NAV_LINKS.length - 1 && <hr className="my-2" />} */}
+
+          {navLinksToRender.length > 1 &&
+            index < navLinksToRender.length - 1 && <hr className="my-2" />}
         </div>
       ))}
     </div>

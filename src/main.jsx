@@ -22,82 +22,56 @@ import AccountConfiguration from "./pages/get-started/AccountConfiguration";
 import Dashboard from "./pages/dashboard/Dashboard";
 import { ToastContainer } from "react-toastify";
 import ReactQueryProviders from "./components/providers";
-import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
-import PublicRoute from "./components/PublicRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <PublicRoute />,
+    Component: RootLayout,
     children: [
+      { index: true, Component: HomePage },
       {
-        path: "",
-        Component: RootLayout,
-        children: [
-          { index: true, Component: HomePage },
-          {
-            path: "learn-more",
-            element: (
-              <div className="flex h-screen items-center justify-center font-extrabold">
-                In Development...
-              </div>
-            ),
-          },
-          { path: "tasks", Component: TaskPage },
-          { path: "communities", Component: CommunitiesPage },
-          { path: "*", Component: NotFound },
-        ],
+        path: "learn-more",
+        element: (
+          <div className="flex h-screen items-center justify-center font-extrabold">
+            In Development...
+          </div>
+        ),
       },
+      { path: "tasks", Component: TaskPage },
+      { path: "communities", Component: CommunitiesPage },
+      { path: "*", Component: NotFound },
     ],
   },
   {
-    path: "/get-started",
-    element: <PublicRoute />,
+    path: "get-started",
+    Component: GetStartedLayout,
     children: [
-      {
-        path: "",
-        Component: GetStartedLayout,
-        children: [
-          { index: true, Component: CreateAccount },
-          { path: "verify-email", Component: VerifyEmail },
-          { path: "username", Component: Username },
-          { path: "account-configuration", Component: AccountConfiguration },
-        ],
-      },
+      { index: true, Component: CreateAccount },
+      { path: "verify-email", Component: VerifyEmail },
+      { path: "username", Component: Username },
+      { path: "account-configuration", Component: AccountConfiguration },
     ],
   },
   {
-    path: "/login",
-    element: <PublicRoute />,
-    children: [
-      {
-        path: "",
-        Component: GetStartedLayout,
-        children: [{ index: true, Component: Login }],
-      },
-    ],
+    path: "login",
+    Component: GetStartedLayout,
+    children: [{ index: true, Component: Login }],
   },
   {
-    path: "/dashboard",
-    element: <ProtectedRoute />,
+    path: "dashboard",
+    Component: DashboardLayout,
     children: [
-      {
-        path: "",
-        Component: DashboardLayout,
-        children: [
-          { index: true, Component: Dashboard },
-          { path: "overview", Component: Overview },
-          { path: "communities", Component: Communities },
-          { path: "tasks", Component: Tasks },
-          { path: "earnings", element: <></> },
-          { path: "analytics", element: <></> },
-          { path: "profile", element: <></> },
-          { path: "notifications", element: <></> },
-          { path: "help", element: <></> },
-          { path: "*", Component: NotFound },
-        ],
-      },
+      { index: true, Component: Dashboard },
+      { path: "overview", Component: Overview },
+      { path: "communities", Component: Communities },
+      { path: "tasks", Component: Tasks },
+      { path: "earnings", element: <></> },
+      { path: "analytics", element: <></> },
+      { path: "profile", element: <></> },
+      { path: "notifications", element: <></> },
+      { path: "help", element: <></> },
+      { path: "*", Component: NotFound },
     ],
   },
   {
@@ -105,6 +79,86 @@ const router = createBrowserRouter([
     Component: NotFound,
   },
 ]);
+
+// const router = createBrowserRouter([
+//   {
+//     path: "/",
+//     element: <PublicRoute />,
+//     children: [
+//       {
+//         path: "",
+//         Component: RootLayout,
+//         children: [
+//           { index: true, Component: HomePage },
+//           {
+//             path: "learn-more",
+//             element: (
+//               <div className="flex h-screen items-center justify-center font-extrabold">
+//                 In Development...
+//               </div>
+//             ),
+//           },
+//           { path: "tasks", Component: TaskPage },
+//           { path: "communities", Component: CommunitiesPage },
+//           { path: "*", Component: NotFound },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     path: "/get-started",
+//     element: <PublicRoute />,
+//     children: [
+//       {
+//         path: "",
+//         Component: GetStartedLayout,
+//         children: [
+//           { index: true, Component: CreateAccount },
+//           { path: "verify-email", Component: VerifyEmail },
+//           { path: "username", Component: Username },
+//           { path: "account-configuration", Component: AccountConfiguration },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     path: "/login",
+//     element: <PublicRoute />,
+//     children: [
+//       {
+//         path: "",
+//         Component: GetStartedLayout,
+//         children: [{ index: true, Component: Login }],
+//       },
+//     ],
+//   },
+//   {
+//     path: "/dashboard",
+//     element: <ProtectedRoute />,
+//     children: [
+//       {
+//         path: "",
+//         Component: DashboardLayout,
+//         children: [
+//           { index: true, Component: Dashboard },
+//           { path: "overview", Component: Overview },
+//           { path: "communities", Component: Communities },
+//           { path: "tasks", Component: Tasks },
+//           { path: "earnings", element: <></> },
+//           { path: "analytics", element: <></> },
+//           { path: "profile", element: <></> },
+//           { path: "notifications", element: <></> },
+//           { path: "help", element: <></> },
+//           { path: "*", Component: NotFound },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     path: "*",
+//     Component: NotFound,
+//   },
+// ]);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

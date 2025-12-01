@@ -6,11 +6,10 @@ function DashboardLogo() {
       onClick={() => {
         window.scrollTo({
           top: 0,
-         
         });
       }}
       className="text-[32px] font-extrabold text-[#2F0FD1]"
-      to="/dashboard/overview"
+      to="/"
     >
       CF
     </Link>

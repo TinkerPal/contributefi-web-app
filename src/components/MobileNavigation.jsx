@@ -47,7 +47,6 @@ function MobileNavigation({
                   setSheetIsOpen(false);
                   window.scrollTo({
                     top: 0,
-                    
                   });
                 }}
                 to="/"
@@ -60,10 +59,9 @@ function MobileNavigation({
                   setSheetIsOpen(false);
                   window.scrollTo({
                     top: 0,
-                    
                   });
                 }}
-                to="/dashboard/overview"
+                to="/"
               >
                 CF
               </Link>

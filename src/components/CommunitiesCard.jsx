@@ -1,16 +1,19 @@
 import { COMMUNITY_TAG_BG } from "@/lib/constants";
 import { useNavigate } from "react-router";
-import { toast } from "react-toastify";
 
 function CommunitiesCard({ community, tag }) {
   const navigate = useNavigate();
 
   const handleJoin = () => {
-    if (tag === "home-page" || tag === "communities-page") {
-      toast.error("Kindly login or register");
-      return;
-    }
-    if (tag === "overview") {
+    // if (tag === "home-page" || tag === "communities-page") {
+    //   toast.error("Kindly login or register");
+    //   return;
+    // }
+    if (
+      tag === "overview" ||
+      tag === "home-page" ||
+      tag === "communities-page"
+    ) {
       const params = new URLSearchParams(window.location.search);
       params.set("community", community?.id);
       navigate(`/dashboard/communities?${params.toString()}`, {
