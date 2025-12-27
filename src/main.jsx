@@ -23,6 +23,8 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import { ToastContainer } from "react-toastify";
 import ReactQueryProviders from "./components/providers";
 import { AuthProvider } from "./contexts/AuthContext";
+import { SidebarContextProvider } from "./contexts/SidebarContext";
+import Wagmi from "./components/Wagmi";
 
 const router = createBrowserRouter([
   {
@@ -80,93 +82,17 @@ const router = createBrowserRouter([
   },
 ]);
 
-// const router = createBrowserRouter([
-//   {
-//     path: "/",
-//     element: <PublicRoute />,
-//     children: [
-//       {
-//         path: "",
-//         Component: RootLayout,
-//         children: [
-//           { index: true, Component: HomePage },
-//           {
-//             path: "learn-more",
-//             element: (
-//               <div className="flex h-screen items-center justify-center font-extrabold">
-//                 In Development...
-//               </div>
-//             ),
-//           },
-//           { path: "tasks", Component: TaskPage },
-//           { path: "communities", Component: CommunitiesPage },
-//           { path: "*", Component: NotFound },
-//         ],
-//       },
-//     ],
-//   },
-//   {
-//     path: "/get-started",
-//     element: <PublicRoute />,
-//     children: [
-//       {
-//         path: "",
-//         Component: GetStartedLayout,
-//         children: [
-//           { index: true, Component: CreateAccount },
-//           { path: "verify-email", Component: VerifyEmail },
-//           { path: "username", Component: Username },
-//           { path: "account-configuration", Component: AccountConfiguration },
-//         ],
-//       },
-//     ],
-//   },
-//   {
-//     path: "/login",
-//     element: <PublicRoute />,
-//     children: [
-//       {
-//         path: "",
-//         Component: GetStartedLayout,
-//         children: [{ index: true, Component: Login }],
-//       },
-//     ],
-//   },
-//   {
-//     path: "/dashboard",
-//     element: <ProtectedRoute />,
-//     children: [
-//       {
-//         path: "",
-//         Component: DashboardLayout,
-//         children: [
-//           { index: true, Component: Dashboard },
-//           { path: "overview", Component: Overview },
-//           { path: "communities", Component: Communities },
-//           { path: "tasks", Component: Tasks },
-//           { path: "earnings", element: <></> },
-//           { path: "analytics", element: <></> },
-//           { path: "profile", element: <></> },
-//           { path: "notifications", element: <></> },
-//           { path: "help", element: <></> },
-//           { path: "*", Component: NotFound },
-//         ],
-//       },
-//     ],
-//   },
-//   {
-//     path: "*",
-//     Component: NotFound,
-//   },
-// ]);
-
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ReactQueryProviders>
-      <AuthProvider>
-        <RouterProvider router={router} />
-        <ToastContainer />
-      </AuthProvider>
-    </ReactQueryProviders>
+    <Wagmi>
+      <ReactQueryProviders>
+        <AuthProvider>
+          <SidebarContextProvider>
+            <RouterProvider router={router} />
+            <ToastContainer />
+          </SidebarContextProvider>
+        </AuthProvider>
+      </ReactQueryProviders>
+    </Wagmi>
   </StrictMode>,
 );

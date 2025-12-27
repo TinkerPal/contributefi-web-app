@@ -1,6 +1,6 @@
 import CustomInput from "@/components/CustomInput";
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { IoMdEyeOff } from "react-icons/io";
 import { IoEye } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
@@ -13,11 +13,13 @@ import { useMutation } from "@tanstack/react-query";
 import { createAccount } from "@/services";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
+import { SidebarContext } from "@/contexts/SidebarContext";
 
 function CreateAccount() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [revealPassword, setRevealPassword] = useState(false);
+  const { setIsOpen } = useContext(SidebarContext);
 
   const handleRevealPassword = () => {
     setRevealPassword((revealPassword) => !revealPassword);
@@ -62,7 +64,7 @@ function CreateAccount() {
   };
 
   return (
-    <div>
+    <div className="">
       <div className="mb-8 space-y-[8px]">
         <h2 className="text-[24px] font-bold text-[#09032A] md:text-[28px]">
           Create Account
@@ -81,6 +83,7 @@ function CreateAccount() {
             className="group w-full border-none bg-[#F7F9FD] text-[#09032A]"
             variant="outline"
             size="lg"
+            onClick={() => setIsOpen(true)}
           >
             <PiPlugsConnectedFill className="text-[#2F0FD1] group-hover:text-white" />
             Connect Wallet
@@ -131,17 +134,6 @@ function CreateAccount() {
             >
               {createAccountPending ? "Processing..." : "Continue"}
             </Button>
-
-            {/* <Button
-              className="w-full border-none bg-white shadow-none"
-              variant="outline"
-              size="lg"
-              type="button"
-              disabled={createAccountPending}
-              onClick={() => navigate("/login")}
-            >
-              Login
-            </Button> */}
           </div>
         </form>
       </div>

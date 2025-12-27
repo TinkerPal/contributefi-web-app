@@ -1,6 +1,6 @@
 import CustomInput from "@/components/CustomInput";
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { IoMdEyeOff } from "react-icons/io";
 import { IoEye } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
@@ -12,11 +12,14 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { loginUser } from "@/services";
 import { useAuth } from "@/hooks/useAuth";
+import { PiPlugsConnectedFill } from "react-icons/pi";
+import { SidebarContext } from "@/contexts/SidebarContext";
 
 function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [revealPassword, setRevealPassword] = useState(false);
+  const { setIsOpen } = useContext(SidebarContext);
 
   const handleRevealPassword = () => {
     setRevealPassword((revealPassword) => !revealPassword);
@@ -98,6 +101,16 @@ function Login() {
 
       <div className="space-y-[32px]">
         <div className="space-y-[16px]">
+          <Button
+            className="group w-full border-none bg-[#F7F9FD] text-[#09032A]"
+            variant="outline"
+            size="lg"
+            onClick={() => setIsOpen(true)}
+          >
+            <PiPlugsConnectedFill className="text-[#2F0FD1] group-hover:text-white" />
+            Connect Wallet
+          </Button>
+
           <Button
             className="w-full border-none bg-[#F7F9FD] text-[#09032A]"
             variant="outline"
