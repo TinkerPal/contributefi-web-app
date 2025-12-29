@@ -12,7 +12,7 @@ import { useIsDesktop } from "@/hooks/useIsDesktop";
 import OnChainQuest from "./OnChainQuest";
 import TechnicalQuest from "./TechnicalQuest";
 
-function NewQuest({ sheetIsOpen, setSheetIsOpen }) {
+function NewQuest({ sheetIsOpen, setSheetIsOpen, setOpenQuestSuccess }) {
   const isDesktop = useIsDesktop();
 
   const side = isDesktop ? "right" : "bottom";
@@ -38,8 +38,9 @@ function NewQuest({ sheetIsOpen, setSheetIsOpen }) {
         </SheetHeader>
 
         <GrowthQuest
-        // sheetIsOpen={sheetIsOpen}
-        // setSheetIsOpen={setSheetIsOpen}
+          // sheetIsOpen={sheetIsOpen}
+          setSheetIsOpen={setSheetIsOpen}
+          setOpenQuestSuccess={setOpenQuestSuccess}
         />
         <OnChainQuest
         // sheetIsOpen={sheetIsOpen}

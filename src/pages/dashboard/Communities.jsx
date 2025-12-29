@@ -35,6 +35,7 @@ import Error from "@/components/Error";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
 import NewQuest from "@/components/dashboard/NewQuest";
+import QuestSuccess from "@/components/dashboard/QuestSuccess";
 
 const TASKS_PER_PAGE = 15;
 
@@ -48,6 +49,7 @@ function Communities() {
   const [communityOwnerId, setCommunityOwnerId] = useState();
   const [displayedCommunities, setDisplayedCommunities] = useState([]);
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
+  const [openQuestSuccess, setOpenQuestSuccess] = useState(false);
 
   const LIMIT = 10;
   const OFFSET = (currentPage - 1) * LIMIT;
@@ -272,6 +274,10 @@ function Communities() {
     <>
       {communityId ? (
         <div className="space-y-6">
+          <QuestSuccess
+            openQuestSuccess={openQuestSuccess}
+            setOpenQuestSuccess={setOpenQuestSuccess}
+          />
           <div className="md:hidden">
             <BackButton />
           </div>
@@ -374,6 +380,7 @@ function Communities() {
                         <NewQuest
                           sheetIsOpen={sheetIsOpen}
                           setSheetIsOpen={setSheetIsOpen}
+                          setOpenQuestSuccess={setOpenQuestSuccess}
                         />
                       </div>
                     ) : (

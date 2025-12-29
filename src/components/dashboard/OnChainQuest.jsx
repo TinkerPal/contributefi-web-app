@@ -54,8 +54,6 @@ function OnChainQuest({ sheetIsOpen, setSheetIsOpen }) {
     name: "tasks", // matches defaultValues
   });
 
-  console.log({ errors });
-
   const onSubmit = (data) => {
     console.log(data);
   };

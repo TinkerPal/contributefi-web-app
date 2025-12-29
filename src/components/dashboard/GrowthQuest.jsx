@@ -17,17 +17,53 @@ import CustomSelect from "../CustomSelect";
 import { Checkbox, Field, Label, Radio, RadioGroup } from "@headlessui/react";
 import CustomDateSelect from "../CustomDateSelect";
 import { RiDeleteBin6Fill } from "react-icons/ri";
+import { Fragment, useState } from "react";
+import { IoChevronDown, IoChevronUp } from "react-icons/io5";
+import { getItemFromLocalStorage, setItemInLocalStorage } from "@/lib/utils";
+import { FaArrowLeftLong } from "react-icons/fa6";
+import { formatDateToYYYYMMDD } from "@/utils";
 
 const REWARD_MODES = ["Overall Reward", "Individual Task Reward"];
 const REWARD_TYPES = [
   { label: "Token", value: "token" },
-  { label: "Cash", value: "cash" },
+  { label: "Points", value: "points" },
+];
+const TASK_TYPES = [
+  { label: "Follow on Twitter", value: "follow_twitter" },
+  { label: "Comment on Twitter", value: "comment_twitter" },
 ];
 
-function GrowthQuest({ sheetIsOpen, setSheetIsOpen }) {
+const TASK_PREVIEW_CONFIG = {
+  follow_twitter: {
+    label: "Twitter Profile",
+    field: "twitterUrl",
+  },
+  comment_twitter: {
+    label: "Tweet URL",
+    field: "tweetUrl",
+  },
+};
+
+function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
   const isDesktop = useIsDesktop();
 
+  const [open, setOpen] = useState(false);
+
   const side = isDesktop ? "right" : "bottom";
+  const [collapsedTasks, setCollapsedTasks] = useState({});
+  const [step, setStep] = useState(getItemFromLocalStorage("step") || 1);
+  const [step1Data, setStep1Data] = useState(
+    getItemFromLocalStorage("step1Data") || null,
+  );
+
+  console.log({ step1Data });
+
+  const toggleTask = (index) => {
+    setCollapsedTasks((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
 
   const {
     register,
@@ -42,13 +78,18 @@ function GrowthQuest({ sheetIsOpen, setSheetIsOpen }) {
       questTitle: "",
       rewardType: "",
       tokenContract: null,
-      numberOfWinners: 0,
+      numberOfWinners: null,
       winnerSelectionMethod: "",
       runContinuously: false,
       startDate: null,
       endDate: null,
       rewardMode: null,
-      pointsPerWinner: 0,
+      pointsPerWinner: null,
+      tasks: [
+        {
+          type: "",
+        },
+      ],
     },
   });
 
@@ -57,16 +98,20 @@ function GrowthQuest({ sheetIsOpen, setSheetIsOpen }) {
     name: "tasks",
   });
 
-  console.log({ errors });
-
   const onSubmit = (data) => {
     console.log(data);
+    setItemInLocalStorage("step1Data", data);
+    setStep(2);
+    setStep1Data(data);
+    setItemInLocalStorage("step", 2);
   };
 
   const rewardType = watch("rewardType");
 
+  console.log({ errors, step });
+
   return (
-    <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <div className="flex cursor-pointer items-center justify-between gap-4 rounded-md bg-[#F7F9FD] p-5 hover:bg-[#F7F9FF]/70">
           <div className="space-y-2">
@@ -88,75 +133,433 @@ function GrowthQuest({ sheetIsOpen, setSheetIsOpen }) {
         className={`bg-white ${side === "bottom" ? "h-[80%]" : "sm:max-w-xl"} overflow-scroll`}
       >
         <SheetHeader className="bg-white px-4 shadow">
-          <SheetTitle className="text-[28px] font-bold text-[#09032A]">
-            Growth Quest
-          </SheetTitle>
-          <SheetDescription className="font-[300] text-[#525866]">
-            Boost visibility and engagement across social media
-          </SheetDescription>
+          {step === 2 || step === 3 ? (
+            <>
+              <FaArrowLeftLong
+                className="text-3xl text-[#050215]"
+                onClick={() => setStep((prev) => prev - 1)}
+              />
+              <SheetTitle className="text-[28px] font-bold text-[#09032A]">
+                Quest Preview
+              </SheetTitle>
+              <SheetDescription className="font-[300] text-[#525866]">
+                Summary of the quest created
+              </SheetDescription>
+            </>
+          ) : (
+            <>
+              {" "}
+              <SheetTitle className="text-[28px] font-bold text-[#09032A]">
+                Growth Quest
+              </SheetTitle>
+              <SheetDescription className="font-[300] text-[#525866]">
+                Boost visibility and engagement across social media
+              </SheetDescription>
+            </>
+          )}
         </SheetHeader>
 
-        <form
-          className="grid gap-5 px-4 py-4"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <CustomInput
-            label="Quest Title"
-            placeholder="Enter Title"
-            type="text"
-            error={errors.questTitle?.message}
-            {...register("questTitle")}
-          />
+        {step === 1 ? (
+          <>
+            {" "}
+            <form
+              className="grid gap-5 px-4 py-4"
+              onSubmit={handleSubmit(onSubmit)}
+            >
+              <CustomInput
+                label="Quest Title"
+                placeholder="Enter Title"
+                type="text"
+                error={errors.questTitle?.message}
+                {...register("questTitle")}
+              />
 
-          <CustomSelect
-            label="Reward Type"
-            placeholder="Select"
-            options={REWARD_TYPES}
-            error={errors.rewardType?.message}
-            register={register("rewardType")}
-          />
+              <CustomSelect
+                label="Reward Type"
+                placeholder="Select"
+                options={REWARD_TYPES}
+                error={errors.rewardType?.message}
+                register={register("rewardType")}
+              />
 
-          {rewardType === "token" && (
-            <CustomInput
-              label="Token Contract"
-              placeholder="000000000000000000000"
-              type="text"
-              error={errors.tokenContract?.message}
-              {...register("tokenContract")}
-              className={rewardType !== "token" ? "hidden" : ""}
-            />
-          )}
+              {rewardType === "token" && (
+                <CustomInput
+                  label="Token Contract"
+                  placeholder="000000000000000000000"
+                  type="text"
+                  error={errors.tokenContract?.message}
+                  {...register("tokenContract")}
+                  className={rewardType !== "token" ? "hidden" : ""}
+                />
+              )}
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <CustomInput
-              label="Number of Winners"
-              placeholder="0"
-              type="number"
-              error={errors.numberOfWinners?.message}
-              {...register("numberOfWinners", { valueAsNumber: true })}
-            />
+              <div className="grid gap-5 sm:grid-cols-2">
+                <CustomInput
+                  label="Number of Winners"
+                  placeholder="eg 50"
+                  type="number"
+                  error={errors.numberOfWinners?.message}
+                  {...register("numberOfWinners", { valueAsNumber: true })}
+                />
 
-            <CustomSelect
-              label="Winner Selection Method"
-              placeholder="Select"
-              options={[
-                { label: "Random", value: "random" },
-                { label: "FCFS", value: "fcfs" },
-              ]}
-              error={errors.winnerSelectionMethod?.message}
-              register={register("winnerSelectionMethod")}
-            />
-          </div>
+                <CustomSelect
+                  label="Winner Selection Method"
+                  placeholder="Select"
+                  options={[
+                    { label: "Random", value: "random" },
+                    { label: "FCFS", value: "fcfs" },
+                  ]}
+                  error={errors.winnerSelectionMethod?.message}
+                  register={register("winnerSelectionMethod")}
+                />
+              </div>
 
-          <div className="grid gap-2">
-            <div className="flex w-full items-center justify-between text-[14px] font-light text-[#09032A]">
-              Quest Duration
-              <div className="ml-auto flex items-center gap-2">
-                <p className="text-[14px] font-[300] text-[#09032A]">
-                  Run quest continuously
-                </p>
+              <div className="grid gap-2">
+                <div className="flex w-full items-center justify-between text-[14px] font-light text-[#09032A]">
+                  Quest Duration
+                  <div className="ml-auto flex items-center gap-2">
+                    <p className="text-[14px] font-[300] text-[#09032A]">
+                      Run quest continuously
+                    </p>
+                    <Controller
+                      name="runContinuously"
+                      control={control}
+                      defaultValue={false}
+                      render={({ field }) => (
+                        <Checkbox
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="group block size-4 shrink-0 rounded border border-[#D0D5DD] bg-white data-checked:border-none data-checked:bg-[#2F0FD1] data-disabled:cursor-not-allowed data-disabled:bg-orange-200"
+                        >
+                          <svg
+                            className="stroke-white opacity-0 group-data-checked:opacity-100"
+                            viewBox="0 0 14 14"
+                            fill="none"
+                          >
+                            <path
+                              d="M3 8L6 11L11 3.5"
+                              strokeWidth={2}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </Checkbox>
+                      )}
+                    />
+                  </div>
+                </div>
+
                 <Controller
-                  name="runContinuously"
+                  name="startDate"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomDateSelect
+                      startDate={field.value}
+                      endDate={watch("endDate")}
+                      onStartDateChange={field.onChange}
+                      onEndDateChange={(date) =>
+                        setValue("endDate", date, { shouldValidate: true })
+                      }
+                      runContinuously={watch("runContinuously")}
+                      startDateError={errors.startDate?.message}
+                      endDateError={errors.endDate?.message}
+                    />
+                  )}
+                />
+              </div>
+
+              <Controller
+                name="rewardMode"
+                control={control}
+                render={({ field }) => (
+                  <div className="grid gap-2">
+                    <p className="text-[14px] font-light text-[#09032A]">
+                      Reward Mode
+                    </p>
+                    <RadioGroup
+                      value={field.value}
+                      onChange={field.onChange}
+                      className="flex w-[80%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+                    >
+                      {REWARD_MODES.map((plan) => (
+                        <Field key={plan} className="flex items-center gap-2">
+                          <Radio
+                            value={plan}
+                            className="group flex size-5 items-center justify-center rounded-full border bg-white data-checked:bg-[#2F0FD1]"
+                          >
+                            <span className="invisible size-2 rounded-full bg-white group-data-checked:visible" />
+                          </Radio>
+                          <Label className="text-[15px] font-[300] text-[#09032A]">
+                            {plan}
+                          </Label>
+                        </Field>
+                      ))}
+                    </RadioGroup>
+
+                    {errors.rewardMode && (
+                      <span className="text-xs text-red-500">
+                        {errors.rewardMode.message}
+                      </span>
+                    )}
+                  </div>
+                )}
+              />
+
+              <CustomInput
+                label={`${rewardType === "token" ? "How many tokens per winner?" : "How many points per winner?"}`}
+                placeholder="eg 50"
+                type="number"
+                error={errors.pointsPerWinner?.message}
+                {...register("pointsPerWinner", { valueAsNumber: true })}
+              />
+
+              <hr className="border border-[#F0F4FD]" />
+
+              {fields.map((task, index) => (
+                <div key={task.id} className="grid gap-4">
+                  <div className="flex items-center justify-between bg-[#EDF2FF] px-3 py-2">
+                    <p className="font-semibold text-[#2F0FD1]">Task </p>
+
+                    <div className="flex items-center gap-2">
+                      {/* Delete */}
+                      {fields.length > 1 && (
+                        <button
+                          type="button"
+                          className="rounded bg-white p-2"
+                          onClick={() => remove(index)}
+                        >
+                          <RiDeleteBin6Fill className="text-red-500" />
+                        </button>
+                      )}
+
+                      {/* Collapse toggle */}
+                      <button
+                        type="button"
+                        onClick={() => toggleTask(index)}
+                        className="rounded bg-white p-2"
+                      >
+                        {collapsedTasks[index] ? (
+                          <IoChevronDown />
+                        ) : (
+                          <IoChevronUp />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {!collapsedTasks[index] && (
+                    <>
+                      <CustomSelect
+                        label="Select Task Type"
+                        placeholder="Select"
+                        options={TASK_TYPES}
+                        error={errors.tasks?.[index]?.type?.message}
+                        register={register(`tasks.${index}.type`)}
+                      />
+
+                      {(watch(`tasks.${index}.type`) === "comment_twitter" ||
+                        watch(`tasks.${index}.type`) === "follow_twitter") && (
+                        <CustomInput
+                          label="Twitter (X) Link"
+                          error={errors.tasks?.[index]?.twitterUrl?.message}
+                          {...register(`tasks.${index}.twitterUrl`)}
+                          placeholder="Paste URL"
+                          prefix="https://"
+                          type="text"
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
+              ))}
+
+              <div className="flex flex-wrap items-center gap-2">
+                {fields.length > 1 && (
+                  <>
+                    {" "}
+                    <Controller
+                      name="makeConcurrent"
+                      control={control}
+                      defaultValue={false}
+                      render={({ field }) => (
+                        <Checkbox
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="group block size-4 shrink-0 rounded border border-[#D0D5DD] bg-white data-checked:border-none data-checked:bg-[#2F0FD1] data-disabled:cursor-not-allowed data-disabled:bg-orange-200"
+                        >
+                          <svg
+                            className="stroke-white opacity-0 group-data-checked:opacity-100"
+                            viewBox="0 0 14 14"
+                            fill="none"
+                          >
+                            <path
+                              d="M3 8L6 11L11 3.5"
+                              strokeWidth={2}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </Checkbox>
+                      )}
+                    />
+                    <p className="text-[14px] font-[300] text-[#09032A]">
+                      Make the tasks concurrent
+                    </p>
+                  </>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => append({ type: "", points: 0 })}
+                  className="ml-auto flex cursor-pointer items-center gap-1 text-[#2F0FD1]"
+                >
+                  + Add Another Task
+                </button>
+              </div>
+
+              <Button
+                variant="secondary"
+                size="lg"
+                type="submit"
+                className="mt-5 w-full"
+              >
+                Continue
+              </Button>
+            </form>
+          </>
+        ) : (
+          <div className="px-4 py-4 text-[14px]">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <p className="w-1/2 font-[300] text-[#525866]">Quest Title</p>
+                <p className="w-1/2 font-medium text-[#050215]">
+                  {step1Data.questTitle}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <p className="w-1/2 font-[300] text-[#525866]">Reward Type</p>
+                <p className="w-1/2 font-medium text-[#050215]">
+                  {step1Data.rewardType}
+                </p>
+              </div>
+
+              {step1Data.rewardType === "token" && (
+                <div className="flex items-center gap-2">
+                  <p className="w-1/2 font-[300] text-[#525866]">
+                    Token Contract
+                  </p>
+                  <p className="w-1/2 font-medium text-[#050215]">
+                    {step1Data.tokenContract}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <p className="w-1/2 font-[300] text-[#525866]">
+                  Number of Winners
+                </p>
+                <p className="w-1/2 font-medium text-[#050215]">
+                  {step1Data.numberOfWinners}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <p className="w-1/2 font-[300] text-[#525866]">
+                  Quest Duration
+                </p>
+                <p className="w-1/2 font-medium text-[#050215]">
+                  {formatDateToYYYYMMDD(new Date(step1Data.startDate))} to{" "}
+                  {formatDateToYYYYMMDD(new Date(step1Data.endDate))}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <p className="w-1/2 font-[300] text-[#525866]">
+                  Selection Method
+                </p>
+                <p className="w-1/2 font-medium text-[#050215]">
+                  {step1Data.winnerSelectionMethod}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <p className="w-1/2 font-[300] text-[#525866]">Reward Mode</p>
+                <p className="w-1/2 font-medium text-[#050215]">
+                  {step1Data.rewardMode}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <p className="w-1/2 font-[300] text-[#525866]">
+                  Reward Per Winner
+                </p>
+                <p className="w-1/2 font-medium text-[#050215]">
+                  {step1Data.pointsPerWinner} XLM
+                </p>
+              </div>
+            </div>
+
+            <hr className="my-6 border border-[#F0F4FD]" />
+
+            {step1Data.tasks.map((task, index) => {
+              const config = TASK_PREVIEW_CONFIG[task.type];
+
+              return (
+                <Fragment key={index}>
+                  <div className="mb-4">
+                    <div className="rounded-[8px] bg-[#EDF2FF] px-3 py-2">
+                      <div className="flex items-center justify-between">
+                        <p className="font-semibold text-[#2F0FD1]">
+                          Task {index + 1}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => toggleTask(index)}
+                          className="rounded bg-white p-2"
+                        >
+                          {collapsedTasks[index] ? (
+                            <IoChevronDown />
+                          ) : (
+                            <IoChevronUp />
+                          )}
+                        </button>
+                      </div>
+
+                      {!collapsedTasks[index] && (
+                        <div className="mt-2 flex justify-between rounded-[8px] bg-white p-4">
+                          <div className="space-y-2">
+                            <p className="font-[300] text-[#525866]">
+                              Task Type
+                            </p>
+                            <p className="font-medium text-[#050215]">
+                              {task.type}
+                            </p>
+                          </div>
+
+                          {config && (
+                            <div className="space-y-2">
+                              <p className="font-[300] text-[#525866]">
+                                {config.label}
+                              </p>
+                              <p className="font-medium text-[#050215]">
+                                {task[config.field]}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Fragment>
+              );
+            })}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <>
+                {" "}
+                <Controller
+                  name="makeConcurrent"
                   control={control}
                   defaultValue={false}
                   render={({ field }) => (
@@ -180,120 +583,72 @@ function GrowthQuest({ sheetIsOpen, setSheetIsOpen }) {
                     </Checkbox>
                   )}
                 />
-              </div>
-            </div>
-
-            <Controller
-              name="startDate"
-              control={control}
-              render={({ field }) => (
-                <CustomDateSelect
-                  startDate={field.value}
-                  endDate={watch("endDate")}
-                  onStartDateChange={field.onChange}
-                  onEndDateChange={(date) =>
-                    setValue("endDate", date, { shouldValidate: true })
-                  }
-                  runContinuously={watch("runContinuously")}
-                  startDateError={errors.startDate?.message}
-                  endDateError={errors.endDate?.message}
-                />
-              )}
-            />
-          </div>
-
-          <Controller
-            name="rewardMode"
-            control={control}
-            render={({ field }) => (
-              <div className="grid gap-2">
-                <p className="text-[14px] font-light text-[#09032A]">
-                  Reward Mode
+                <p className="text-[14px] font-[300] text-[#09032A]">
+                  Reward all participants with points
                 </p>
-                <RadioGroup
-                  value={field.value}
-                  onChange={field.onChange}
-                  className="flex w-[80%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
-                >
-                  {REWARD_MODES.map((plan) => (
-                    <Field key={plan} className="flex items-center gap-2">
-                      <Radio
-                        value={plan}
-                        className="group flex size-5 items-center justify-center rounded-full border bg-white data-checked:bg-[#2F0FD1]"
-                      >
-                        <span className="invisible size-2 rounded-full bg-white group-data-checked:visible" />
-                      </Radio>
-                      <Label className="text-[15px] font-[300] text-[#09032A]">
-                        {plan}
-                      </Label>
-                    </Field>
-                  ))}
-                </RadioGroup>
-
-                {errors.rewardMode && (
-                  <span className="text-xs text-red-500">
-                    {errors.rewardMode.message}
-                  </span>
-                )}
-              </div>
-            )}
-          />
-
-          <CustomInput
-            label="How many points per winner?"
-            placeholder="eg 50"
-            type="number"
-            error={errors.pointsPerWinner?.message}
-            {...register("pointsPerWinner", { valueAsNumber: true })}
-          />
-
-          <hr className="border border-[#F0F4FD]" />
-
-          {fields.map((task, index) => (
-            <div key={task.id} className="grid gap-4">
-              <div className="flex items-center justify-between bg-[#EDF2FF] px-3 py-2">
-                <p className="font-semibold text-[#2F0FD1]">Task {index + 1}</p>
-                {fields.length > 1 && (
-                  <button
-                    type="button"
-                    className="text-md bg-white p-2"
-                    onClick={() => remove(index)}
-                  >
-                    <RiDeleteBin6Fill className="text-red-500" />
-                  </button>
-                )}
-              </div>
-
-              <CustomSelect
-                label="Select Task Type"
-                placeholder="Select"
-                options={[
-                  { label: "Option 1", value: "option1" },
-                  { label: "Option 2", value: "option2" },
-                ]}
-                error={errors.taskType?.message}
-                register={register("taskType")}
-              />
+              </>
             </div>
-          ))}
 
-          <button
-            type="button"
-            onClick={() => append({ type: "", points: 0 })}
-            className="ml-auto flex cursor-pointer items-center gap-1 text-[#2F0FD1]"
-          >
-            + Add Another Task
-          </button>
+            <div className="mt-6 space-y-2 rounded-[8px] bg-[#EDF2FF] px-9 py-6">
+              {step === 2 && (
+                <>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-[300] text-[#09032A]">
+                      Total Rewards (to be deposited):
+                    </p>
+                    <p className="text-2xl font-bold text-[#050215]">
+                      6,000 XLM
+                    </p>
+                  </div>
 
-          <Button
-            variant="secondary"
-            size="lg"
-            type="submit"
-            className="mt-5 w-full"
-          >
-            Continue
-          </Button>
-        </form>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-[300] text-[#09032A]">Fees to Charge</p>
+                    <p className="text-2xl font-bold text-[#050215]">100 XLM</p>
+                  </div>
+                </>
+              )}
+
+              {step === 3 && (
+                <div className="space-y-1 text-center">
+                  <p className="font-[300] text-[#09032A]">Amount Deposited</p>
+                  <p className="text-2xl font-bold text-[#050215]">6,000 XLM</p>
+                </div>
+              )}
+
+              {step === 2 && (
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  type="submit"
+                  className="mt-5 w-full"
+                  onClick={() => {
+                    setStep((prev) => prev + 1);
+                    setItemInLocalStorage("step", 3);
+                  }}
+                >
+                  Deposit Token
+                </Button>
+              )}
+
+              {step === 3 && (
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  type="submit"
+                  className="mt-5 w-full"
+                  onClick={() => {
+                    // setStep((prev) => prev + 1);
+                    // setItemInLocalStorage("step", 3);
+                    setSheetIsOpen(false);
+                    setOpenQuestSuccess(true);
+                  }}
+                >
+                  Publish Quest
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );

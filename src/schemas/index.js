@@ -62,33 +62,80 @@ export const CreateCommunitySchema = z.object({
   message: z.string().optional(),
 });
 
+const TaskSchema = z
+  .object({
+    type: z.string().min(1, "Task type is required"),
+    twitterUrl: socialUrlSchema("Enter a valid Twitter URL").optional(),
+    tweetUrl: socialUrlSchema("Enter a valid Tweet URL").optional(),
+  })
+  .superRefine((task, ctx) => {
+    if (task.type === "follow_twitter") {
+      if (!task.twitterUrl || task.twitterUrl.trim() === "") {
+        ctx.addIssue({
+          path: ["twitterUrl"],
+          message: "Twitter URL is required",
+          code: "custom",
+        });
+      }
+    }
+
+    if (task.type === "comment_twitter") {
+      if (!task.tweetUrl || task.tweetUrl.trim() === "") {
+        ctx.addIssue({
+          path: ["tweetUrl"],
+          message: "Tweet URL is required",
+          code: "custom",
+        });
+      }
+    }
+  });
+
 export const CreateGrowthQuestSchema = z
   .object({
     questTitle: z.string().min(1, "Quest title is required"),
-
     rewardType: z.string().min(1, "Reward type is required"),
-
     tokenContract: z.string().optional().nullable(),
-
-    numberOfWinners: z
-      .number({ invalid_type_error: "Number of winners is required" })
-      .min(1, "Must have at least one winner"),
-    pointsPerWinner: z
-      .number({ invalid_type_error: "Points per winner is required" })
-      .min(1, "Points per winner is required"),
+    numberOfWinners: z.number().nullable(),
+    pointsPerWinner: z.number().nullable(),
     winnerSelectionMethod: z
       .string()
       .min(1, "Winner selection method is required"),
     rewardMode: z.enum(["Overall Reward", "Individual Task Reward"]).nullable(),
     runContinuously: z.boolean().default(false),
+    makeConcurrent: z.boolean().default(false),
     startDate: z.date().nullable(),
     endDate: z.date().optional().nullable(),
+    tasks: z.array(TaskSchema).min(1, "At least one task is required"),
   })
   .superRefine((data, ctx) => {
+    if (data.numberOfWinners === null) {
+      ctx.addIssue({
+        path: ["numberOfWinners"],
+        message: "Number of winners is required",
+        code: "custom",
+      });
+    }
+
+    if (data.pointsPerWinner === null) {
+      ctx.addIssue({
+        path: ["pointsPerWinner"],
+        message: "Points per winner is required",
+        code: "custom",
+      });
+    }
+
     if (!data.startDate) {
       ctx.addIssue({
         path: ["startDate"],
         message: "Start date is required",
+        code: "custom",
+      });
+    }
+
+    if (data.startDate && data.startDate < new Date()) {
+      ctx.addIssue({
+        path: ["startDate"],
+        message: "Start date must be greater than or equal today",
         code: "custom",
       });
     }
