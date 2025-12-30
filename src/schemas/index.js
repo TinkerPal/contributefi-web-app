@@ -295,3 +295,115 @@ export const CreateOnChainQuestSchema = z
       });
     }
   });
+
+const LinkSchema = z.object({
+  name: z.string().min(1, "Link name is required"),
+  url: socialUrlSchema("Enter a valid URL"),
+});
+
+const TechnicalTaskSchema = z.object({
+  description: z.string().min(1, "Task description is required"),
+  instruction: z.string().min(1, "Task instruction is required"),
+  links: z.array(LinkSchema).max(5, "Maximum 5 links"),
+});
+
+export const CreateTechnicalQuestSchema = z
+  .object({
+    questTitle: z.string().min(1, "Quest title is required"),
+    questType: z.string().min(1, "Quest type is required"),
+    rewardType: z.string().min(1, "Reward type is required"),
+    tokenContract: z.string().optional().nullable(),
+    // numberOfWinners: z.number().nullable(),
+    // pointsPerWinner: z.number().nullable(),
+    // winnerSelectionMethod: z
+    //   .string()
+    //   .min(1, "Winner selection method is required"),
+    rewardMode: z.enum(["Overall Reward", "Individual Task Reward"]).nullable(),
+    questGoal: z.enum(["Project-based", "Recruit Candidates"]).nullable(),
+    // runContinuously: z.boolean().default(false),
+    makeConcurrent: z.boolean().default(false),
+    // startDate: z.date().nullable(),
+    // endDate: z.date().optional().nullable(),
+    tasks: z.array(TechnicalTaskSchema).min(1, "At least one task is required"),
+  })
+  .superRefine((data, ctx) => {
+    // if (data.numberOfWinners === null) {
+    //   ctx.addIssue({
+    //     path: ["numberOfWinners"],
+    //     message: "Number of winners is required",
+    //     code: "custom",
+    //   });
+    // }
+
+    // if (data.pointsPerWinner === null) {
+    //   ctx.addIssue({
+    //     path: ["pointsPerWinner"],
+    //     message: "Points per winner is required",
+    //     code: "custom",
+    //   });
+    // }
+
+    // if (!data.startDate) {
+    //   ctx.addIssue({
+    //     path: ["startDate"],
+    //     message: "Start date is required",
+    //     code: "custom",
+    //   });
+    // }
+
+    // if (data.startDate && data.startDate < new Date()) {
+    //   ctx.addIssue({
+    //     path: ["startDate"],
+    //     message: "Start date must be greater than or equal today",
+    //     code: "custom",
+    //   });
+    // }
+
+    if (data.rewardType === "token") {
+      if (!data.tokenContract || data.tokenContract.trim() === "") {
+        ctx.addIssue({
+          path: ["tokenContract"],
+          message: "Token contract is required",
+          code: "custom",
+        });
+      }
+    }
+
+    // if (!data.runContinuously) {
+    //   if (!data.endDate) {
+    //     ctx.addIssue({
+    //       path: ["endDate"],
+    //       message: "End date is required",
+    //       code: "custom",
+    //     });
+    //   }
+    // }
+
+    // if (
+    //   !data.runContinuously &&
+    //   data.endDate &&
+    //   data.endDate < data.startDate
+    // ) {
+    //   ctx.addIssue({
+    //     path: ["endDate"],
+    //     message: "End date must be greater than start date",
+    //     code: "custom",
+    //   });
+    // }
+
+    if (!data.rewardMode) {
+      ctx.addIssue({
+        path: ["rewardMode"],
+        message: "Reward mode is required",
+        code: "custom",
+      });
+    }
+
+    if (!data.questGoal) {
+      ctx.addIssue({
+        path: ["questGoal"],
+        message: "Quest goal is required",
+        code: "custom",
+      });
+    }
+  });
