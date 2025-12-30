@@ -136,7 +136,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
           {step === 2 || step === 3 ? (
             <>
               <FaArrowLeftLong
-                className="text-3xl text-[#050215]"
+                className="cursor-pointer text-3xl text-[#050215]"
                 onClick={() => setStep((prev) => prev - 1)}
               />
               <SheetTitle className="text-[28px] font-bold text-[#09032A]">
@@ -637,8 +637,6 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                   type="submit"
                   className="mt-5 w-full"
                   onClick={() => {
-                    // setStep((prev) => prev + 1);
-                    // setItemInLocalStorage("step", 3);
                     setSheetIsOpen(false);
                     setOpenQuestSuccess(true);
                   }}

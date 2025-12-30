@@ -38,13 +38,12 @@ function NewQuest({ sheetIsOpen, setSheetIsOpen, setOpenQuestSuccess }) {
         </SheetHeader>
 
         <GrowthQuest
-          // sheetIsOpen={sheetIsOpen}
           setSheetIsOpen={setSheetIsOpen}
           setOpenQuestSuccess={setOpenQuestSuccess}
         />
         <OnChainQuest
-        // sheetIsOpen={sheetIsOpen}
-        // setSheetIsOpen={setSheetIsOpen}
+          setSheetIsOpen={setSheetIsOpen}
+          setOpenQuestSuccess={setOpenQuestSuccess}
         />
         <TechnicalQuest
         // sheetIsOpen={sheetIsOpen}
