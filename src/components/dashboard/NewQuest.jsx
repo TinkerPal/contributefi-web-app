@@ -29,7 +29,7 @@ function NewQuest({ sheetIsOpen, setSheetIsOpen, setOpenQuestSuccess }) {
         className={`bg-white ${side === "bottom" ? "h-[80%]" : "sm:max-w-xl"} px-4`}
       >
         <SheetHeader className="relative">
-          <SheetTitle className="text-[28px] font-bold text-[#09032A]">
+          <SheetTitle className="font-bricolage text-[28px] font-bold text-[#09032A]">
             Create New Quest
           </SheetTitle>
           <SheetDescription className="font-[300] text-[#525866]">

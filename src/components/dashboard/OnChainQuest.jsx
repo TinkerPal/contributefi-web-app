@@ -30,16 +30,16 @@ const REWARD_TYPES = [
   { label: "Points", value: "points" },
 ];
 const TASK_TYPES = [
-  { label: "Follow on Twitter", value: "follow_twitter" },
-  { label: "Comment on Twitter", value: "comment_twitter" },
+  { label: "Follow on Twitter", value: "follow_on_twitter" },
+  { label: "Comment on Twitter", value: "comment_on_twitter" },
 ];
 
 const TASK_PREVIEW_CONFIG = {
-  follow_twitter: {
+  follow_on_twitter: {
     label: "Twitter Profile",
     field: "twitterUrl",
   },
-  comment_twitter: {
+  comment_on_twitter: {
     label: "Tweet URL",
     field: "tweetUrl",
   },
@@ -627,12 +627,12 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                             </div>
                           )}
 
-                           <div className="space-y-2">
-                              <p className="font-[300] text-[#525866]">Link</p>
-                              <p className="font-medium text-[#050215]">
-                                {task.link}
-                              </p>
-                            </div>
+                          <div className="space-y-2">
+                            <p className="font-[300] text-[#525866]">Link</p>
+                            <p className="font-medium text-[#050215]">
+                              {task.link}
+                            </p>
+                          </div>
                         </div>
                       )}
                     </div>

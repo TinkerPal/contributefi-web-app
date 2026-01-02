@@ -329,7 +329,7 @@ function Communities() {
                   </div>
 
                   <div
-                    className={`top-[42%] right-0 flex flex-wrap items-center justify-between gap-2 lg:absolute lg:w-1/2 xl:top-[53%]`}
+                    className={`top-[42%] right-0 flex flex-wrap items-center justify-between gap-2 xl:absolute xl:top-[53%] xl:w-1/2`}
                   >
                     <div className="flex flex-wrap gap-2">
                       {community?.communityLinks.map((link, i) => {

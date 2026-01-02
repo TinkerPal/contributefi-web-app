@@ -68,14 +68,28 @@ export const CreateCommunitySchema = z.object({
   message: z.string().optional(),
 });
 
-const TaskSchema = z
+const numberOrNull = z.preprocess(
+  (val) => (val === undefined || Number.isNaN(val) ? null : val),
+  z.number().nullable(),
+);
+
+const GrowthTaskSchema = z
   .object({
     type: z.string().min(1, "Task type is required"),
+    pointsPerTask: numberOrNull,
+    tokensPerTask: numberOrNull,
     twitterUrl: socialUrlSchema("Enter a valid Twitter URL").optional(),
     tweetUrl: socialUrlSchema("Enter a valid Tweet URL").optional(),
+    keywordValidation: z.string().optional(),
+    discordLink: socialUrlSchema("Enter a valid Discord link").optional(),
+    channelId: z.string().optional(),
+    telegramLink: socialUrlSchema("Enter a valid Telegram link").optional(),
+    telegramGroupLink: socialUrlSchema(
+      "Enter a valid Telegram group link",
+    ).optional(),
   })
   .superRefine((task, ctx) => {
-    if (task.type === "follow_twitter") {
+    if (task.type === "follow_on_twitter") {
       if (!task.twitterUrl || task.twitterUrl.trim() === "") {
         ctx.addIssue({
           path: ["twitterUrl"],
@@ -85,7 +99,7 @@ const TaskSchema = z
       }
     }
 
-    if (task.type === "comment_twitter") {
+    if (task.type === "comment_on_twitter") {
       if (!task.tweetUrl || task.tweetUrl.trim() === "") {
         ctx.addIssue({
           path: ["tweetUrl"],
@@ -94,15 +108,70 @@ const TaskSchema = z
         });
       }
     }
+
+    if (task.type === "like_tweet") {
+      if (!task.tweetUrl || task.tweetUrl.trim() === "") {
+        ctx.addIssue({
+          path: ["tweetUrl"],
+          message: "Tweet URL is required",
+          code: "custom",
+        });
+      }
+    }
+
+    if (task.type === "post_on_discord") {
+      if (!task.discordLink || task.discordLink.trim() === "") {
+        ctx.addIssue({
+          path: ["discordLink"],
+          message: "Discord link is required",
+          code: "custom",
+        });
+      }
+    }
+
+    if (task.type === "post_on_discord") {
+      if (!task.channelId || task.channelId.trim() === "") {
+        ctx.addIssue({
+          path: ["channelId"],
+          message: "Channel ID is required",
+          code: "custom",
+        });
+      }
+    }
+
+    if (task.type === "join_telegram_channel") {
+      if (!task.telegramLink || task.telegramLink.trim() === "") {
+        ctx.addIssue({
+          path: ["telegramLink"],
+          message: "Telegram Link is required",
+          code: "custom",
+        });
+      }
+    }
+
+    if (task.type === "post_on_telegram_group") {
+      if (!task.telegramGroupLink || task.telegramGroupLink.trim() === "") {
+        ctx.addIssue({
+          path: ["telegramGroupLink"],
+          message: "Telegram Group Link is required",
+          code: "custom",
+        });
+      }
+    }
   });
+
+// export const CreateGrowthQuestSchema = z.object({
+//   questTitle: z.string().min(1, "Quest title is required"),
+// });
 
 export const CreateGrowthQuestSchema = z
   .object({
     questTitle: z.string().min(1, "Quest title is required"),
     rewardType: z.string().min(1, "Reward type is required"),
     tokenContract: z.string().optional().nullable(),
-    numberOfWinners: z.number().nullable(),
-    pointsPerWinner: z.number().nullable(),
+    numberOfWinners: numberOrNull,
+    pointsPerWinner: numberOrNull,
+    tokensPerWinner: numberOrNull,
     winnerSelectionMethod: z
       .string()
       .min(1, "Winner selection method is required"),
@@ -111,7 +180,7 @@ export const CreateGrowthQuestSchema = z
     makeConcurrent: z.boolean().default(false),
     startDate: z.date().nullable(),
     endDate: z.date().optional().nullable(),
-    tasks: z.array(TaskSchema).min(1, "At least one task is required"),
+    tasks: z.array(GrowthTaskSchema).min(1, "At least one task is required"),
   })
   .superRefine((data, ctx) => {
     if (data.numberOfWinners === null) {
@@ -120,12 +189,18 @@ export const CreateGrowthQuestSchema = z
         message: "Number of winners is required",
         code: "custom",
       });
+    } else if (data.numberOfWinners < 0) {
+      ctx.addIssue({
+        path: ["numberOfWinners"],
+        message: "Number of winners cannot be negative",
+        code: "custom",
+      });
     }
 
-    if (data.pointsPerWinner === null) {
+    if (!data.rewardMode) {
       ctx.addIssue({
-        path: ["pointsPerWinner"],
-        message: "Points per winner is required",
+        path: ["rewardMode"],
+        message: "Reward mode is required",
         code: "custom",
       });
     }
@@ -138,15 +213,21 @@ export const CreateGrowthQuestSchema = z
       });
     }
 
-    if (data.startDate && data.startDate < new Date()) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startDate = new Date(data.startDate);
+    startDate.setHours(0, 0, 0, 0);
+
+    if (startDate < today) {
       ctx.addIssue({
         path: ["startDate"],
-        message: "Start date must be greater than or equal today",
+        message: "Start date must be greater than or equal to today",
         code: "custom",
       });
     }
 
-    if (data.rewardType === "token") {
+    if (data.rewardType === "Token") {
       if (!data.tokenContract || data.tokenContract.trim() === "") {
         ctx.addIssue({
           path: ["tokenContract"],
@@ -178,12 +259,66 @@ export const CreateGrowthQuestSchema = z
       });
     }
 
-    if (!data.rewardMode) {
-      ctx.addIssue({
-        path: ["rewardMode"],
-        message: "Reward mode is required",
-        code: "custom",
+    if (data.rewardMode === "Individual Task Reward") {
+      data.tasks.forEach((task, index) => {
+        if (data.rewardType === "Points" && task.pointsPerTask == null) {
+          ctx.addIssue({
+            path: ["tasks", index, "pointsPerTask"],
+            message: "Points per task is required",
+            code: "custom",
+          });
+        } else if (task.pointsPerTask < 0) {
+          ctx.addIssue({
+            path: ["tasks", index, "pointsPerTask"],
+            message: "Points per task cannot be negative",
+            code: "custom",
+          });
+        }
+
+        if (data.rewardType === "Token" && task.tokensPerTask == null) {
+          ctx.addIssue({
+            path: ["tasks", index, "tokensPerTask"],
+            message: "Tokens per task is required",
+            code: "custom",
+          });
+        } else if (task.tokensPerTask < 0) {
+          ctx.addIssue({
+            path: ["tasks", index, "tokensPerTask"],
+            message: "Tokens per task cannot be negative",
+            code: "custom",
+          });
+        }
       });
+    }
+
+    if (data.rewardMode === "Overall Reward") {
+      if (data.rewardType === "Points" && data.pointsPerWinner == null) {
+        ctx.addIssue({
+          path: ["pointsPerWinner"],
+          message: "Points per winner is required",
+          code: "custom",
+        });
+      } else if (data.pointsPerWinner < 0) {
+        ctx.addIssue({
+          path: ["pointsPerWinner"],
+          message: "Points per winner cannot be negative",
+          code: "custom",
+        });
+      }
+
+      if (data.rewardType === "Token" && data.tokensPerWinner == null) {
+        ctx.addIssue({
+          path: ["tokensPerWinner"],
+          message: "Tokens per winner is required",
+          code: "custom",
+        });
+      } else if (data.tokensPerWinner < 0) {
+        ctx.addIssue({
+          path: ["tokensPerWinner"],
+          message: "Tokens per winner cannot be negative",
+          code: "custom",
+        });
+      }
     }
   });
 

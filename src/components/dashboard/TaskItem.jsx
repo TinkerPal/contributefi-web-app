@@ -58,6 +58,7 @@ export default function TaskItem({
           {/* Task Description */}
           <CustomTextArea
             label="Task Description"
+            placeholder="Briefly describe the task"
             error={errors.tasks?.[taskIndex]?.description?.message}
             {...register(`tasks.${taskIndex}.description`)}
           />
@@ -116,6 +117,7 @@ export default function TaskItem({
           {/* Task Instruction */}
           <CustomTextArea
             label="Task Instruction"
+            placeholder="Kindly Specify the Instructions"
             error={errors.tasks?.[taskIndex]?.instruction?.message}
             {...register(`tasks.${taskIndex}.instruction`)}
           />

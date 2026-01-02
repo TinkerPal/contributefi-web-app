@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -39,6 +40,8 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: var(--font-sans);
+  --font-bricolage: var(--font-bricolage);
 }
 
 :root {
@@ -74,6 +77,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-bricolage: "Bricolage Grotesque", system-ui, sans-serif;
 }
 
 .dark {
@@ -115,7 +120,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background font-sans text-foreground;
   }
 
   .scrollbar-hidden::-webkit-scrollbar {

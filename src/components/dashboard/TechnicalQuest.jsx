@@ -20,7 +20,6 @@ import CustomDateSelect from "../CustomDateSelect";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import { getItemFromLocalStorage, setItemInLocalStorage } from "@/lib/utils";
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { formatDateToYYYYMMDD } from "@/utils";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 import CustomTextArea from "../CustomTextArea";
 import { FaLink } from "react-icons/fa";
@@ -37,8 +36,8 @@ const QUEST_TYPES = [
   { label: "Development", value: "development" },
 ];
 const TASK_TYPES = [
-  { label: "Follow on Twitter", value: "follow_twitter" },
-  { label: "Comment on Twitter", value: "comment_twitter" },
+  { label: "Follow on Twitter", value: "follow_on_twitter" },
+  { label: "Comment on Twitter", value: "comment_on_twitter" },
 ];
 
 function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
@@ -491,15 +490,13 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
               )}
 
               <div className="flex items-center gap-2">
-                <p className="w-1/2 font-[300] text-[#525866]">
-                  Number of Winners
-                </p>
+                <p className="w-1/2 font-[300] text-[#525866]">Quest Goal</p>
                 <p className="w-1/2 font-medium text-[#050215]">
-                  {step1Data.numberOfWinners}
+                  {step1Data.questGoal}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <p className="w-1/2 font-[300] text-[#525866]">
                   Quest Duration
                 </p>
@@ -507,7 +504,7 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                   {formatDateToYYYYMMDD(new Date(step1Data.startDate))} to{" "}
                   {formatDateToYYYYMMDD(new Date(step1Data.endDate))}
                 </p>
-              </div>
+              </div> */}
 
               <div className="flex items-center gap-2">
                 <p className="w-1/2 font-[300] text-[#525866]">
@@ -525,12 +522,12 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <p className="w-1/2 font-[300] text-[#525866]">Quest Goal</p>
                 <p className="w-1/2 font-medium text-[#050215]">
                   {step1Data.questGoal}
                 </p>
-              </div>
+              </div> */}
 
               <div className="flex items-center gap-2">
                 <p className="w-1/2 font-[300] text-[#525866]">
