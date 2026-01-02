@@ -17,7 +17,7 @@ import CustomSelect from "../CustomSelect";
 import { Checkbox, Field, Label, Radio, RadioGroup } from "@headlessui/react";
 import CustomDateSelect from "../CustomDateSelect";
 import { RiDeleteBin6Fill } from "react-icons/ri";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 import {
   getItemFromLocalStorage,
@@ -25,50 +25,14 @@ import {
   setItemInLocalStorage,
 } from "@/lib/utils";
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { formatDateToYYYYMMDD } from "@/utils";
-
-const REWARD_MODES = ["Overall Reward", "Individual Task Reward"];
-
-const REWARD_TYPES = [
-  { label: "Token", value: "Token" },
-  { label: "Points", value: "Points" },
-];
-
-const TASK_TYPES = [
-  { label: "Follow on Twitter", value: "follow_on_twitter" },
-  { label: "Comment on Twitter", value: "comment_on_twitter" },
-  { label: "Like Tweet", value: "like_tweet" },
-  { label: "Post on Discord", value: "post_on_discord" },
-  { label: "Join Telegram Channel", value: "join_telegram_channel" },
-  { label: "Post on Telegram Group", value: "post_on_telegram_group" },
-];
-
-const TASK_PREVIEW_CONFIG = {
-  follow_on_twitter: {
-    label: "Twitter Profile",
-    field: "twitterUrl",
-  },
-  comment_on_twitter: {
-    label: "Tweet URL",
-    field: "tweetUrl",
-  },
-  like_tweet: {
-    label: "Tweet URL",
-    field: "tweetUrl",
-  },
-  post_on_discord: {
-    label: "Discord Link",
-    field: "discordLink",
-  },
-  join_telegram_channel: {
-    label: "Telegram Link",
-    field: "telegramLink",
-  },
-  post_on_telegram_group: {
-    label: "Telegram Group Link",
-    field: "telegramGroupLink",
-  },
-};
+import { formatDateToYYYYMMDD, hydrateGrowthQuestData } from "@/utils";
+import {
+  REWARD_MODES,
+  REWARD_TYPES,
+  TASK_PREVIEW_CONFIG,
+  TASK_TYPES,
+  WINNER_SELECTION_METHOD,
+} from "@/utils/constants";
 
 function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
   const isDesktop = useIsDesktop();
@@ -78,9 +42,14 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
   const [step, setStep] = useState(
     getItemFromLocalStorage("growthQuestStep") || 1,
   );
-  const [step1Data, setStep1Data] = useState(
-    getItemFromLocalStorage("growthQuestStep1Data") || null,
-  );
+  //   const [step1Data, setStep1Data] = useState(
+  //     getItemFromLocalStorage("growthQuestStep1Data") || null,
+  //   );
+
+  const [step1Data, setStep1Data] = useState(() => {
+    const stored = getItemFromLocalStorage("growthQuestStep1Data");
+    return stored ? hydrateGrowthQuestData(stored) : null;
+  });
 
   console.log({ step1Data });
 
@@ -100,28 +69,24 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
     control,
   } = useForm({
     resolver: zodResolver(CreateGrowthQuestSchema),
-    defaultValues: {
+    defaultValues: step1Data ?? {
       questTitle: "",
       rewardType: "",
-      tokenContract: null,
-      numberOfWinners: null,
+      tokenContract: "",
+      numberOfWinners: "",
       winnerSelectionMethod: "",
       runContinuously: false,
-      startDate: null,
-      endDate: null,
-      rewardMode: null,
-      pointsPerWinner: null,
-      tokensPerWinner: null,
+      startDate: "",
+      endDate: "",
+      rewardMode: "",
+      pointsPerWinner: "",
+      tokensPerWinner: "",
       tasks: [
         {
           type: "",
-          pointsPerTask: null,
-          tokensPerTask: null,
-          keywordValidation: null,
         },
       ],
     },
-    shouldUnregister: true,
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -131,6 +96,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
 
   const onSubmit = (data) => {
     console.log(data);
+
     setItemInLocalStorage("growthQuestStep1Data", data);
     setStep(2);
     setStep1Data(data);
@@ -139,6 +105,15 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
 
   const rewardType = watch("rewardType");
   const rewardMode = watch("rewardMode");
+
+  useEffect(() => {
+    if (rewardType === "Points") {
+      setValue("tokenContract", "");
+      setValue("tokensPerWinner", "");
+    } else {
+      setValue("pointsPerWinner", "");
+    }
+  }, [rewardType, setValue]);
 
   console.log({ errors });
 
@@ -164,28 +139,14 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
         className={`bg-white ${side === "bottom" ? "h-[80%]" : "sm:max-w-xl"} overflow-scroll`}
       >
         <SheetHeader className="bg-white px-4 shadow">
-          {step === 2 ? (
+          {step === 2 || step === 3 ? (
             <>
               <FaArrowLeftLong
                 className="cursor-pointer text-3xl text-[#050215]"
                 onClick={() => {
-                  setItemInLocalStorage("growthQuestStep", 1);
-                  setStep((prev) => prev - 1);
-                }}
-              />
-              <SheetTitle className="text-[28px] font-bold text-[#09032A]">
-                Quest Preview
-              </SheetTitle>
-              <SheetDescription className="font-[300] text-[#525866]">
-                Summary of the quest created
-              </SheetDescription>
-            </>
-          ) : step === 3 ? (
-            <>
-              <FaArrowLeftLong
-                className="cursor-pointer text-3xl text-[#050215]"
-                onClick={() => {
-                  setItemInLocalStorage("growthQuestStep", 2);
+                  step === 2
+                    ? setItemInLocalStorage("growthQuestStep", 1)
+                    : setItemInLocalStorage("growthQuestStep", 2);
                   setStep((prev) => prev - 1);
                 }}
               />
@@ -253,10 +214,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 <CustomSelect
                   label="Winner Selection Method"
                   placeholder="Select"
-                  options={[
-                    { label: "Random", value: "random" },
-                    { label: "FCFS", value: "fcfs" },
-                  ]}
+                  options={WINNER_SELECTION_METHOD}
                   error={errors.winnerSelectionMethod?.message}
                   register={register("winnerSelectionMethod")}
                 />
@@ -375,141 +333,118 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
 
               <hr className="border border-[#F0F4FD]" />
 
-              {fields.map((task, index) => (
-                <div key={task.id} className="grid gap-4">
-                  <div className="flex items-center justify-between bg-[#EDF2FF] px-3 py-2">
-                    <p className="font-semibold text-[#2F0FD1]">
-                      Task {fields.length > 1 && index + 1}
-                    </p>
+              {fields.map((task, index) => {
+                // setIndex(() => index);
+                return (
+                  <div key={task.id} className="grid gap-4">
+                    <div className="flex items-center justify-between bg-[#EDF2FF] px-3 py-2">
+                      <p className="font-semibold text-[#2F0FD1]">
+                        Task {fields.length > 1 && index + 1}
+                      </p>
 
-                    <div className="flex items-center gap-2">
-                      {/* Delete */}
-                      {fields.length > 1 && (
+                      <div className="flex items-center gap-2">
+                        {/* Delete */}
+                        {fields.length > 1 && (
+                          <button
+                            type="button"
+                            className="rounded bg-white p-2"
+                            onClick={() => remove(index)}
+                          >
+                            <RiDeleteBin6Fill className="text-red-500" />
+                          </button>
+                        )}
+
+                        {/* Collapse toggle */}
                         <button
                           type="button"
+                          onClick={() => toggleTask(index)}
                           className="rounded bg-white p-2"
-                          onClick={() => remove(index)}
                         >
-                          <RiDeleteBin6Fill className="text-red-500" />
+                          {collapsedTasks[index] ? (
+                            <IoChevronDown />
+                          ) : (
+                            <IoChevronUp />
+                          )}
                         </button>
-                      )}
-
-                      {/* Collapse toggle */}
-                      <button
-                        type="button"
-                        onClick={() => toggleTask(index)}
-                        className="rounded bg-white p-2"
-                      >
-                        {collapsedTasks[index] ? (
-                          <IoChevronDown />
-                        ) : (
-                          <IoChevronUp />
-                        )}
-                      </button>
+                      </div>
                     </div>
-                  </div>
 
-                  {!collapsedTasks[index] && (
-                    <>
-                      <CustomSelect
-                        label="Select Task Type"
-                        placeholder="Select"
-                        options={TASK_TYPES}
-                        error={errors.tasks?.[index]?.type?.message}
-                        register={register(`tasks.${index}.type`)}
-                      />
+                    {!collapsedTasks[index] && (
+                      <>
+                        <CustomSelect
+                          label="Select Task Type"
+                          placeholder="Select"
+                          options={TASK_TYPES}
+                          error={errors.tasks?.[index]?.type?.message}
+                          register={register(`tasks.${index}.type`)}
+                        />
 
-                      {rewardType === "Token" &&
-                        rewardMode === "Individual Task Reward" && (
+                        {rewardType === "Token" &&
+                          rewardMode === "Individual Task Reward" && (
+                            <CustomInput
+                              label="How many tokens per task?"
+                              placeholder="eg 50"
+                              type="number"
+                              error={
+                                errors.tasks?.[index]?.tokensPerTask?.message
+                              }
+                              {...register(`tasks.${index}.tokensPerTask`, {
+                                valueAsNumber: true,
+                              })}
+                            />
+                          )}
+
+                        {rewardType === "Points" &&
+                          rewardMode === "Individual Task Reward" && (
+                            <CustomInput
+                              label="How many points per task?"
+                              placeholder="eg 50"
+                              type="number"
+                              error={
+                                errors.tasks?.[index]?.pointsPerTask?.message
+                              }
+                              {...register(`tasks.${index}.pointsPerTask`, {
+                                valueAsNumber: true,
+                              })}
+                            />
+                          )}
+
+                        {watch(`tasks.${index}.type`) ===
+                          "Follow on Twitter" && (
                           <CustomInput
-                            label="How many tokens per task?"
-                            placeholder="eg 50"
-                            type="number"
-                            error={
-                              errors.tasks?.[index]?.tokensPerTask?.message
-                            }
-                            {...register(`tasks.${index}.tokensPerTask`, {
-                              valueAsNumber: true,
-                            })}
-                          />
-                        )}
-
-                      {rewardType === "Points" &&
-                        rewardMode === "Individual Task Reward" && (
-                          <CustomInput
-                            label="How many points per task?"
-                            placeholder="eg 50"
-                            type="number"
-                            error={
-                              errors.tasks?.[index]?.pointsPerTask?.message
-                            }
-                            {...register(`tasks.${index}.pointsPerTask`, {
-                              valueAsNumber: true,
-                            })}
-                          />
-                        )}
-
-                      {watch(`tasks.${index}.type`) === "post_on_discord" && (
-                        <div className="space-y-5">
-                          <CustomInput
-                            label="Discord Invite Link"
-                            error={errors.tasks?.[index]?.discordLink?.message}
-                            {...register(`tasks.${index}.discordLink`)}
+                            label="Twitter (X) Link"
+                            error={errors.tasks?.[index]?.twitterUrl?.message}
+                            {...register(`tasks.${index}.twitterUrl`)}
                             placeholder="Paste URL"
                             prefix="https://"
                             type="text"
                           />
+                        )}
 
-                          <CustomInput
-                            label="Channel ID"
-                            error={errors.tasks?.[index]?.channelId?.message}
-                            {...register(`tasks.${index}.channelId`)}
-                            placeholder="Enter Text"
-                            type="text"
-                          />
-                        </div>
-                      )}
+                        {watch(`tasks.${index}.type`) === "Post on Discord" && (
+                          <div className="space-y-5">
+                            <CustomInput
+                              label="Discord Invite Link"
+                              error={
+                                errors.tasks?.[index]?.discordLink?.message
+                              }
+                              {...register(`tasks.${index}.discordLink`)}
+                              placeholder="Paste URL"
+                              prefix="https://"
+                              type="text"
+                            />
 
-                      {watch(`tasks.${index}.type`) === "like_tweet" && (
-                        <CustomInput
-                          label="Tweet URL"
-                          error={errors.tasks?.[index]?.tweetUrl?.message}
-                          {...register(`tasks.${index}.tweetUrl`)}
-                          placeholder="Paste URL"
-                          prefix="https://"
-                          type="text"
-                        />
-                      )}
+                            <CustomInput
+                              label="Channel ID"
+                              error={errors.tasks?.[index]?.channelId?.message}
+                              {...register(`tasks.${index}.channelId`)}
+                              placeholder="Enter Text"
+                              type="text"
+                            />
+                          </div>
+                        )}
 
-                      {watch(`tasks.${index}.type`) ===
-                        "join_telegram_channel" && (
-                        <CustomInput
-                          label="Telegram Link"
-                          error={errors.tasks?.[index]?.telegramLink?.message}
-                          {...register(`tasks.${index}.telegramLink`)}
-                          placeholder="Paste URL"
-                          prefix="https://"
-                          type="text"
-                        />
-                      )}
-
-                      {watch(`tasks.${index}.type`) ===
-                        "post_on_telegram_group" && (
-                        <CustomInput
-                          label="Telegram Group Link"
-                          error={
-                            errors.tasks?.[index]?.telegramGroupLink?.message
-                          }
-                          {...register(`tasks.${index}.telegramGroupLink`)}
-                          placeholder="Paste URL"
-                          prefix="https://"
-                          type="text"
-                        />
-                      )}
-
-                      {watch(`tasks.${index}.type`) ===
-                        "comment_on_twitter" && (
-                        <div className="space-y-5">
+                        {watch(`tasks.${index}.type`) === "Like Tweet" && (
                           <CustomInput
                             label="Tweet URL"
                             error={errors.tasks?.[index]?.tweetUrl?.message}
@@ -518,33 +453,63 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                             prefix="https://"
                             type="text"
                           />
+                        )}
 
+                        {watch(`tasks.${index}.type`) ===
+                          "Join Telegram Channel" && (
                           <CustomInput
-                            label="Keyword Validation (optional)"
-                            error={
-                              errors.tasks?.[index]?.keywordValidation?.message
-                            }
-                            {...register(`tasks.${index}.keywordValidation`)}
-                            placeholder="Enter Text"
+                            label="Telegram Link"
+                            error={errors.tasks?.[index]?.telegramLink?.message}
+                            {...register(`tasks.${index}.telegramLink`)}
+                            placeholder="Paste URL"
+                            prefix="https://"
                             type="text"
                           />
-                        </div>
-                      )}
+                        )}
 
-                      {watch(`tasks.${index}.type`) === "follow_on_twitter" && (
-                        <CustomInput
-                          label="Twitter (X) Link"
-                          error={errors.tasks?.[index]?.twitterUrl?.message}
-                          {...register(`tasks.${index}.twitterUrl`)}
-                          placeholder="Paste URL"
-                          prefix="https://"
-                          type="text"
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
-              ))}
+                        {watch(`tasks.${index}.type`) ===
+                          "Post on Telegram Group" && (
+                          <CustomInput
+                            label="Telegram Group Link"
+                            error={
+                              errors.tasks?.[index]?.telegramGroupLink?.message
+                            }
+                            {...register(`tasks.${index}.telegramGroupLink`)}
+                            placeholder="Paste URL"
+                            prefix="https://"
+                            type="text"
+                          />
+                        )}
+
+                        {watch(`tasks.${index}.type`) ===
+                          "Comment on Twitter" && (
+                          <div className="space-y-5">
+                            <CustomInput
+                              label="Tweet URL"
+                              error={errors.tasks?.[index]?.tweetUrl?.message}
+                              {...register(`tasks.${index}.tweetUrl`)}
+                              placeholder="Paste URL"
+                              prefix="https://"
+                              type="text"
+                            />
+
+                            <CustomInput
+                              label="Keyword Validation (optional)"
+                              error={
+                                errors.tasks?.[index]?.keywordValidation
+                                  ?.message
+                              }
+                              {...register(`tasks.${index}.keywordValidation`)}
+                              placeholder="Enter Text"
+                              type="text"
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                );
+              })}
 
               <div className="flex flex-wrap items-center gap-2">
                 {fields.length > 1 && (
@@ -649,7 +614,8 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                   Quest Duration
                 </p>
                 <p className="w-1/2 font-medium text-[#050215]">
-                  {formatDateToYYYYMMDD(new Date(step1Data.startDate))}
+                  {step1Data.startDate &&
+                    formatDateToYYYYMMDD(new Date(step1Data.startDate))}
                   {step1Data.endDate &&
                     ` to ${formatDateToYYYYMMDD(new Date(step1Data.endDate))}`}
                 </p>
@@ -695,71 +661,72 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
 
             <hr className="my-6 border border-[#F0F4FD]" />
 
-            {step1Data.tasks.map((task, index) => {
-              const config = TASK_PREVIEW_CONFIG[task.type];
+            {step1Data.tasks &&
+              step1Data.tasks.map((task, index) => {
+                const config = TASK_PREVIEW_CONFIG[task.type];
 
-              return (
-                <Fragment key={index}>
-                  <div className="mb-4">
-                    <div className="rounded-[8px] bg-[#EDF2FF] px-3 py-2">
-                      <div className="flex items-center justify-between">
-                        <p className="font-semibold text-[#2F0FD1]">
-                          Task {index + 1}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => toggleTask(index)}
-                          className="rounded bg-white p-2"
-                        >
-                          {collapsedTasks[index] ? (
-                            <IoChevronDown />
-                          ) : (
-                            <IoChevronUp />
-                          )}
-                        </button>
-                      </div>
-
-                      {!collapsedTasks[index] && (
-                        <div className="mt-2 flex justify-between rounded-[8px] bg-white p-4">
-                          <div className="space-y-2">
-                            <p className="font-[300] text-[#525866]">
-                              Task Type
-                            </p>
-                            <p className="font-medium text-[#050215]">
-                              {task.type}
-                            </p>
-                          </div>
-
-                          {step1Data?.rewardMode ===
-                            "Individual Task Reward" && (
-                            <div className="space-y-2">
-                              <p className="font-[300] text-[#525866]">
-                                Reward Per Task
-                              </p>
-                              <p className="font-medium text-[#050215]">
-                                {task.pointsPerTask || task?.tokensPerTask}{" "}
-                                {task?.tokensPerTask ? "XLM" : "Points"}
-                              </p>
-                            </div>
-                          )}
-
-                          {config && (
-                            <div className="space-y-2">
-                              <p className="font-[300] text-[#525866]">
-                                {config.label}
-                              </p>
-                              <p className="font-medium text-[#050215]">
-                                {task[config.field]}
-                              </p>
-                            </div>
-                          )}
+                return (
+                  <Fragment key={index}>
+                    <div className="mb-4">
+                      <div className="rounded-[8px] bg-[#EDF2FF] px-3 py-2">
+                        <div className="flex items-center justify-between">
+                          <p className="font-semibold text-[#2F0FD1]">
+                            Task {index + 1}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => toggleTask(index)}
+                            className="rounded bg-white p-2"
+                          >
+                            {collapsedTasks[index] ? (
+                              <IoChevronDown />
+                            ) : (
+                              <IoChevronUp />
+                            )}
+                          </button>
                         </div>
-                      )}
+
+                        {!collapsedTasks[index] && (
+                          <div className="mt-2 flex justify-between rounded-[8px] bg-white p-4">
+                            <div className="space-y-2">
+                              <p className="font-[300] text-[#525866]">
+                                Task Type
+                              </p>
+                              <p className="font-medium text-[#050215]">
+                                {task.type}
+                              </p>
+                            </div>
+
+                            {step1Data?.rewardMode ===
+                              "Individual Task Reward" && (
+                              <div className="space-y-2">
+                                <p className="font-[300] text-[#525866]">
+                                  Reward Per Task
+                                </p>
+                                <p className="font-medium text-[#050215]">
+                                  {task.pointsPerTask || task?.tokensPerTask}{" "}
+                                  {task?.tokensPerTask ? "XLM" : "Points"}
+                                </p>
+                              </div>
+                            )}
+
+                            {config && (
+                              <div className="space-y-2">
+                                <p className="font-[300] text-[#525866]">
+                                  {config.label}
+                                </p>
+                                <p className="font-medium text-[#050215]">
+                                  {task[config.field]}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Fragment>
-              );
-            })}
+                  </Fragment>
+                );
+              })}
 
             <div className="flex flex-wrap items-center gap-2">
               <>
@@ -845,7 +812,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                   className="mt-5 w-full"
                   onClick={() => {
                     setStep((prev) => prev + 1);
-                    setItemInLocalStorage("step", 3);
+                    setItemInLocalStorage("growthQuestStep", 3);
                   }}
                 >
                   Deposit Token
@@ -862,6 +829,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     setSheetIsOpen(false);
                     setOpenQuestSuccess(true);
                     removeItemFromLocalStorage("growthQuestStep");
+                    removeItemFromLocalStorage("growthQuestStep1Data");
                   }}
                 >
                   Publish Quest

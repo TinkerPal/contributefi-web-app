@@ -70,3 +70,30 @@ export function formatDate(date) {
 }
 
 export const formatDateToYYYYMMDD = (date) => date.toISOString().split("T")[0];
+
+export const validateUrl = (value) => {
+  const urlStr = value.startsWith("http") ? value : `https://${value}`;
+
+  try {
+    const url = new URL(urlStr);
+    const dotCount = (url.hostname.match(/\./g) || []).length;
+
+    if (url.hostname.startsWith("www")) {
+      return dotCount >= 2;
+    } else {
+      return dotCount >= 1;
+    }
+  } catch {
+    return false;
+  }
+};
+
+export const hydrateGrowthQuestData = (data) => {
+  if (!data) return data;
+
+  return {
+    ...data,
+    startDate: data.startDate ? new Date(data.startDate) : null,
+    endDate: data.endDate ? new Date(data.endDate) : null,
+  };
+};
