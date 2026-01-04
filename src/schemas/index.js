@@ -1,10 +1,11 @@
+import { validateUrl } from "@/utils";
 import { z } from "zod";
 
 export const SignUpSchema = z.object({
   email: z.email("Enter a valid email"),
   password: z
     .string()
-    .min(1, "Password is required")
+    .nonempty("Password is required")
     .min(6, "Password must be at least 6 characters"),
 });
 
@@ -12,52 +13,538 @@ export const LoginSchema = z.object({
   email: z.string().min(1, "Email or username is required"),
   password: z
     .string()
-    .min(1, "Password is required")
+    .nonempty("Password is required")
     .min(6, "Password must be at least 6 characters"),
 });
 
 export const VerifyEmailSchema = z.object({
   otp: z
     .string()
-    .min(1, "OTP is required")
+    .nonempty("OTP is required")
     .regex(/^\d{6}$/, "OTP must be 6 digits"),
 });
 
 export const UsernameSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  username: z.string().nonempty("Username is required"),
 });
 
-const validateSocialUrl = (value) => {
-  const urlStr = value.startsWith("http") ? value : `https://${value}`;
-
-  try {
-    const url = new URL(urlStr);
-    const dotCount = (url.hostname.match(/\./g) || []).length;
-
-    if (url.hostname.startsWith("www")) {
-      return dotCount >= 2;
-    } else {
-      return dotCount >= 1;
-    }
-  } catch {
-    return false;
-  }
-};
-
-const socialUrlSchema = (message) =>
+const urlSchema = (message) =>
   z
     .string()
-    .min(1, message)
+    .trim()
+    .nonempty(message)
     .transform((val) => (val.startsWith("http") ? val : `https://${val}`))
-    .refine(validateSocialUrl, { message });
+    .refine(validateUrl, { message });
+
+const optionalUrlSchema = (message) =>
+  z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    urlSchema(message).optional(),
+  );
 
 export const CreateCommunitySchema = z.object({
-  communityName: z.string().min(1, "Community name is required"),
-  communityUsername: z.string().min(1, "Community username is required"),
-  websitePage: socialUrlSchema("Enter a valid Website URL"),
-  githubPage: socialUrlSchema("Enter a valid GitHub URL"),
-  twitterPage: socialUrlSchema("Enter a valid Twitter URL"),
-  instagramPage: socialUrlSchema("Enter a valid Instagram URL"),
+  communityName: z.string().nonempty("Community name is required"),
+  communityUsername: z.string().nonempty("Community username is required"),
+  websitePage: urlSchema("Enter a valid Website URL"),
+  githubPage: urlSchema("Enter a valid GitHub URL"),
+  twitterPage: urlSchema("Enter a valid Twitter URL"),
+  instagramPage: urlSchema("Enter a valid Instagram URL"),
   communityDescription: z.string().optional(),
   message: z.string().optional(),
 });
+
+const numberOrNullSchema = z.preprocess(
+  (val) => (val === undefined || val === "" || Number.isNaN(val) ? null : val),
+  z.number().nullable(),
+);
+
+const GrowthTaskSchema = z.object({
+  type: z
+    .string()
+    .nonempty("Task type is required")
+    .refine(
+      (val) =>
+        [
+          "Follow on Twitter",
+          "Comment on Twitter",
+          "Like Tweet",
+          "Post on Discord",
+          "Join Telegram Channel",
+          "Post on Telegram Group",
+        ].includes(val),
+      { message: "Invalid task type" },
+    ),
+
+  tokensPerTask: numberOrNullSchema,
+  pointsPerTask: numberOrNullSchema,
+
+  twitterUrl: optionalUrlSchema("Invalid Twitter URL"),
+  tweetUrl: optionalUrlSchema("Invalid Tweet URL"),
+  discordLink: optionalUrlSchema("Invalid Discord invite link"),
+  telegramLink: optionalUrlSchema("Invalid Telegram link"),
+  telegramGroupLink: optionalUrlSchema("Invalid Telegram group link"),
+
+  channelId: z.string().nullish(),
+  keywordValidation: z.string().nullish(),
+});
+
+export const CreateGrowthQuestSchema = z
+  .object({
+    questTitle: z.string().nonempty("Quest title is required"),
+    rewardType: z
+      .string()
+      .nonempty("Reward type is required")
+      .refine((val) => ["Token", "Points"].includes(val), {
+        message: "Invalid reward type",
+      }),
+    tokenContract: z.string().nullish(),
+    numberOfWinners: numberOrNullSchema,
+    winnerSelectionMethod: z
+      .string()
+      .nonempty("Winner selection method is required")
+      .refine((val) => ["Random", "FCFS"].includes(val), {
+        message: "Invalid selection method",
+      }),
+    runContinuously: z.boolean().default(false),
+    startDate: z.preprocess(
+      (val) => (val === "" ? null : val),
+      z.date().nullable(),
+    ),
+    endDate: z.preprocess(
+      (val) => (val === "" ? null : val),
+      z.date().nullable(),
+    ),
+    rewardMode: z
+      .string()
+      .nullish()
+      .refine((val) => val !== null && val.length > 0, {
+        message: "Reward mode is required",
+      })
+      .refine(
+        (val) => val === "Overall Reward" || val === "Individual Task Reward",
+        {
+          message: "Invalid reward mode",
+        },
+      ),
+    tokensPerWinner: numberOrNullSchema,
+    pointsPerWinner: numberOrNullSchema,
+    tasks: z.array(GrowthTaskSchema).nonempty("At least one task is required"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.rewardType === "Token") {
+      if (!data.tokenContract || data.tokenContract.trim() === "") {
+        ctx.addIssue({
+          path: ["tokenContract"],
+          message: "Token contract is required",
+          code: "custom",
+        });
+      }
+    }
+
+    if (!data.numberOfWinners) {
+      ctx.addIssue({
+        path: ["numberOfWinners"],
+        message: "Number of winners is required",
+        code: "custom",
+      });
+    } else if (data.numberOfWinners < 0) {
+      ctx.addIssue({
+        path: ["numberOfWinners"],
+        message: "Number of winners cannot be negative",
+        code: "custom",
+      });
+    }
+
+    if (!data.startDate) {
+      ctx.addIssue({
+        path: ["startDate"],
+        message: "Start date is required",
+        code: "custom",
+      });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startDate = new Date(data.startDate);
+    startDate.setHours(0, 0, 0, 0);
+
+    if (startDate < today) {
+      ctx.addIssue({
+        path: ["startDate"],
+        message: "Start date must be greater than or equal to today",
+        code: "custom",
+      });
+    }
+
+    if (!data.runContinuously) {
+      if (!data.endDate) {
+        ctx.addIssue({
+          path: ["endDate"],
+          message: "End date is required",
+          code: "custom",
+        });
+      }
+    }
+
+    if (
+      !data.runContinuously &&
+      data.endDate &&
+      data.endDate < data.startDate
+    ) {
+      ctx.addIssue({
+        path: ["endDate"],
+        message: "End date must be greater than start date",
+        code: "custom",
+      });
+    }
+
+    if (data.rewardMode === "Overall Reward") {
+      if (data.rewardType === "Token" && !data.tokensPerWinner) {
+        ctx.addIssue({
+          path: ["tokensPerWinner"],
+          message: "Token per winner is required",
+          code: "custom",
+        });
+      } else if (data.tokensPerWinner < 0) {
+        ctx.addIssue({
+          path: ["tokensPerWinner"],
+          message: "Token per winner cannot be negative",
+          code: "custom",
+        });
+      }
+
+      if (data.rewardType === "Points" && !data.pointsPerWinner) {
+        ctx.addIssue({
+          path: ["pointsPerWinner"],
+          message: "Points per winner is required",
+          code: "custom",
+        });
+      } else if (data.pointsPerWinner < 0) {
+        ctx.addIssue({
+          path: ["pointsPerWinner"],
+          message: "Points per winner cannot be negative",
+          code: "custom",
+        });
+      }
+    }
+
+    data.tasks.forEach((task, index) => {
+      const taskPath = ["tasks", index];
+
+      if (data.rewardMode === "Individual Task Reward") {
+        if (data.rewardType === "Token") {
+          if (!task.tokensPerTask) {
+            ctx.addIssue({
+              path: [...taskPath, "tokensPerTask"],
+              message: "Tokens per task is required",
+              code: "custom",
+            });
+          } else if (task.tokensPerTask < 0) {
+            ctx.addIssue({
+              path: [...taskPath, "tokensPerTask"],
+              message: "Tokens per task cannot be negative",
+              code: "custom",
+            });
+          }
+        }
+
+        if (data.rewardType === "Points") {
+          if (!task.pointsPerTask) {
+            ctx.addIssue({
+              path: [...taskPath, "pointsPerTask"],
+              message: "Points per task is required",
+              code: "custom",
+            });
+          } else if (task.pointsPerTask < 0) {
+            ctx.addIssue({
+              path: [...taskPath, "pointsPerTask"],
+              message: "Points per task cannot be negative",
+              code: "custom",
+            });
+          }
+        }
+      }
+
+      switch (task.type) {
+        case "Follow on Twitter":
+          if (!task.twitterUrl) {
+            ctx.addIssue({
+              path: [...taskPath, "twitterUrl"],
+              message: "Twitter URL is required",
+              code: "custom",
+            });
+          }
+          break;
+
+        case "Like Tweet":
+        case "Comment on Twitter":
+          if (!task.tweetUrl) {
+            ctx.addIssue({
+              path: [...taskPath, "tweetUrl"],
+              message: "Tweet URL is required",
+              code: "custom",
+            });
+          }
+          break;
+
+        case "Post on Discord":
+          if (!task.discordLink) {
+            ctx.addIssue({
+              path: [...taskPath, "discordLink"],
+              message: "Discord invite link is required",
+              code: "custom",
+            });
+          }
+          if (!task.channelId) {
+            ctx.addIssue({
+              path: [...taskPath, "channelId"],
+              message: "Channel ID is required",
+              code: "custom",
+            });
+          }
+          break;
+
+        case "Join Telegram Channel":
+          if (!task.telegramLink) {
+            ctx.addIssue({
+              path: [...taskPath, "telegramLink"],
+              message: "Telegram link is required",
+              code: "custom",
+            });
+          }
+          break;
+
+        case "Post on Telegram Group":
+          if (!task.telegramGroupLink) {
+            ctx.addIssue({
+              path: [...taskPath, "telegramGroupLink"],
+              message: "Telegram group link is required",
+              code: "custom",
+            });
+          }
+          break;
+      }
+    });
+  });
+
+const OnChainTaskSchema = z.object({
+  type: z.string().min(1, "Task type is required"),
+  description: z.string().min(1, "Task description is required"),
+  link: optionalUrlSchema("Enter a valid link"),
+});
+
+export const CreateOnChainQuestSchema = z
+  .object({
+    questTitle: z.string().min(1, "Quest title is required"),
+    contractAddress: z.string().min(1, "Contract address is required"),
+    rewardType: z.string().min(1, "Reward type is required"),
+    tokenContract: z.string().optional().nullable(),
+    numberOfWinners: z.number().nullable(),
+    pointsPerWinner: z.number().nullable(),
+    winnerSelectionMethod: z
+      .string()
+      .min(1, "Winner selection method is required"),
+    rewardMode: z.enum(["Overall Reward", "Individual Task Reward"]).nullable(),
+    verificationMode: z
+      .enum(["Contract Invocation", "Observe Account Calls"])
+      .nullable(),
+    runContinuously: z.boolean().default(false),
+    makeConcurrent: z.boolean().default(false),
+    startDate: z.date().nullable(),
+    endDate: z.date().optional().nullable(),
+    tasks: z.array(OnChainTaskSchema).min(1, "At least one task is required"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.numberOfWinners === null) {
+      ctx.addIssue({
+        path: ["numberOfWinners"],
+        message: "Number of winners is required",
+        code: "custom",
+      });
+    }
+
+    if (data.pointsPerWinner === null) {
+      ctx.addIssue({
+        path: ["pointsPerWinner"],
+        message: "Points per winner is required",
+        code: "custom",
+      });
+    }
+
+    if (!data.startDate) {
+      ctx.addIssue({
+        path: ["startDate"],
+        message: "Start date is required",
+        code: "custom",
+      });
+    }
+
+    if (data.startDate && data.startDate < new Date()) {
+      ctx.addIssue({
+        path: ["startDate"],
+        message: "Start date must be greater than or equal today",
+        code: "custom",
+      });
+    }
+
+    if (data.rewardType === "token") {
+      if (!data.tokenContract || data.tokenContract.trim() === "") {
+        ctx.addIssue({
+          path: ["tokenContract"],
+          message: "Token contract is required",
+          code: "custom",
+        });
+      }
+    }
+
+    if (!data.runContinuously) {
+      if (!data.endDate) {
+        ctx.addIssue({
+          path: ["endDate"],
+          message: "End date is required",
+          code: "custom",
+        });
+      }
+    }
+
+    if (
+      !data.runContinuously &&
+      data.endDate &&
+      data.endDate < data.startDate
+    ) {
+      ctx.addIssue({
+        path: ["endDate"],
+        message: "End date must be greater than start date",
+        code: "custom",
+      });
+    }
+
+    if (!data.rewardMode) {
+      ctx.addIssue({
+        path: ["rewardMode"],
+        message: "Reward mode is required",
+        code: "custom",
+      });
+    }
+
+    if (!data.verificationMode) {
+      ctx.addIssue({
+        path: ["verificationMode"],
+        message: "Verification mode is required",
+        code: "custom",
+      });
+    }
+  });
+
+const LinkSchema = z.object({
+  name: z.string().min(1, "Link name is required"),
+  url: urlSchema("Enter a valid URL"),
+});
+
+const TechnicalTaskSchema = z.object({
+  description: z.string().min(1, "Task description is required"),
+  instruction: z.string().min(1, "Task instruction is required"),
+  links: z.array(LinkSchema).max(5, "Maximum 5 links"),
+});
+
+export const CreateTechnicalQuestSchema = z
+  .object({
+    questTitle: z.string().min(1, "Quest title is required"),
+    questType: z.string().min(1, "Quest type is required"),
+    rewardType: z.string().min(1, "Reward type is required"),
+    tokenContract: z.string().optional().nullable(),
+    // numberOfWinners: z.number().nullable(),
+    // pointsPerWinner: z.number().nullable(),
+    // winnerSelectionMethod: z
+    //   .string()
+    //   .min(1, "Winner selection method is required"),
+    rewardMode: z.enum(["Overall Reward", "Individual Task Reward"]).nullable(),
+    questGoal: z.enum(["Project-based", "Recruit Candidates"]).nullable(),
+    // runContinuously: z.boolean().default(false),
+    makeConcurrent: z.boolean().default(false),
+    // startDate: z.date().nullable(),
+    // endDate: z.date().optional().nullable(),
+    tasks: z.array(TechnicalTaskSchema).min(1, "At least one task is required"),
+  })
+  .superRefine((data, ctx) => {
+    // if (data.numberOfWinners === null) {
+    //   ctx.addIssue({
+    //     path: ["numberOfWinners"],
+    //     message: "Number of winners is required",
+    //     code: "custom",
+    //   });
+    // }
+
+    // if (data.pointsPerWinner === null) {
+    //   ctx.addIssue({
+    //     path: ["pointsPerWinner"],
+    //     message: "Points per winner is required",
+    //     code: "custom",
+    //   });
+    // }
+
+    // if (!data.startDate) {
+    //   ctx.addIssue({
+    //     path: ["startDate"],
+    //     message: "Start date is required",
+    //     code: "custom",
+    //   });
+    // }
+
+    // if (data.startDate && data.startDate < new Date()) {
+    //   ctx.addIssue({
+    //     path: ["startDate"],
+    //     message: "Start date must be greater than or equal today",
+    //     code: "custom",
+    //   });
+    // }
+
+    if (data.rewardType === "token") {
+      if (!data.tokenContract || data.tokenContract.trim() === "") {
+        ctx.addIssue({
+          path: ["tokenContract"],
+          message: "Token contract is required",
+          code: "custom",
+        });
+      }
+    }
+
+    // if (!data.runContinuously) {
+    //   if (!data.endDate) {
+    //     ctx.addIssue({
+    //       path: ["endDate"],
+    //       message: "End date is required",
+    //       code: "custom",
+    //     });
+    //   }
+    // }
+
+    // if (
+    //   !data.runContinuously &&
+    //   data.endDate &&
+    //   data.endDate < data.startDate
+    // ) {
+    //   ctx.addIssue({
+    //     path: ["endDate"],
+    //     message: "End date must be greater than start date",
+    //     code: "custom",
+    //   });
+    // }
+
+    if (!data.rewardMode) {
+      ctx.addIssue({
+        path: ["rewardMode"],
+        message: "Reward mode is required",
+        code: "custom",
+      });
+    }
+
+    if (!data.questGoal) {
+      ctx.addIssue({
+        path: ["questGoal"],
+        message: "Quest goal is required",
+        code: "custom",
+      });
+    }
+  });

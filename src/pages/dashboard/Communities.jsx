@@ -34,6 +34,8 @@ import Loader from "@/components/Loader";
 import Error from "@/components/Error";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
+import NewQuest from "@/components/dashboard/NewQuest";
+import QuestSuccess from "@/components/dashboard/QuestSuccess";
 
 const TASKS_PER_PAGE = 15;
 
@@ -46,6 +48,8 @@ function Communities() {
   const queryClient = useQueryClient();
   const [communityOwnerId, setCommunityOwnerId] = useState();
   const [displayedCommunities, setDisplayedCommunities] = useState([]);
+  const [sheetIsOpen, setSheetIsOpen] = useState(false);
+  const [openQuestSuccess, setOpenQuestSuccess] = useState(false);
 
   const LIMIT = 10;
   const OFFSET = (currentPage - 1) * LIMIT;
@@ -270,6 +274,10 @@ function Communities() {
     <>
       {communityId ? (
         <div className="space-y-6">
+          <QuestSuccess
+            openQuestSuccess={openQuestSuccess}
+            setOpenQuestSuccess={setOpenQuestSuccess}
+          />
           <div className="md:hidden">
             <BackButton />
           </div>
@@ -321,7 +329,7 @@ function Communities() {
                   </div>
 
                   <div
-                    className={`top-[42%] right-0 flex flex-wrap items-center justify-between gap-2 lg:absolute lg:w-1/2 xl:top-[53%]`}
+                    className={`top-[42%] right-0 flex flex-wrap items-center justify-between gap-2 xl:absolute xl:top-[53%] xl:w-1/2`}
                   >
                     <div className="flex flex-wrap gap-2">
                       {community?.communityLinks.map((link, i) => {
@@ -369,9 +377,11 @@ function Communities() {
                           Edit Details
                         </Button>
 
-                        <Button className="cursor-pointer rounded-md bg-[#2F0FD1] px-8 py-5 hover:bg-[#2F0FD1]/70">
-                          Create Task
-                        </Button>
+                        <NewQuest
+                          sheetIsOpen={sheetIsOpen}
+                          setSheetIsOpen={setSheetIsOpen}
+                          setOpenQuestSuccess={setOpenQuestSuccess}
+                        />
                       </div>
                     ) : (
                       <Button

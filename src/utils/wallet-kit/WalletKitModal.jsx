@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { WalletKitService } from "./services/global-service";
-import { SidebarContext } from "@/contexts/SidebarContext";
-
+import { WalletContext } from "@/contexts/WalletContext";
 
 export default function WalletKitModal() {
   const [isAvailableMap, setIsAvailableMap] = useState(null);
@@ -14,7 +13,7 @@ export default function WalletKitModal() {
     setUserKey,
     setNetwork,
     selectedSourceChain,
-  } = useContext(SidebarContext);
+  } = useContext(WalletContext);
   const stellarWalletKitOptions = WalletKitService.walletKit.modules;
 
   useEffect(() => {
@@ -54,7 +53,7 @@ export default function WalletKitModal() {
   return (
     <div
       onClick={closeHandler}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/35 px-2 py-5 sm:p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/35 px-2 py-5 backdrop-blur-sm sm:p-6"
     >
       {/* Modal Panel */}
       <div

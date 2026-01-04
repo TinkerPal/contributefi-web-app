@@ -13,13 +13,13 @@ import { toast } from "react-toastify";
 import { loginUser } from "@/services";
 import { useAuth } from "@/hooks/useAuth";
 import { PiPlugsConnectedFill } from "react-icons/pi";
-import { SidebarContext } from "@/contexts/SidebarContext";
+import { WalletContext } from "@/contexts/WalletContext";
 
 function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [revealPassword, setRevealPassword] = useState(false);
-  const { setIsOpen } = useContext(SidebarContext);
+  const { setIsOpen } = useContext(WalletContext);
 
   const handleRevealPassword = () => {
     setRevealPassword((revealPassword) => !revealPassword);

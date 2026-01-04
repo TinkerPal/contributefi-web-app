@@ -17,7 +17,7 @@ function Header() {
       <Logo />
 
       {/* DESKTOP NAV */}
-      <nav className="hidden md:block">
+      <nav className="hidden lg:block">
         <ul className="flex gap-5 lg:gap-10">
           {LANDING_NAV_LINKS.map((link) => (
             <li key={link.title}>
@@ -47,7 +47,7 @@ function Header() {
 
       {isAuthenticated ? (
         <Button
-          className="hidden md:flex"
+          className="hidden lg:flex"
           onClick={() => navigate("/dashboard")}
           variant="secondary"
           size="lg"
@@ -55,7 +55,7 @@ function Header() {
           Go to Dashboard
         </Button>
       ) : (
-        <AuthButtons device="desktop" />
+        <AuthButtons device="desktop" tag="heading" />
       )}
 
       {/* MOBILE NAV */}

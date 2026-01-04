@@ -23,7 +23,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import { ToastContainer } from "react-toastify";
 import ReactQueryProviders from "./components/providers";
 import { AuthProvider } from "./contexts/AuthContext";
-import { SidebarContextProvider } from "./contexts/SidebarContext";
+import { WalletContextProvider } from "./contexts/WalletContext";
 import Wagmi from "./components/Wagmi";
 
 const router = createBrowserRouter([
@@ -87,10 +87,10 @@ createRoot(document.getElementById("root")).render(
     <Wagmi>
       <ReactQueryProviders>
         <AuthProvider>
-          <SidebarContextProvider>
+          <WalletContextProvider>
             <RouterProvider router={router} />
             <ToastContainer />
-          </SidebarContextProvider>
+          </WalletContextProvider>
         </AuthProvider>
       </ReactQueryProviders>
     </Wagmi>

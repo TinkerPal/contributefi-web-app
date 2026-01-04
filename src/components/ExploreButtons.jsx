@@ -23,7 +23,7 @@ function ExploreButtons({ tag }) {
         }}
         variant="outline"
         size="lg"
-        className="bg-white"
+        className={tag === "footer" && "bg-white"}
       >
         View Tasks
       </Button>

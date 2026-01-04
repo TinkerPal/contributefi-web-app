@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router";
 import { Button } from "./ui/button";
 
-function AuthButtons({ device }) {
+function AuthButtons({ device, tag }) {
   const navigate = useNavigate();
   return (
     <div
-      className={`${device === "desktop" ? "hidden items-center justify-between gap-4 md:flex" : device === "mobile" ? "flex w-full flex-col gap-2 md:hidden" : "flex flex-wrap gap-4"}`}
+      className={`${device === "desktop" ? "hidden items-center justify-between gap-4 lg:flex" : device === "mobile" ? "flex w-full flex-col gap-2 lg:hidden" : "flex flex-wrap gap-4"}`}
     >
       <Button
         onClick={() => navigate("/get-started")}
@@ -18,7 +18,7 @@ function AuthButtons({ device }) {
         onClick={() => navigate("/login")}
         variant="outline"
         size="lg"
-        className="bg-white"
+        className={`${tag === "heading" && "bg-white"}`}
       >
         Log In
       </Button>

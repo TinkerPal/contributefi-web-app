@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { useConnect } from "wagmi";
 import { avalancheFuji } from "viem/chains";
 import ConnectIcon from "../assets/svg/connect.svg";
-import { SidebarContext } from "@/contexts/SidebarContext";
+import { WalletContext } from "@/contexts/WalletContext";
 import { ArrowRight } from "lucide-react";
 
 function WalletsModal({ isOpen, onClose }) {
@@ -13,7 +13,7 @@ function WalletsModal({ isOpen, onClose }) {
     useConnect();
 
   const { handleConnectStellarKit, selectedSourceChain } =
-    useContext(SidebarContext);
+    useContext(WalletContext);
 
   useEffect(() => {
     if (error && error.message) {

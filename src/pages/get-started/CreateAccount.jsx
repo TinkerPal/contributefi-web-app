@@ -13,13 +13,13 @@ import { useMutation } from "@tanstack/react-query";
 import { createAccount } from "@/services";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
-import { SidebarContext } from "@/contexts/SidebarContext";
+import { WalletContext } from "@/contexts/WalletContext";
 
 function CreateAccount() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [revealPassword, setRevealPassword] = useState(false);
-  const { setIsOpen } = useContext(SidebarContext);
+  const { setIsOpen } = useContext(WalletContext);
 
   const handleRevealPassword = () => {
     setRevealPassword((revealPassword) => !revealPassword);
