@@ -99,12 +99,7 @@ export const CreateGrowthQuestSchema = z
       }),
     tokenContract: z.string().nullish(),
     numberOfWinners: numberOrNullSchema,
-    winnerSelectionMethod: z
-      .string()
-      .nonempty("Winner selection method is required")
-      .refine((val) => ["Random", "FCFS"].includes(val), {
-        message: "Invalid selection method",
-      }),
+    winnerSelectionMethod: z.string().nullish(),
     runContinuously: z.boolean().default(false),
     startDate: z.preprocess(
       (val) => (val === "" ? null : val),
@@ -136,6 +131,17 @@ export const CreateGrowthQuestSchema = z
         ctx.addIssue({
           path: ["tokenContract"],
           message: "Token contract is required",
+          code: "custom",
+        });
+      }
+
+      if (
+        !data.winnerSelectionMethod ||
+        data.winnerSelectionMethod.trim() === ""
+      ) {
+        ctx.addIssue({
+          path: ["winnerSelectionMethod"],
+          message: "Winner selection method is required",
           code: "custom",
         });
       }
@@ -177,7 +183,7 @@ export const CreateGrowthQuestSchema = z
       });
     }
 
-    if (!data.runContinuously) {
+    if (!data.runContinuously && data.rewardType === "Token") {
       if (!data.endDate) {
         ctx.addIssue({
           path: ["endDate"],

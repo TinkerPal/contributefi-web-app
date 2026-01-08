@@ -39,7 +39,7 @@ function Filter({ tag }) {
         <Button
           role="combobox"
           aria-expanded={open}
-          className={`group ${tag === "landing" ? "bg-[#2F0FD1] hover:bg-[#F7F9FD]" : "bg-[#F7F9FD] hover:bg-[#2F0FD1]"} py-5`}
+          className={`group ${tag === "landing" ? "bg-[#2F0FD1] hover:bg-[#F7F9FD]" : "bg-[#F7F9FD] hover:bg-[#2F0FD1]"} py-5 shadow`}
         >
           <LuSlidersVertical
             className={`text-[24px] ${tag === "landing" ? "text-[#F7F9FD] group-hover:text-[#2F0FD1]" : "text-[#2F0FD1] group-hover:text-[#F7F9FD]"}`}

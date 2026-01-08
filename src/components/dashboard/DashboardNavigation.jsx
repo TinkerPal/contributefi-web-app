@@ -27,7 +27,6 @@ function DashboardNavigation({
               <li key={idx}>
                 <NavLink
                   onClick={() => {
-                    console.log(link);
                     if (link.title === "Log Out") {
                       logout();
                       return;

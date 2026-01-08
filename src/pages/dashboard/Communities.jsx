@@ -100,29 +100,6 @@ function Communities() {
     }
   }, [memberCommunitiesData, communityView]);
 
-  // const handleChangeCommunityView = (view) => {
-  //   if (view === "created") {
-  //     setCommunityOwnerId(user.id);
-  //     refetch();
-  //     setCommunityView(view);
-  //     return;
-  //   }
-
-  //   if (view === "joined") {
-  //     setCommunityOwnerId(user.id);
-  //     communities = memberCommunitiesData?.data ?? [];
-  //     setCommunityView(view);
-  //     return;
-  //   }
-
-  //   if (view === "all") {
-  //     setCommunityOwnerId("");
-  //     refetch();
-  //     setCommunityView(view);
-  //     return;
-  //   }
-  // };
-
   const handleChangeCommunityView = (view) => {
     setCommunityView(view);
 
@@ -269,6 +246,8 @@ function Communities() {
   const handleLeaveCommunity = () => {
     leaveCommunityMutation(communityId);
   };
+
+
 
   return (
     <>
@@ -439,7 +418,7 @@ function Communities() {
                 </div>
               </div>
 
-              <div className="space-y-4 rounded-[4px] bg-white p-4">
+              <div className="space-y-4 rounded-[4px] p-4">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="w-full xl:order-2 xl:w-fit">
                     <CustomSearch placeholder="Search task" />
@@ -523,7 +502,7 @@ function Communities() {
             </MetricsContainer>
           </div>
 
-          <div className="space-y-4 rounded-[4px] bg-white p-4">
+          <div className="space-y-4 rounded-[4px] p-4">
             <div className="flex flex-col items-center gap-3 sm:flex-row lg:hidden">
               <div className="w-full flex-1">
                 <CustomSearch placeholder="search community" />

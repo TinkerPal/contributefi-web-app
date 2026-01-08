@@ -42,9 +42,6 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
   const [step, setStep] = useState(
     getItemFromLocalStorage("growthQuestStep") || 1,
   );
-  //   const [step1Data, setStep1Data] = useState(
-  //     getItemFromLocalStorage("growthQuestStep1Data") || null,
-  //   );
 
   const [step1Data, setStep1Data] = useState(() => {
     const stored = getItemFromLocalStorage("growthQuestStep1Data");
@@ -71,14 +68,14 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
     resolver: zodResolver(CreateGrowthQuestSchema),
     defaultValues: step1Data ?? {
       questTitle: "",
-      rewardType: "",
+      rewardType: "Points",
       tokenContract: "",
       numberOfWinners: "",
       winnerSelectionMethod: "",
       runContinuously: false,
-      startDate: "",
+      startDate: new Date(),
       endDate: "",
-      rewardMode: "",
+      rewardMode: "Overall Reward",
       pointsPerWinner: "",
       tokensPerWinner: "",
       tasks: [
@@ -202,7 +199,9 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 />
               )}
 
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div
+                className={`grid gap-5 ${rewardType === "Token" && "sm:grid-cols-2"}`}
+              >
                 <CustomInput
                   label="Number of Winners"
                   placeholder="0"
@@ -211,48 +210,52 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                   {...register("numberOfWinners", { valueAsNumber: true })}
                 />
 
-                <CustomSelect
-                  label="Winner Selection Method"
-                  placeholder="Select"
-                  options={WINNER_SELECTION_METHOD}
-                  error={errors.winnerSelectionMethod?.message}
-                  register={register("winnerSelectionMethod")}
-                />
+                {rewardType === "Token" && (
+                  <CustomSelect
+                    label="Winner Selection Method"
+                    placeholder="Select"
+                    options={WINNER_SELECTION_METHOD}
+                    error={errors.winnerSelectionMethod?.message}
+                    register={register("winnerSelectionMethod")}
+                  />
+                )}
               </div>
 
               <div className="grid gap-2">
                 <div className="flex w-full items-center justify-between text-[14px] font-light text-[#09032A]">
                   Quest Duration
-                  <div className="ml-auto flex items-center gap-2">
-                    <p className="text-[14px] font-[300] text-[#09032A]">
-                      Run quest continuously
-                    </p>
-                    <Controller
-                      name="runContinuously"
-                      control={control}
-                      defaultValue={false}
-                      render={({ field }) => (
-                        <Checkbox
-                          checked={field.value}
-                          onChange={field.onChange}
-                          className="group block size-4 shrink-0 rounded border border-[#D0D5DD] bg-white data-checked:border-none data-checked:bg-[#2F0FD1] data-disabled:cursor-not-allowed data-disabled:bg-orange-200"
-                        >
-                          <svg
-                            className="stroke-white opacity-0 group-data-checked:opacity-100"
-                            viewBox="0 0 14 14"
-                            fill="none"
+                  {rewardType === "Token" && (
+                    <div className="ml-auto flex items-center gap-2">
+                      <p className="text-[14px] font-[300] text-[#09032A]">
+                        Run quest continuously
+                      </p>
+                      <Controller
+                        name="runContinuously"
+                        control={control}
+                        defaultValue={false}
+                        render={({ field }) => (
+                          <Checkbox
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="group block size-4 shrink-0 rounded border border-[#D0D5DD] bg-white data-checked:border-none data-checked:bg-[#2F0FD1] data-disabled:cursor-not-allowed data-disabled:bg-orange-200"
                           >
-                            <path
-                              d="M3 8L6 11L11 3.5"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </Checkbox>
-                      )}
-                    />
-                  </div>
+                            <svg
+                              className="stroke-white opacity-0 group-data-checked:opacity-100"
+                              viewBox="0 0 14 14"
+                              fill="none"
+                            >
+                              <path
+                                d="M3 8L6 11L11 3.5"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </Checkbox>
+                        )}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <Controller
@@ -266,7 +269,11 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                       onEndDateChange={(date) =>
                         setValue("endDate", date, { shouldValidate: true })
                       }
-                      runContinuously={watch("runContinuously")}
+                      runContinuously={
+                        watch("runContinuously") ||
+                        rewardType === "" ||
+                        rewardType === "Points"
+                      }
                       startDateError={errors.startDate?.message}
                       endDateError={errors.endDate?.message}
                     />
