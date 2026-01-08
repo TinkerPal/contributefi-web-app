@@ -189,7 +189,7 @@ function CommunitiesCard({ community, tag }) {
           // onClick={handleJoinCommunity}
           disabled={joinCommunityPending || leaveCommunityPending}
           onClick={data?.isMember ? handleLeaveCommunity : handleJoinCommunity}
-          className={`cursor-pointer font-medium ${data?.isMember ? "text-[#F31307]" : "text-[#2F0FD1]"}`}
+          className={`cursor-pointer font-medium ${data?.isMember ? "text-[#F31307]" : "text-[#2F0FD1]"} disabled:cursor-not-allowed`}
         >
           {/* {joinCommunityPending ? "Joining..." : "+ Join"} */}
           {joinCommunityPending

@@ -618,7 +618,9 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
 
               <div className="flex items-center gap-2">
                 <p className="w-1/2 font-[300] text-[#525866]">
-                  Quest Duration
+                  {step1Data.rewardType === "Token" && step1Data?.endDate
+                    ? "Quest Duration"
+                    : "Quest Start"}
                 </p>
                 <p className="w-1/2 font-medium text-[#050215]">
                   {step1Data.startDate &&
@@ -628,14 +630,16 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <p className="w-1/2 font-[300] text-[#525866]">
-                  Selection Method
-                </p>
-                <p className="w-1/2 font-medium text-[#050215]">
-                  {step1Data.winnerSelectionMethod}
-                </p>
-              </div>
+              {step1Data.rewardType === "Token" && (
+                <div className="flex items-center gap-2">
+                  <p className="w-1/2 font-[300] text-[#525866]">
+                    Selection Method
+                  </p>
+                  <p className="w-1/2 font-medium text-[#050215]">
+                    {step1Data.winnerSelectionMethod}
+                  </p>
+                </div>
+              )}
 
               <div className="flex items-center gap-2">
                 <p className="w-1/2 font-[300] text-[#525866]">Reward Mode</p>
@@ -735,65 +739,83 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 );
               })}
 
-            <div className="flex flex-wrap items-center gap-2">
-              <>
-                {" "}
-                <Controller
-                  name="makeConcurrent"
-                  control={control}
-                  defaultValue={false}
-                  render={({ field }) => (
-                    <Checkbox
-                      checked={field.value}
-                      onChange={field.onChange}
-                      className="group block size-4 shrink-0 rounded border border-[#D0D5DD] bg-white data-checked:border-none data-checked:bg-[#2F0FD1] data-disabled:cursor-not-allowed data-disabled:bg-orange-200"
-                    >
-                      <svg
-                        className="stroke-white opacity-0 group-data-checked:opacity-100"
-                        viewBox="0 0 14 14"
-                        fill="none"
+            {step1Data?.rewardType === "Token" && (
+              <div className="flex flex-wrap items-center gap-2">
+                <>
+                  {" "}
+                  <Controller
+                    name="makeConcurrent"
+                    control={control}
+                    defaultValue={false}
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="group block size-4 shrink-0 rounded border border-[#D0D5DD] bg-white data-checked:border-none data-checked:bg-[#2F0FD1] data-disabled:cursor-not-allowed data-disabled:bg-orange-200"
                       >
-                        <path
-                          d="M3 8L6 11L11 3.5"
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </Checkbox>
-                  )}
-                />
-                <p className="text-[14px] font-[300] text-[#09032A]">
-                  Reward all participants with points
-                </p>
-              </>
-            </div>
+                        <svg
+                          className="stroke-white opacity-0 group-data-checked:opacity-100"
+                          viewBox="0 0 14 14"
+                          fill="none"
+                        >
+                          <path
+                            d="M3 8L6 11L11 3.5"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </Checkbox>
+                    )}
+                  />
+                  <p className="text-[14px] font-[300] text-[#09032A]">
+                    Reward all participants with points
+                  </p>
+                </>
+              </div>
+            )}
 
             <div className="mt-6 space-y-2 rounded-[8px] bg-[#EDF2FF] px-9 py-6">
-              {step === 2 && (
+              {step === 2 && step1Data?.rewardType === "Points" ? (
+                <>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-[300] text-[#09032A]">Total Points:</p>
+                    <p className="text-2xl font-bold text-[#050215]">
+                      {step1Data.rewardMode === "Overall Reward" &&
+                        `${step1Data.pointsPerWinner * step1Data.numberOfWinners}`}
+
+                      {step1Data.rewardMode === "Individual Task Reward" &&
+                        `${step1Data.tasks.reduce((total, task) => total + task.pointsPerTask, 0) * step1Data.numberOfWinners}`}
+                    </p>
+                  </div>
+
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    type="submit"
+                    className="mt-5 w-full"
+                    onClick={() => {
+                      setSheetIsOpen(false);
+                      setOpenQuestSuccess(true);
+                      removeItemFromLocalStorage("growthQuestStep");
+                      removeItemFromLocalStorage("growthQuestStep1Data");
+                    }}
+                  >
+                    Publish Quest
+                  </Button>
+                </>
+              ) : step === 2 && step1Data?.rewardType === "Token" ? (
                 <>
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-[300] text-[#09032A]">
-                      {step1Data.rewardType === "Token"
-                        ? "Total Rewards (to be deposited):"
-                        : "Total Rewards (points):"}
+                      Total Rewards (to be deposited):
                     </p>
                     <p className="text-2xl font-bold text-[#050215]">
-                      {step1Data.rewardType === "Token" &&
-                        step1Data.rewardMode === "Overall Reward" &&
+                      {step1Data.rewardMode === "Overall Reward" &&
                         `${step1Data.tokensPerWinner * step1Data.numberOfWinners} XLM`}
 
-                      {step1Data.rewardType === "Token" &&
-                        step1Data.rewardMode === "Individual Task Reward" &&
+                      {step1Data.rewardMode === "Individual Task Reward" &&
                         `${step1Data.tasks.reduce((total, task) => total + task.tokensPerTask, 0) * step1Data.numberOfWinners} XLM`}
-
-                      {step1Data.rewardType === "Points" &&
-                        step1Data.rewardMode === "Individual Task Reward" &&
-                        `${step1Data.tasks.reduce((total, task) => total + task.pointsPerTask, 0) * step1Data.numberOfWinners}`}
-
-                      {step1Data.rewardType === "Points" &&
-                        step1Data.rewardMode === "Overall Reward" &&
-                        `${step1Data.pointsPerWinner * step1Data.numberOfWinners}`}
                     </p>
                   </div>
 
@@ -801,46 +823,48 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     <p className="font-[300] text-[#09032A]">Fees to Charge</p>
                     <p className="text-2xl font-bold text-[#050215]">100 XLM</p>
                   </div>
+
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    type="submit"
+                    className="mt-5 w-full"
+                    onClick={() => {
+                      setStep((prev) => prev + 1);
+                      setItemInLocalStorage("growthQuestStep", 3);
+                    }}
+                  >
+                    Deposit Token
+                  </Button>
                 </>
-              )}
+              ) : null}
 
               {step === 3 && (
-                <div className="space-y-1 text-center">
-                  <p className="font-[300] text-[#09032A]">Amount Deposited</p>
-                  <p className="text-2xl font-bold text-[#050215]">6,000 XLM</p>
-                </div>
-              )}
+                <>
+                  <div className="space-y-1 text-center">
+                    <p className="font-[300] text-[#09032A]">
+                      Amount Deposited
+                    </p>
+                    <p className="text-2xl font-bold text-[#050215]">
+                      6,000 XLM
+                    </p>
+                  </div>
 
-              {step === 2 && (
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  type="submit"
-                  className="mt-5 w-full"
-                  onClick={() => {
-                    setStep((prev) => prev + 1);
-                    setItemInLocalStorage("growthQuestStep", 3);
-                  }}
-                >
-                  Deposit Token
-                </Button>
-              )}
-
-              {step === 3 && (
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  type="submit"
-                  className="mt-5 w-full"
-                  onClick={() => {
-                    setSheetIsOpen(false);
-                    setOpenQuestSuccess(true);
-                    removeItemFromLocalStorage("growthQuestStep");
-                    removeItemFromLocalStorage("growthQuestStep1Data");
-                  }}
-                >
-                  Publish Quest
-                </Button>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    type="submit"
+                    className="mt-5 w-full"
+                    onClick={() => {
+                      setSheetIsOpen(false);
+                      setOpenQuestSuccess(true);
+                      removeItemFromLocalStorage("growthQuestStep");
+                      removeItemFromLocalStorage("growthQuestStep1Data");
+                    }}
+                  >
+                    Publish Quest
+                  </Button>
+                </>
               )}
             </div>
           </div>
