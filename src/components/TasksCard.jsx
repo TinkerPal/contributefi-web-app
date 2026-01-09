@@ -5,23 +5,16 @@ function TasksCard({ task, tag }) {
   const navigate = useNavigate();
 
   const handleOpen = () => {
-    if (tag === "home-page") return;
-    if (tag === "task-page") return;
-    if (tag === "overview") {
-      const params = new URLSearchParams(window.location.search);
-      params.set("task", task.title);
-      navigate(`/dashboard/tasks?${params.toString()}`, { replace: false });
-      return;
-    }
     const params = new URLSearchParams(window.location.search);
     params.set("task", task.title);
-    navigate(`?${params.toString()}`, { replace: false });
+    navigate(`/dashboard/tasks?${params.toString()}`, { replace: false });
+    return;
   };
 
   return (
     <div
       onClick={handleOpen}
-      className={`flex ${tag === "home-page" || tag === "task-page" ? "" : "cursor-pointer"} flex-col justify-center gap-8 rounded-[8px] border-2 border-[#F0F4FD] bg-white px-[24px] py-[28px]`}
+      className={`flex cursor-pointer ${tag === "home-page" || tag === "task-page" ? "" : "cursor-pointer"} flex-col justify-center gap-8 rounded-[8px] border-2 border-[#F0F4FD] bg-white px-[24px] py-[28px]`}
     >
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">

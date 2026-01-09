@@ -1,6 +1,12 @@
+import { useAuth } from "@/hooks/useAuth";
 import AuthButtons from "./AuthButtons";
+import { useNavigate } from "react-router";
+import { Button } from "./ui/button";
 
 function CreateWorkAndEarn() {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 bg-white px-5 py-10 pb-10 md:py-[104px] lg:flex-row lg:gap-20 lg:px-10">
       <div className="flex flex-col gap-6 lg:order-2 lg:max-w-[576px]">
@@ -21,7 +27,18 @@ function CreateWorkAndEarn() {
           </p>
         </div>
 
-        <AuthButtons />
+        {isAuthenticated ? (
+          <Button
+            className="w-fit"
+            onClick={() => navigate("/dashboard")}
+            variant="secondary"
+            size="lg"
+          >
+            Go to Dashboard
+          </Button>
+        ) : (
+          <AuthButtons />
+        )}
       </div>
 
       <img

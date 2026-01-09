@@ -1,14 +1,17 @@
+import { useAuth } from "@/hooks/useAuth";
 import { COMMUNITY_TAG_BG } from "@/lib/constants";
+import { getCommunity, joinCommunity, leaveCommunity } from "@/services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 
 function CommunitiesCard({ community, tag }) {
   const navigate = useNavigate();
 
-  const handleJoin = () => {
-    // if (tag === "home-page" || tag === "communities-page") {
-    //   toast.error("Kindly login or register");
-    //   return;
-    // }
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  const handleOpen = () => {
     if (
       tag === "overview" ||
       tag === "home-page" ||
@@ -26,9 +29,110 @@ function CommunitiesCard({ community, tag }) {
     navigate(`?${params.toString()}`, { replace: false });
   };
 
+  const { data } = useQuery({
+    queryKey: ["community", community.id],
+    queryFn: () => getCommunity(community.id),
+    enabled: !!community.id,
+    keepPreviousData: true,
+  });
+
+  const { mutate: joinCommunityMutation, isPending: joinCommunityPending } =
+    useMutation({
+      mutationFn: () => joinCommunity(community.id),
+      onMutate: async () => {
+        await queryClient.cancelQueries(["community", community.id]);
+
+        const previousCommunity = queryClient.getQueryData([
+          "community",
+          community.id,
+        ]);
+
+        queryClient.setQueryData(["community", community.id], (old) => ({
+          ...old,
+          isMember: true,
+          totalMembers: (old?.totalMembers ?? 0) + 1,
+        }));
+
+        return { previousCommunity };
+      },
+
+      onError: (error, _, context) => {
+        // Rollback on error
+        queryClient.setQueryData(
+          ["community", community.id],
+          context.previousCommunity,
+        );
+        toast.error(
+          error?.response?.data?.message || "Failed to join community",
+        );
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["community", community.id]);
+      },
+      onSuccess: (data) => {
+        if (data.status === 201) {
+          toast.success("Community joined successfully");
+        } else {
+          toast.error("Something went wrong");
+        }
+      },
+    });
+
+  const handleJoinCommunity = (e) => {
+    e.stopPropagation();
+    joinCommunityMutation(community.id);
+  };
+
+  const { mutate: leaveCommunityMutation, isPending: leaveCommunityPending } =
+    useMutation({
+      mutationFn: () => leaveCommunity(community.id, user?.id),
+      onMutate: async () => {
+        await queryClient.cancelQueries(["community", community.id]);
+        const previousCommunity = queryClient.getQueryData([
+          "community",
+          community.id,
+        ]);
+
+        queryClient.setQueryData(["community", community.id], (old) => ({
+          ...old,
+          isMember: false,
+          totalMembers: Math.max((old?.totalMembers ?? 1) - 1, 0),
+        }));
+
+        return { previousCommunity };
+      },
+      onError: (error, _, context) => {
+        queryClient.setQueryData(
+          ["community", community.id],
+          context.previousCommunity,
+        );
+        toast.error(
+          error?.response?.data?.message || "Failed to leave community",
+        );
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["community", community.id]);
+      },
+      onSuccess: (data) => {
+        if (data.status === 201) {
+          toast.success("Successfully left the community");
+        } else {
+          toast.error("Something went wrong");
+        }
+      },
+    });
+
+  const handleLeaveCommunity = (e) => {
+    e.stopPropagation();
+    leaveCommunityMutation(community.id);
+  };
+
+  console.log({ data });
+
   return (
     <div
-      className={`flex flex-col justify-center gap-8 rounded-[8px] border-2 border-[#F0F4FD] bg-white px-[24px] py-[28px]`}
+      onClick={handleOpen}
+      className={`flex cursor-pointer flex-col justify-center gap-8 rounded-[8px] border-2 border-[#F0F4FD] bg-white px-[24px] py-[28px]`}
     >
       <div className="space-y-4">
         <div className="flex items-start justify-between">
@@ -82,10 +186,19 @@ function CommunitiesCard({ community, tag }) {
         </div>
 
         <button
-          onClick={handleJoin}
-          className="cursor-pointer font-medium text-[#2F0FD1]"
+          // onClick={handleJoinCommunity}
+          disabled={joinCommunityPending || leaveCommunityPending}
+          onClick={data?.isMember ? handleLeaveCommunity : handleJoinCommunity}
+          className={`cursor-pointer font-medium ${data?.isMember ? "text-[#F31307]" : "text-[#2F0FD1]"} disabled:cursor-not-allowed`}
         >
-          View
+          {/* {joinCommunityPending ? "Joining..." : "+ Join"} */}
+          {joinCommunityPending
+            ? "Joining..."
+            : leaveCommunityPending
+              ? "Leaving..."
+              : data?.isMember
+                ? "Leave"
+                : "+ Join"}
         </button>
       </div>
     </div>

@@ -892,7 +892,7 @@ function Tasks() {
             </MetricsContainer>
           </div>
 
-          <div className="space-y-4 rounded-[4px] bg-white p-4">
+          <div className="space-y-4 rounded-[4px] p-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="w-full xl:order-2 xl:w-fit">
                 <CustomSearch placeholder="Search task" />
