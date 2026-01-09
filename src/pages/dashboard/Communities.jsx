@@ -456,7 +456,7 @@ function Communities() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                   {currentTask.map((task, i) => (
                     <TasksCard task={task} key={i} />
                   ))}
@@ -555,7 +555,7 @@ function Communities() {
                 <p className="text-2xl font-bold">No communities found...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {displayedCommunities.map((community, i) => (
                   <CommunitiesCard
                     community={community}

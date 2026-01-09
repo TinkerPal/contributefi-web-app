@@ -1,8 +1,8 @@
 export const REWARD_MODES = ["Overall Reward", "Individual Task Reward"];
 
 export const REWARD_TYPES = [
-  { label: "Token", value: "Token" },
   { label: "Points", value: "Points" },
+  { label: "Token", value: "Token" },
 ];
 
 export const TASK_TYPES = [

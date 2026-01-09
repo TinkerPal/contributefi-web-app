@@ -75,7 +75,7 @@ function Overview() {
           </Button>
         </OverviewHeading>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {TASKS.slice(0, 6).map((task, i) => (
             <TasksCard task={task} key={i} tag="overview" />
           ))}
@@ -117,7 +117,7 @@ function Overview() {
             <p className="text-2xl font-bold">No communities found...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {communities.map((community, i) => (
               <CommunitiesCard community={community} key={i} tag="overview" />
             ))}

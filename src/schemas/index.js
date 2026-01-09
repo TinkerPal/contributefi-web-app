@@ -74,10 +74,8 @@ const GrowthTaskSchema = z.object({
         ].includes(val),
       { message: "Invalid task type" },
     ),
-
   tokensPerTask: numberOrNullSchema,
   pointsPerTask: numberOrNullSchema,
-
   twitterUrl: optionalUrlSchema("Invalid Twitter URL"),
   tweetUrl: optionalUrlSchema("Invalid Tweet URL"),
   discordLink: optionalUrlSchema("Invalid Discord invite link"),
@@ -101,6 +99,8 @@ export const CreateGrowthQuestSchema = z
     numberOfWinners: numberOrNullSchema,
     winnerSelectionMethod: z.string().nullish(),
     runContinuously: z.boolean().default(false),
+    makeConcurrent: z.boolean().default(false),
+    rewardAllWithPoints: z.boolean().default(false),
     startDate: z.preprocess(
       (val) => (val === "" ? null : val),
       z.date().nullable(),
@@ -123,6 +123,7 @@ export const CreateGrowthQuestSchema = z
       ),
     tokensPerWinner: numberOrNullSchema,
     pointsPerWinner: numberOrNullSchema,
+    allWithPoints: numberOrNullSchema,
     tasks: z.array(GrowthTaskSchema).nonempty("At least one task is required"),
   })
   .superRefine((data, ctx) => {
@@ -145,17 +146,25 @@ export const CreateGrowthQuestSchema = z
           code: "custom",
         });
       }
+
+      if (!data.numberOfWinners) {
+        ctx.addIssue({
+          path: ["numberOfWinners"],
+          message: "Number of winners is required",
+          code: "custom",
+        });
+      } else if (data.numberOfWinners < 0) {
+        ctx.addIssue({
+          path: ["numberOfWinners"],
+          message: "Number of winners cannot be negative",
+          code: "custom",
+        });
+      }
     }
 
-    if (!data.numberOfWinners) {
+    if (data.rewardAllWithPoints) {
       ctx.addIssue({
-        path: ["numberOfWinners"],
-        message: "Number of winners is required",
-        code: "custom",
-      });
-    } else if (data.numberOfWinners < 0) {
-      ctx.addIssue({
-        path: ["numberOfWinners"],
+        path: ["allWithPoints"],
         message: "Number of winners cannot be negative",
         code: "custom",
       });
@@ -183,7 +192,7 @@ export const CreateGrowthQuestSchema = z
       });
     }
 
-    if (!data.runContinuously && data.rewardType === "Token") {
+    if (!data.runContinuously) {
       if (!data.endDate) {
         ctx.addIssue({
           path: ["endDate"],
