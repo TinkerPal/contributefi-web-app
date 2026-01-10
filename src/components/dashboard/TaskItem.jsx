@@ -14,6 +14,8 @@ export default function TaskItem({
   collapsed,
   toggleTask,
   totalTasks,
+  rewardMode,
+  rewardType,
 }) {
   const {
     fields: linkFields,
@@ -121,6 +123,32 @@ export default function TaskItem({
             error={errors.tasks?.[taskIndex]?.instruction?.message}
             {...register(`tasks.${taskIndex}.instruction`)}
           />
+
+          {rewardType === "Token" &&
+            rewardMode === "Individual Task Reward" && (
+              <CustomInput
+                label="How many tokens per task?"
+                placeholder="eg 50"
+                type="number"
+                error={errors.tasks?.[taskIndex]?.tokensPerTask?.message}
+                {...register(`tasks.${taskIndex}.tokensPerTask`, {
+                  valueAsNumber: true,
+                })}
+              />
+            )}
+
+          {rewardType === "Points" &&
+            rewardMode === "Individual Task Reward" && (
+              <CustomInput
+                label="How many points per task?"
+                placeholder="eg 50"
+                type="number"
+                error={errors.tasks?.[taskIndex]?.pointsPerTask?.message}
+                {...register(`tasks.${taskIndex}.pointsPerTask`, {
+                  valueAsNumber: true,
+                })}
+              />
+            )}
         </>
       )}
     </div>

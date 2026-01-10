@@ -1,13 +1,13 @@
 export const REWARD_MODES = ["Overall Reward", "Individual Task Reward"];
 
 export const REWARD_TYPES = [
-  { label: "Token", value: "Token" },
   { label: "Points", value: "Points" },
+  { label: "Token", value: "Token" },
 ];
 
 export const TASK_TYPES = [
   { label: "Follow on Twitter", value: "Follow on Twitter" },
-  { label: "Comment on Twitter", value: "Comment on Twitter" },
+  { label: "Comment on Tweet", value: "Comment on Tweet" },
   { label: "Like Tweet", value: "Like Tweet" },
   { label: "Post on Discord", value: "Post on Discord" },
   { label: "Join Telegram Channel", value: "Join Telegram Channel" },
@@ -19,12 +19,17 @@ export const WINNER_SELECTION_METHOD = [
   { label: "FCFS", value: "FCFS" },
 ];
 
+export const SELECTION_METHOD = [
+  { label: "Manual Assignment Required", value: "Manual Assignment Required" },
+  { label: "First to Complete", value: "First to Complete" },
+];
+
 export const TASK_PREVIEW_CONFIG = {
   "Follow on Twitter": {
     label: "Twitter Profile",
     field: "twitterUrl",
   },
-  "Comment on Twitter": {
+  "Comment on Tweet": {
     label: "Tweet URL",
     field: "tweetUrl",
   },
@@ -45,3 +50,8 @@ export const TASK_PREVIEW_CONFIG = {
     field: "telegramGroupLink",
   },
 };
+
+export const VERIFICATION_MODES = [
+  "Contract Invocation",
+  "Observe Account Calls",
+];

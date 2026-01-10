@@ -15,46 +15,50 @@ import { CreateTechnicalQuestSchema } from "@/schemas";
 import CustomInput from "../CustomInput";
 import CustomSelect from "../CustomSelect";
 import { Checkbox, Field, Label, Radio, RadioGroup } from "@headlessui/react";
-import { Fragment, useState } from "react";
-import CustomDateSelect from "../CustomDateSelect";
-import { RiDeleteBin6Fill } from "react-icons/ri";
-import { getItemFromLocalStorage, setItemInLocalStorage } from "@/lib/utils";
+import { Fragment, useEffect, useState } from "react";
+import {
+  getItemFromLocalStorage,
+  removeItemFromLocalStorage,
+  setItemInLocalStorage,
+} from "@/lib/utils";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
-import CustomTextArea from "../CustomTextArea";
-import { FaLink } from "react-icons/fa";
 import TaskItem from "./TaskItem";
+import {
+  REWARD_MODES,
+  REWARD_TYPES,
+  SELECTION_METHOD,
+} from "@/utils/constants";
+import { hydrateGrowthQuestData } from "@/utils";
+import { BsFillInfoCircleFill } from "react-icons/bs";
+import FileUpload from "../FileUpload";
 
 const QUEST_GOAL = ["Project-based", "Recruit Candidates"];
-const REWARD_MODES = ["Overall Reward", "Individual Task Reward"];
-const REWARD_TYPES = [
-  { label: "Token", value: "token" },
-  { label: "Points", value: "points" },
-];
+const QUEST_VISIBILITY = ["Open Quest", "Closed Quest"];
 const QUEST_TYPES = [
-  { label: "Design", value: "design" },
-  { label: "Development", value: "development" },
-];
-const TASK_TYPES = [
-  { label: "Follow on Twitter", value: "follow_on_twitter" },
-  { label: "Comment on Twitter", value: "comment_on_twitter" },
+  { label: "Design", value: "Design" },
+  { label: "Development", value: "Development" },
 ];
 
 function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
   const isDesktop = useIsDesktop();
-
-  const side = isDesktop ? "right" : "bottom";
-
   const [open, setOpen] = useState(false);
+  const side = isDesktop ? "right" : "bottom";
+  const [collapsedTasks, setCollapsedTasks] = useState({});
   const [technicalQuestStep, setTechnicalQuestStep] = useState(
     getItemFromLocalStorage("technicalQuestStep") || 1,
   );
-  const [collapsedTasks, setCollapsedTasks] = useState({});
-  const [step1Data, setStep1Data] = useState(
-    getItemFromLocalStorage("technicalQuestStep1Data") || null,
-  );
+  const [step1Data, setStep1Data] = useState(() => {
+    const stored = getItemFromLocalStorage("technicalQuestStep1Data");
+    return stored ? hydrateGrowthQuestData(stored) : null;
+  });
 
-  console.log({ step1Data });
+  const toggleTask = (index) => {
+    setCollapsedTasks((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
 
   const {
     register,
@@ -62,15 +66,25 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
     formState: { errors },
     watch,
     control,
+    setValue,
   } = useForm({
     resolver: zodResolver(CreateTechnicalQuestSchema),
-    defaultValues: {
+    defaultValues: step1Data ?? {
       questTitle: "",
-      questType: "",
-      rewardType: "",
-      tokenContract: null,
-      rewardMode: null,
-      questGoal: null,
+      questType: "Design",
+      rewardType: "Points",
+      tokenContract: "",
+      questGoal: "Project-based",
+      questVisibility: "",
+      candidateListFile: null,
+      numberOfPeople: 1,
+      selectionMethod: "Manual Assignment Required",
+      rewardMode: "Overall Reward",
+      makeConcurrent: false,
+      rewardAllWithPoints: step1Data?.rewardAllWithPoints || false,
+      pointsPerWinner: step1Data?.pointsPerTask || "",
+      tokensPerWinner: step1Data?.tokensPerWinner || "",
+      extraPoints: step1Data?.extraPoints || "",
       tasks: [
         {
           description: "",
@@ -86,16 +100,9 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
     },
   });
 
-  const toggleTask = (index) => {
-    setCollapsedTasks((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  };
-
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "tasks", // matches defaultValues
+    name: "tasks",
   });
 
   const onSubmit = (data) => {
@@ -107,8 +114,12 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
   };
 
   const rewardType = watch("rewardType");
+  const extraPoints = watch("extraPoints");
+  const questGoal = watch("questGoal");
+  const questVisibility = watch("questVisibility");
+  const rewardMode = watch("rewardMode");
+  const rewardAllWithPoints = watch("rewardAllWithPoints");
 
-  console.log({ errors });
   const removeTaskSafe = (index) => {
     remove(index);
     setCollapsedTasks((prev) => {
@@ -117,6 +128,25 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
       return copy;
     });
   };
+
+  useEffect(() => {
+    if (questGoal === "Recruit Candidates") {
+      setValue("questVisibility", "Open Quest");
+    } else {
+      setValue("questVisibility", "");
+    }
+  }, [questGoal, setValue, watch]);
+
+  useEffect(() => {
+    if (
+      questGoal !== "Recruit Candidates" ||
+      questVisibility !== "Closed Quest"
+    ) {
+      setValue("candidateListFile", null);
+    }
+  }, [questGoal, questVisibility, setValue]);
+
+  console.log({ errors, step1Data });
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -143,10 +173,24 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
         <SheetHeader className="bg-white px-4 shadow">
           {technicalQuestStep === 2 || technicalQuestStep === 3 ? (
             <>
-              <FaArrowLeftLong
-                className="text-3xl text-[#050215]"
-                onClick={() => setTechnicalQuestStep((prev) => prev - 1)}
-              />
+              {technicalQuestStep === 2 && (
+                <FaArrowLeftLong
+                  className="cursor-pointer text-3xl text-[#050215]"
+                  onClick={() => {
+                    if (technicalQuestStep === 2) {
+                      setItemInLocalStorage("technicalQuestStep", 1);
+                      if (!extraPoints) {
+                        console.log({ extraPoints });
+                        setValue("rewardAllWithPoints", false);
+                      }
+                    } else {
+                      setItemInLocalStorage("technicalQuestStep", 2);
+                    }
+                    setTechnicalQuestStep((prev) => prev - 1);
+                  }}
+                />
+              )}
+
               <SheetTitle className="text-[28px] font-bold text-[#09032A]">
                 Quest Preview
               </SheetTitle>
@@ -168,7 +212,6 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
 
         {technicalQuestStep === 1 ? (
           <>
-            {" "}
             <form
               className="grid gap-5 px-4 py-4"
               onSubmit={handleSubmit(onSubmit)}
@@ -197,14 +240,14 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 register={register("rewardType")}
               />
 
-              {rewardType === "token" && (
+              {rewardType === "Token" && (
                 <CustomInput
                   label="Token Contract"
                   placeholder="000000000000000000000"
                   type="text"
                   error={errors.tokenContract?.message}
                   {...register("tokenContract")}
-                  className={rewardType !== "token" ? "hidden" : ""}
+                  className={rewardType !== "Token" ? "hidden" : ""}
                 />
               )}
 
@@ -213,16 +256,20 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 control={control}
                 render={({ field }) => (
                   <div className="grid gap-2">
-                    <p className="text-[14px] font-light text-[#09032A]">
+                    <p className="flex items-center gap-1 text-[14px] font-light text-[#09032A]">
                       Quest Goal
+                      <BsFillInfoCircleFill className="text-[#2F0FD1]" />
                     </p>
                     <RadioGroup
                       value={field.value}
                       onChange={field.onChange}
-                      className="flex w-[80%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+                      className="flex w-[100%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
                     >
                       {QUEST_GOAL.map((plan) => (
-                        <Field key={plan} className="flex items-center gap-2">
+                        <Field
+                          key={plan}
+                          className="flex w-[50%] items-center gap-2"
+                        >
                           <Radio
                             value={plan}
                             className="group flex size-5 items-center justify-center rounded-full border bg-white data-checked:bg-[#2F0FD1]"
@@ -245,6 +292,97 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 )}
               />
 
+              {questGoal === "Recruit Candidates" && (
+                <Controller
+                  name="questVisibility"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="grid gap-2">
+                      <p className="flex items-center gap-1 text-[14px] font-light text-[#09032A]">
+                        Quest Visibility
+                      </p>
+                      <RadioGroup
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        className="flex w-[100%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+                      >
+                        {QUEST_VISIBILITY.map((plan) => (
+                          <Field
+                            key={plan}
+                            className="flex w-[50%] items-center gap-2"
+                          >
+                            <Radio
+                              value={plan}
+                              className="group flex size-5 items-center justify-center rounded-full border bg-white data-checked:bg-[#2F0FD1]"
+                            >
+                              <span className="invisible size-2 rounded-full bg-white group-data-checked:visible" />
+                            </Radio>
+                            <Label className="text-[15px] font-[300] text-[#09032A]">
+                              {plan}
+                            </Label>
+                          </Field>
+                        ))}
+                      </RadioGroup>
+
+                      {errors.questVisibility && (
+                        <span className="text-xs text-red-500">
+                          {errors.questVisibility.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                />
+              )}
+
+              {questGoal === "Recruit Candidates" &&
+                questVisibility === "Closed Quest" && (
+                  <div className="space-y-1">
+                    <Controller
+                      name="candidateListFile"
+                      control={control}
+                      render={({ field }) => (
+                        <FileUpload
+                          description="Files supported: CSV"
+                          buttonText={
+                            watch("candidateListFile")?.name || "Upload List"
+                          }
+                          // accept="text/csv"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] ?? null;
+                            field.onChange(file);
+                          }}
+                        />
+                      )}
+                    />
+                    {errors.candidateListFile && (
+                      <p className="text-xs text-red-500">
+                        {errors.candidateListFile.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+              {((questGoal === "Recruit Candidates" &&
+                questVisibility === "Open Quest") ||
+                questGoal === "Project-based") && (
+                <div className={`grid gap-5 sm:grid-cols-2`}>
+                  <CustomInput
+                    label="Number of People"
+                    placeholder="0"
+                    type="number"
+                    error={errors.numberOfPeople?.message}
+                    {...register("numberOfPeople", { valueAsNumber: true })}
+                  />
+                  <CustomSelect
+                    label="Selection Method"
+                    placeholder="Select"
+                    options={SELECTION_METHOD}
+                    error={errors.selectionMethod?.message}
+                    register={register("selectionMethod")}
+                  />
+                </div>
+              )}
+
               <Controller
                 name="rewardMode"
                 control={control}
@@ -256,10 +394,13 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     <RadioGroup
                       value={field.value}
                       onChange={field.onChange}
-                      className="flex w-[80%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+                      className="flex w-[100%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
                     >
                       {REWARD_MODES.map((plan) => (
-                        <Field key={plan} className="flex items-center gap-2">
+                        <Field
+                          key={plan}
+                          className="flex w-[50%] items-center gap-2"
+                        >
                           <Radio
                             value={plan}
                             className="group flex size-5 items-center justify-center rounded-full border bg-white data-checked:bg-[#2F0FD1]"
@@ -282,6 +423,26 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 )}
               />
 
+              {rewardType === "Token" && rewardMode === "Overall Reward" && (
+                <CustomInput
+                  label="How many tokens per winner?"
+                  placeholder="eg 50"
+                  type="number"
+                  error={errors.tokensPerWinner?.message}
+                  {...register("tokensPerWinner", { valueAsNumber: true })}
+                />
+              )}
+
+              {rewardType === "Points" && rewardMode === "Overall Reward" && (
+                <CustomInput
+                  label="How many points per winner?"
+                  placeholder="eg 50"
+                  type="number"
+                  error={errors.pointsPerWinner?.message}
+                  {...register("pointsPerWinner", { valueAsNumber: true })}
+                />
+              )}
+
               <hr className="border border-[#F0F4FD]" />
 
               {fields.map((task, index) => {
@@ -296,109 +457,15 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     collapsed={collapsedTasks[index]}
                     toggleTask={toggleTask}
                     totalTasks={fields.length}
+                    rewardMode={rewardMode}
+                    rewardType={rewardType}
                   />
-                  // <div key={task.id} className="grid gap-4">
-                  //   <div className="flex items-center justify-between bg-[#EDF2FF] px-3 py-2">
-                  //     <p className="font-semibold text-[#2F0FD1]">
-                  //       Task {fields.length > 1 && index + 1}{" "}
-                  //     </p>
-
-                  //     <div className="flex items-center gap-2">
-                  //       {/* Delete */}
-                  //       {fields.length > 1 && (
-                  //         <button
-                  //           type="button"
-                  //           className="rounded bg-white p-2"
-                  //           onClick={() => remove(index)}
-                  //         >
-                  //           <RiDeleteBin6Fill className="text-red-500" />
-                  //         </button>
-                  //       )}
-
-                  //       {/* Collapse toggle */}
-                  //       <button
-                  //         type="button"
-                  //         onClick={() => toggleTask(index)}
-                  //         className="rounded bg-white p-2"
-                  //       >
-                  //         {collapsedTasks[index] ? (
-                  //           <IoChevronDown />
-                  //         ) : (
-                  //           <IoChevronUp />
-                  //         )}
-                  //       </button>
-                  //     </div>
-                  //   </div>
-
-                  //   {!collapsedTasks[index] && (
-                  //     <>
-                  //       <CustomTextArea
-                  //         label="Task Description"
-                  //         placeholder="Briefly describe the task"
-                  //         error={errors.tasks?.[index]?.description?.message}
-                  //         {...register(`tasks.${index}.description`)}
-                  //       />
-
-                  //       <div className="flex items-center justify-between gap-2 text-[14px] font-light text-[#09032A]">
-                  //         <p>Reference Links</p>
-                  //         <p>1/5</p>
-                  //       </div>
-
-                  //       <div className="space-y-1">
-                  //         <div className="flex items-center justify-between">
-                  //           <p className="text-[14px] font-light text-[#09032A]">
-                  //             Link 1
-                  //           </p>
-
-                  //           <button
-                  //             type="button"
-                  //             className="rounded-full bg-[#FCE9E9] p-2"
-                  //             onClick={() => remove(index)}
-                  //           >
-                  //             <RiDeleteBin6Fill className="m text-red-500" />
-                  //           </button>
-                  //         </div>
-
-                  //         <CustomInput
-                  //           error={errors.tasks?.[index]?.link?.message}
-                  //           {...register(`tasks.${index}.link`)}
-                  //           placeholder="Link Name"
-                  //           type="text"
-                  //         />
-
-                  //         <CustomInput
-                  //           error={errors.tasks?.[index]?.link?.message}
-                  //           {...register(`tasks.${index}.link`)}
-                  //           placeholder="Paste URL"
-                  //           prefix="https://"
-                  //           type="text"
-                  //         />
-
-                  //         <button
-                  //           type="button"
-                  //           onClick={() => append({ type: "", points: 0 })}
-                  //           className="ml-auto flex cursor-pointer items-center gap-1 text-[14px] font-light text-[#2F0FD1]"
-                  //         >
-                  //           <FaLink /> Add Another Link
-                  //         </button>
-                  //       </div>
-
-                  //       <CustomTextArea
-                  //         label="Task Instruction"
-                  //         placeholder="Kindly Specify the Instructions"
-                  //         error={errors.tasks?.[index]?.instruction?.message}
-                  //         {...register(`tasks.${index}.instruction`)}
-                  //       />
-                  //     </>
-                  //   )}
-                  // </div>
                 );
               })}
 
               <div className="flex flex-wrap items-center gap-2">
                 {fields.length > 1 && (
                   <>
-                    {" "}
                     <Controller
                       name="makeConcurrent"
                       control={control}
@@ -432,7 +499,6 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
 
                 <button
                   type="button"
-                  // onClick={() => append({ type: "", points: 0 })}
                   onClick={() => {
                     append({
                       description: "",
@@ -478,7 +544,7 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 </p>
               </div>
 
-              {step1Data.rewardType === "token" && (
+              {step1Data.rewardType === "Token" && (
                 <div className="flex items-center gap-2">
                   <p className="w-1/2 font-[300] text-[#525866]">
                     Token Contract
@@ -496,22 +562,21 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 </p>
               </div>
 
-              {/* <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <p className="w-1/2 font-[300] text-[#525866]">
-                  Quest Duration
+                  Number of People
                 </p>
                 <p className="w-1/2 font-medium text-[#050215]">
-                  {formatDateToYYYYMMDD(new Date(step1Data.startDate))} to{" "}
-                  {formatDateToYYYYMMDD(new Date(step1Data.endDate))}
+                  {step1Data.numberOfPeople}
                 </p>
-              </div> */}
+              </div>
 
               <div className="flex items-center gap-2">
                 <p className="w-1/2 font-[300] text-[#525866]">
                   Selection Method
                 </p>
                 <p className="w-1/2 font-medium text-[#050215]">
-                  {step1Data.winnerSelectionMethod}
+                  {step1Data.selectionMethod}
                 </p>
               </div>
 
@@ -522,19 +587,14 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 </p>
               </div>
 
-              {/* <div className="flex items-center gap-2">
-                <p className="w-1/2 font-[300] text-[#525866]">Quest Goal</p>
-                <p className="w-1/2 font-medium text-[#050215]">
-                  {step1Data.questGoal}
-                </p>
-              </div> */}
-
               <div className="flex items-center gap-2">
                 <p className="w-1/2 font-[300] text-[#525866]">
-                  Reward Per Winner
+                  Reward Per Person
                 </p>
                 <p className="w-1/2 font-medium text-[#050215]">
-                  {step1Data.pointsPerWinner} XLM
+                  {step1Data?.tokensPerWinner
+                    ? `${step1Data?.tokensPerWinner} XLM`
+                    : `${step1Data?.pointsPerWinner} Points`}
                 </p>
               </div>
             </div>
@@ -542,6 +602,7 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
             <hr className="my-6 border border-[#F0F4FD]" />
 
             {step1Data.tasks.map((task, index) => {
+              // const config = TASK_PREVIEW_CONFIG[task.type];
               return (
                 <Fragment key={index}>
                   <div className="mb-4">
@@ -564,7 +625,7 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                       </div>
 
                       {!collapsedTasks[index] && (
-                        <div className="mt-2 flex flex-wrap justify-between rounded-[8px] bg-white p-4">
+                        <div className="mt-2 flex flex-wrap justify-between gap-4 rounded-[8px] bg-white p-4">
                           <div className="space-y-2">
                             <p className="font-[300] text-[#525866]">
                               Task Description
@@ -574,28 +635,36 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                             </p>
                           </div>
 
-                          <div className="space-y-2">
-                            <p className="font-[300] text-[#525866]">
-                              Functional Name
-                            </p>
-                            <p className="font-medium text-[#050215]">
-                              {task.type}
-                            </p>
-                          </div>
-
-                          {task.link && (
+                          {step1Data?.rewardMode ===
+                            "Individual Task Reward" && (
                             <div className="space-y-2">
-                              <p className="font-[300] text-[#525866]">Link</p>
+                              <p className="font-[300] text-[#525866]">
+                                Reward Per Task
+                              </p>
                               <p className="font-medium text-[#050215]">
-                                {task.link}
+                                {task.pointsPerTask || task?.tokensPerTask}{" "}
+                                {task?.tokensPerTask ? "XLM" : "Points"}
                               </p>
                             </div>
                           )}
 
+                          {task.links.map((link) => (
+                            <div className="space-y-2">
+                              <p className="font-[300] text-[#525866]">
+                                {link.name}
+                              </p>
+                              <p className="font-medium text-[#050215]">
+                                {link.url}
+                              </p>
+                            </div>
+                          ))}
+
                           <div className="space-y-2">
-                            <p className="font-[300] text-[#525866]">Link</p>
+                            <p className="font-[300] text-[#525866]">
+                              Task Instruction
+                            </p>
                             <p className="font-medium text-[#050215]">
-                              {task.link}
+                              {task.instruction}
                             </p>
                           </div>
                         </div>
@@ -606,11 +675,10 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
               );
             })}
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
               <>
-                {" "}
                 <Controller
-                  name="makeConcurrent"
+                  name="rewardAllWithPoints"
                   control={control}
                   defaultValue={false}
                   render={({ field }) => (
@@ -640,15 +708,48 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
               </>
             </div>
 
+            {rewardAllWithPoints && (
+              <CustomInput
+                label="How many points per participant?"
+                placeholder="eg 50"
+                type="number"
+                error={errors.extraPoints?.message}
+                {...register("extraPoints", { valueAsNumber: true })}
+              />
+            )}
+
             <div className="mt-6 space-y-2 rounded-[8px] bg-[#EDF2FF] px-9 py-6">
-              {technicalQuestStep === 2 && (
+              {technicalQuestStep === 2 &&
+              step1Data?.rewardType === "Points" ? (
+                <>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    type="submit"
+                    className="mt-5 w-full"
+                    onClick={() => {
+                      setSheetIsOpen(false);
+                      setOpenQuestSuccess(true);
+                      removeItemFromLocalStorage("technicalQuestStep");
+                      removeItemFromLocalStorage("technicalQuestStep1Data");
+                    }}
+                  >
+                    Publish Quest
+                  </Button>
+                </>
+              ) : technicalQuestStep === 2 &&
+                step1Data?.rewardType === "Token" ? (
                 <>
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-[300] text-[#09032A]">
                       Total Rewards (to be deposited):
                     </p>
                     <p className="text-2xl font-bold text-[#050215]">
-                      6,000 XLM
+                      {step1Data.rewardMode === "Overall Reward" &&
+                        `${step1Data.tokensPerWinner * step1Data.numberOfWinners} XLM`}
+
+                      {step1Data.rewardMode === "Individual Task Reward" &&
+                        `${step1Data.tasks.reduce((total, task) => total + task.tokensPerTask, 0) * step1Data.numberOfWinners} XLM`}
                     </p>
                   </div>
 
@@ -656,17 +757,92 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     <p className="font-[300] text-[#09032A]">Fees to Charge</p>
                     <p className="text-2xl font-bold text-[#050215]">100 XLM</p>
                   </div>
+
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    type="submit"
+                    className="mt-5 w-full"
+                    onClick={() => {
+                      setTechnicalQuestStep((prev) => prev + 1);
+                      setItemInLocalStorage("technicalQuestStep", 3);
+                    }}
+                    disabled={rewardAllWithPoints && !extraPoints}
+                  >
+                    Deposit Token
+                  </Button>
+                </>
+              ) : null}
+
+              {technicalQuestStep === 3 && (
+                <>
+                  <div className="space-y-1 text-center">
+                    <p className="font-[300] text-[#09032A]">
+                      Amount Deposited
+                    </p>
+                    <p className="text-2xl font-bold text-[#050215]">
+                      {step1Data.rewardMode === "Overall Reward" &&
+                        `${step1Data.tokensPerWinner * step1Data.numberOfWinners} XLM`}
+
+                      {step1Data.rewardMode === "Individual Task Reward" &&
+                        `${step1Data.tasks.reduce((total, task) => total + task.tokensPerTask, 0) * step1Data.numberOfWinners} XLM`}
+                    </p>
+                  </div>
+
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    type="submit"
+                    className="mt-5 w-full"
+                    onClick={() => {
+                      setSheetIsOpen(false);
+                      setOpenQuestSuccess(true);
+                      removeItemFromLocalStorage("technicalQuestStep");
+                      removeItemFromLocalStorage("technicalQuestStep1Data");
+                    }}
+                    disabled={rewardAllWithPoints && !extraPoints}
+                  >
+                    Publish Quest
+                  </Button>
                 </>
               )}
+              {/* {technicalQuestStep === 2 && step1Data?.rewardType === "Points" ? ( <>
+                                <Button
+                                  variant="secondary"
+                                  size="lg"
+                                  type="submit"
+                                  className="mt-5 w-full"
+                                  onClick={() => {
+                                    setSheetIsOpen(false);
+                                    setOpenQuestSuccess(true);
+                                    removeItemFromLocalStorage("growthQuestStep");
+                                    removeItemFromLocalStorage("growthQuestStep1Data");
+                                  }}
+                                >
+                                  Publish Quest
+                                </Button>
+                              </>) : */}
+              {/* <>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-[300] text-[#09032A]">
+                    Total Rewards (to be deposited):
+                  </p>
+                  <p className="text-2xl font-bold text-[#050215]">6,000 XLM</p>
+                </div>
 
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-[300] text-[#09032A]">Fees to Charge</p>
+                  <p className="text-2xl font-bold text-[#050215]">100 XLM</p>
+                </div>
+              </>
+              )}
               {technicalQuestStep === 3 && (
                 <div className="space-y-1 text-center">
                   <p className="font-[300] text-[#09032A]">Amount Deposited</p>
                   <p className="text-2xl font-bold text-[#050215]">6,000 XLM</p>
                 </div>
-              )}
-
-              {technicalQuestStep === 2 && (
+              )} */}
+              {/* {technicalQuestStep === 2 && (
                 <Button
                   variant="secondary"
                   size="lg"
@@ -679,9 +855,8 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 >
                   Deposit Token
                 </Button>
-              )}
-
-              {technicalQuestStep === 3 && (
+              )} */}
+              {/* {technicalQuestStep === 3 && (
                 <Button
                   variant="secondary"
                   size="lg"
@@ -694,7 +869,7 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 >
                   Publish Quest
                 </Button>
-              )}
+              )} */}
             </div>
           </div>
         )}

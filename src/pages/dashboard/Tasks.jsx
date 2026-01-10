@@ -853,7 +853,7 @@ function Tasks() {
               <h2 className="text-[20px] font-semibold text-[#050215]">
                 Similar Tasks
               </h2>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {SIMILAR_TASKS.map((task, i) => (
                   <TasksCard task={task} key={i} />
                 ))}
@@ -930,7 +930,7 @@ function Tasks() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {currentTask.map((task, i) => (
                 <TasksCard task={task} key={i} />
               ))}

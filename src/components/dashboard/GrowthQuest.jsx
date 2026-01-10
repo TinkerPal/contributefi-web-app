@@ -33,6 +33,7 @@ import {
   TASK_TYPES,
   WINNER_SELECTION_METHOD,
 } from "@/utils/constants";
+import { BsFillInfoCircleFill } from "react-icons/bs";
 
 function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
   const isDesktop = useIsDesktop();
@@ -42,13 +43,10 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
   const [step, setStep] = useState(
     getItemFromLocalStorage("growthQuestStep") || 1,
   );
-
   const [step1Data, setStep1Data] = useState(() => {
     const stored = getItemFromLocalStorage("growthQuestStep1Data");
     return stored ? hydrateGrowthQuestData(stored) : null;
   });
-
-  console.log({ step1Data });
 
   const toggleTask = (index) => {
     setCollapsedTasks((prev) => ({
@@ -71,13 +69,15 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
       rewardType: "Points",
       tokenContract: "",
       numberOfWinners: "",
-      winnerSelectionMethod: "",
-      runContinuously: false,
+      winnerSelectionMethod: "Random",
+      makeConcurrent: false,
+      rewardAllWithPoints: step1Data?.rewardAllWithPoints || false,
       startDate: new Date(),
       endDate: "",
       rewardMode: "Overall Reward",
-      pointsPerWinner: "",
-      tokensPerWinner: "",
+      pointsPerWinner: step1Data?.pointsPerTask || "",
+      extraPoints: step1Data?.extraPoints || "",
+      tokensPerWinner: step1Data?.tokensPerWinner || "",
       tasks: [
         {
           type: "",
@@ -102,6 +102,46 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
 
   const rewardType = watch("rewardType");
   const rewardMode = watch("rewardMode");
+  const runContinuously = watch("runContinuously");
+  const rewardAllWithPoints = watch("rewardAllWithPoints");
+  const extraPoints = watch("extraPoints");
+  const tasks = watch("tasks");
+  const tasksLength = tasks.length;
+
+  useEffect(() => {
+    if (runContinuously === true) {
+      setValue("endDate", "");
+    }
+  }, [runContinuously, setValue]);
+
+  useEffect(() => {
+    if (rewardType === "Points") {
+      setValue("numberOfWinners", "");
+      setValue("winnerSelectionMethod", "");
+      setValue("rewardAllWithPoints", false);
+      setValue("extraPoints", "");
+    } else {
+      setValue("winnerSelectionMethod", "Random");
+    }
+  }, [rewardType, setValue]);
+
+  useEffect(() => {
+    if (step !== 2 || !step1Data) return;
+
+    setStep1Data((prev) => {
+      const updated = {
+        ...prev,
+        rewardAllWithPoints,
+        extraPoints,
+      };
+
+      setItemInLocalStorage("growthQuestStep1Data", updated);
+
+      return updated;
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rewardAllWithPoints, extraPoints]);
 
   useEffect(() => {
     if (rewardType === "Points") {
@@ -112,7 +152,69 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
     }
   }, [rewardType, setValue]);
 
-  console.log({ errors });
+  useEffect(() => {
+    if (rewardMode === "Individual Task Reward") {
+      setValue("pointsPerWinner", "");
+      setValue("tokensPerWinner", "");
+      if (rewardType === "Points") {
+        for (let i = 0; i < tasksLength; i++) {
+          setValue(`tasks.${i}.tokensPerTask`, "");
+        }
+      } else {
+        for (let i = 0; i < tasksLength; i++) {
+          setValue(`tasks.${i}.pointsPerTask`, "");
+        }
+      }
+    } else {
+      for (let i = 0; i < tasksLength; i++) {
+        setValue(`tasks.${i}.pointsPerTask`, "");
+        setValue(`tasks.${i}.tokensPerTask`, "");
+      }
+    }
+  }, [rewardMode, setValue, tasksLength, rewardType]);
+
+  useEffect(() => {
+    if (step1Data) {
+      if (step1Data?.rewardAllWithPoints && !step1Data?.extraPoints) {
+        setStep1Data((prev) => {
+          const updated = {
+            ...prev,
+            rewardAllWithPoints: false,
+            extraPoints: "",
+          };
+
+          setItemInLocalStorage("growthQuestStep1Data", updated);
+
+          return updated;
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  //   useEffect(() => {
+  //     tasks.forEach((task, index) => {
+  //       const allowedFields = TASK_FIELDS[task.type] ?? [];
+
+  //       const allFields = [
+  //         "twitterUrl",
+  //         "tweetUrl",
+  //         "discordLink",
+  //         "telegramLink",
+  //         "telegramGroupLink",
+  //         "channelId",
+  //         "keywordValidation",
+  //       ];
+
+  //       allFields.forEach((field) => {
+  //         if (!allowedFields.includes(field)) {
+  //           unregister(`tasks.${index}.${field}`);
+  //         }
+  //       });
+  //     });
+  //   }, [tasks, unregister]);
+
+  console.log({ errors, step1Data });
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -138,15 +240,24 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
         <SheetHeader className="bg-white px-4 shadow">
           {step === 2 || step === 3 ? (
             <>
-              <FaArrowLeftLong
-                className="cursor-pointer text-3xl text-[#050215]"
-                onClick={() => {
-                  step === 2
-                    ? setItemInLocalStorage("growthQuestStep", 1)
-                    : setItemInLocalStorage("growthQuestStep", 2);
-                  setStep((prev) => prev - 1);
-                }}
-              />
+              {step === 2 && (
+                <FaArrowLeftLong
+                  className="cursor-pointer text-3xl text-[#050215]"
+                  onClick={() => {
+                    if (step === 2) {
+                      setItemInLocalStorage("growthQuestStep", 1);
+                      if (!extraPoints) {
+                        console.log({ extraPoints });
+                        setValue("rewardAllWithPoints", false);
+                      }
+                    } else {
+                      setItemInLocalStorage("growthQuestStep", 2);
+                    }
+                    setStep((prev) => prev - 1);
+                  }}
+                />
+              )}
+
               <SheetTitle className="text-[28px] font-bold text-[#09032A]">
                 Quest Preview
               </SheetTitle>
@@ -199,18 +310,15 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 />
               )}
 
-              <div
-                className={`grid gap-5 ${rewardType === "Token" && "sm:grid-cols-2"}`}
-              >
-                <CustomInput
-                  label="Number of Winners"
-                  placeholder="0"
-                  type="number"
-                  error={errors.numberOfWinners?.message}
-                  {...register("numberOfWinners", { valueAsNumber: true })}
-                />
-
-                {rewardType === "Token" && (
+              {rewardType === "Token" && (
+                <div className={`grid gap-5 sm:grid-cols-2`}>
+                  <CustomInput
+                    label="Number of Winners"
+                    placeholder="0"
+                    type="number"
+                    error={errors.numberOfWinners?.message}
+                    {...register("numberOfWinners", { valueAsNumber: true })}
+                  />
                   <CustomSelect
                     label="Winner Selection Method"
                     placeholder="Select"
@@ -218,44 +326,42 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     error={errors.winnerSelectionMethod?.message}
                     register={register("winnerSelectionMethod")}
                   />
-                )}
-              </div>
+                </div>
+              )}
 
               <div className="grid gap-2">
                 <div className="flex w-full items-center justify-between text-[14px] font-light text-[#09032A]">
                   Quest Duration
-                  {rewardType === "Token" && (
-                    <div className="ml-auto flex items-center gap-2">
-                      <p className="text-[14px] font-[300] text-[#09032A]">
-                        Run quest continuously
-                      </p>
-                      <Controller
-                        name="runContinuously"
-                        control={control}
-                        defaultValue={false}
-                        render={({ field }) => (
-                          <Checkbox
-                            checked={field.value}
-                            onChange={field.onChange}
-                            className="group block size-4 shrink-0 rounded border border-[#D0D5DD] bg-white data-checked:border-none data-checked:bg-[#2F0FD1] data-disabled:cursor-not-allowed data-disabled:bg-orange-200"
+                  <div className="ml-auto flex items-center gap-2">
+                    <p className="text-[14px] font-[300] text-[#09032A]">
+                      Run quest continuously
+                    </p>
+                    <Controller
+                      name="runContinuously"
+                      control={control}
+                      defaultValue={false}
+                      render={({ field }) => (
+                        <Checkbox
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="group block size-4 shrink-0 rounded border border-[#D0D5DD] bg-white data-checked:border-none data-checked:bg-[#2F0FD1] data-disabled:cursor-not-allowed data-disabled:bg-orange-200"
+                        >
+                          <svg
+                            className="stroke-white opacity-0 group-data-checked:opacity-100"
+                            viewBox="0 0 14 14"
+                            fill="none"
                           >
-                            <svg
-                              className="stroke-white opacity-0 group-data-checked:opacity-100"
-                              viewBox="0 0 14 14"
-                              fill="none"
-                            >
-                              <path
-                                d="M3 8L6 11L11 3.5"
-                                strokeWidth={2}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </Checkbox>
-                        )}
-                      />
-                    </div>
-                  )}
+                            <path
+                              d="M3 8L6 11L11 3.5"
+                              strokeWidth={2}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </Checkbox>
+                      )}
+                    />
+                  </div>
                 </div>
 
                 <Controller
@@ -269,11 +375,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                       onEndDateChange={(date) =>
                         setValue("endDate", date, { shouldValidate: true })
                       }
-                      runContinuously={
-                        watch("runContinuously") ||
-                        rewardType === "" ||
-                        rewardType === "Points"
-                      }
+                      runContinuously={watch("runContinuously")}
                       startDateError={errors.startDate?.message}
                       endDateError={errors.endDate?.message}
                     />
@@ -292,10 +394,13 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     <RadioGroup
                       value={field.value}
                       onChange={field.onChange}
-                      className="flex w-[80%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+                      className="flex w-[100%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
                     >
                       {REWARD_MODES.map((plan) => (
-                        <Field key={plan} className="flex items-center gap-2">
+                        <Field
+                          key={plan}
+                          className="flex w-[50%] items-center gap-2"
+                        >
                           <Radio
                             value={plan}
                             className="group flex size-5 items-center justify-center rounded-full border bg-white data-checked:bg-[#2F0FD1]"
@@ -341,7 +446,6 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
               <hr className="border border-[#F0F4FD]" />
 
               {fields.map((task, index) => {
-                // setIndex(() => index);
                 return (
                   <div key={task.id} className="grid gap-4">
                     <div className="flex items-center justify-between bg-[#EDF2FF] px-3 py-2">
@@ -465,7 +569,15 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                         {watch(`tasks.${index}.type`) ===
                           "Join Telegram Channel" && (
                           <CustomInput
-                            label="Telegram Link"
+                            label={
+                              <div className="flex w-full items-center justify-between">
+                                <span>Telegram Link</span>
+                                <span className="flex items-center gap-1 text-[14px] font-normal text-[#2F0FD1]">
+                                  Channel needs a ContributeFi bot{" "}
+                                  <BsFillInfoCircleFill />
+                                </span>
+                              </div>
+                            }
                             error={errors.tasks?.[index]?.telegramLink?.message}
                             {...register(`tasks.${index}.telegramLink`)}
                             placeholder="Paste URL"
@@ -489,7 +601,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                         )}
 
                         {watch(`tasks.${index}.type`) ===
-                          "Comment on Twitter" && (
+                          "Comment on Tweet" && (
                           <div className="space-y-5">
                             <CustomInput
                               label="Tweet URL"
@@ -521,7 +633,6 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
               <div className="flex flex-wrap items-center gap-2">
                 {fields.length > 1 && (
                   <>
-                    {" "}
                     <Controller
                       name="makeConcurrent"
                       control={control}
@@ -607,20 +718,20 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 </div>
               )}
 
-              <div className="flex items-center gap-2">
-                <p className="w-1/2 font-[300] text-[#525866]">
-                  Number of Winners
-                </p>
-                <p className="w-1/2 font-medium text-[#050215]">
-                  {step1Data.numberOfWinners}
-                </p>
-              </div>
+              {step1Data?.numberOfWinners && (
+                <div className="flex items-center gap-2">
+                  <p className="w-1/2 font-[300] text-[#525866]">
+                    Number of Winners
+                  </p>
+                  <p className="w-1/2 font-medium text-[#050215]">
+                    {step1Data.numberOfWinners}
+                  </p>
+                </div>
+              )}
 
               <div className="flex items-center gap-2">
                 <p className="w-1/2 font-[300] text-[#525866]">
-                  {step1Data.rewardType === "Token" && step1Data?.endDate
-                    ? "Quest Duration"
-                    : "Quest Start"}
+                  {step1Data?.endDate ? "Quest Duration" : "Quest Start"}
                 </p>
                 <p className="w-1/2 font-medium text-[#050215]">
                   {step1Data.startDate &&
@@ -649,25 +760,19 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
               </div>
 
               {step1Data?.rewardMode === "Overall Reward" && (
-                <div className="flex items-center gap-2">
-                  <p className="w-1/2 font-[300] text-[#525866]">
-                    Reward Per Winner
-                  </p>
-                  <p className="w-1/2 font-medium text-[#050215]">
-                    {step1Data.pointsPerWinner || step1Data?.tokensPerWinner}{" "}
-                    {step1Data?.tokensPerWinner ? "XLM" : "Points"}
-                  </p>
-                </div>
+                <>
+                  <div className="flex items-center gap-2">
+                    <p className="w-1/2 font-[300] text-[#525866]">
+                      Reward Per Winner
+                    </p>
+                    <p className="w-1/2 font-medium text-[#050215]">
+                      {step1Data?.tokensPerWinner
+                        ? `${step1Data?.tokensPerWinner} XLM`
+                        : `${step1Data?.pointsPerWinner} Points`}
+                    </p>
+                  </div>
+                </>
               )}
-
-              {/* <div className="flex items-center gap-2">
-                <p className="w-1/2 font-[300] text-[#525866]">
-                  Reward Per Winner
-                </p>
-                <p className="w-1/2 font-medium text-[#050215]">
-                  {step1Data.pointsPerWinner} XLM
-                </p>
-              </div> */}
             </div>
 
             <hr className="my-6 border border-[#F0F4FD]" />
@@ -698,7 +803,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                         </div>
 
                         {!collapsedTasks[index] && (
-                          <div className="mt-2 flex justify-between rounded-[8px] bg-white p-4">
+                          <div className="mt-2 flex flex-wrap justify-between gap-4 rounded-[8px] bg-white p-4">
                             <div className="space-y-2">
                               <p className="font-[300] text-[#525866]">
                                 Task Type
@@ -731,6 +836,30 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                                 </p>
                               </div>
                             )}
+
+                            {task["keywordValidation"] &&
+                              task.type === "Comment on Tweet" && (
+                                <div className="space-y-2">
+                                  <p className="font-[300] text-[#525866]">
+                                    Keyword Validation
+                                  </p>
+                                  <p className="font-medium text-[#050215]">
+                                    {task["keywordValidation"]}
+                                  </p>
+                                </div>
+                              )}
+
+                            {task["channelId"] &&
+                              task.type === "Post on Discord" && (
+                                <div className="space-y-2">
+                                  <p className="font-[300] text-[#525866]">
+                                    Channel ID
+                                  </p>
+                                  <p className="font-medium text-[#050215]">
+                                    {task["channelId"]}
+                                  </p>
+                                </div>
+                              )}
                           </div>
                         )}
                       </div>
@@ -740,11 +869,10 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
               })}
 
             {step1Data?.rewardType === "Token" && (
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
                 <>
-                  {" "}
                   <Controller
-                    name="makeConcurrent"
+                    name="rewardAllWithPoints"
                     control={control}
                     defaultValue={false}
                     render={({ field }) => (
@@ -775,20 +903,19 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
               </div>
             )}
 
+            {rewardAllWithPoints && (
+              <CustomInput
+                label="How many points per participant?"
+                placeholder="eg 50"
+                type="number"
+                error={errors.extraPoints?.message}
+                {...register("extraPoints", { valueAsNumber: true })}
+              />
+            )}
+
             <div className="mt-6 space-y-2 rounded-[8px] bg-[#EDF2FF] px-9 py-6">
               {step === 2 && step1Data?.rewardType === "Points" ? (
                 <>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="font-[300] text-[#09032A]">Total Points:</p>
-                    <p className="text-2xl font-bold text-[#050215]">
-                      {step1Data.rewardMode === "Overall Reward" &&
-                        `${step1Data.pointsPerWinner * step1Data.numberOfWinners}`}
-
-                      {step1Data.rewardMode === "Individual Task Reward" &&
-                        `${step1Data.tasks.reduce((total, task) => total + task.pointsPerTask, 0) * step1Data.numberOfWinners}`}
-                    </p>
-                  </div>
-
                   <Button
                     variant="secondary"
                     size="lg"
@@ -833,6 +960,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                       setStep((prev) => prev + 1);
                       setItemInLocalStorage("growthQuestStep", 3);
                     }}
+                    disabled={rewardAllWithPoints && !extraPoints}
                   >
                     Deposit Token
                   </Button>
@@ -846,7 +974,11 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                       Amount Deposited
                     </p>
                     <p className="text-2xl font-bold text-[#050215]">
-                      6,000 XLM
+                      {step1Data.rewardMode === "Overall Reward" &&
+                        `${step1Data.tokensPerWinner * step1Data.numberOfWinners} XLM`}
+
+                      {step1Data.rewardMode === "Individual Task Reward" &&
+                        `${step1Data.tasks.reduce((total, task) => total + task.tokensPerTask, 0) * step1Data.numberOfWinners} XLM`}
                     </p>
                   </div>
 
@@ -861,6 +993,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                       removeItemFromLocalStorage("growthQuestStep");
                       removeItemFromLocalStorage("growthQuestStep1Data");
                     }}
+                    disabled={rewardAllWithPoints && !extraPoints}
                   >
                     Publish Quest
                   </Button>
