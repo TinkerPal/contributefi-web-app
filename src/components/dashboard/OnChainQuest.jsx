@@ -405,15 +405,13 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 )}
               />
 
-              {verificationMode === "Contract Invocation" && (
-                <CustomInput
-                  label="Contract Address"
-                  placeholder="Enter Contract Address"
-                  type="text"
-                  error={errors.contractAddress?.message}
-                  {...register("contractAddress")}
-                />
-              )}
+              <CustomInput
+                label="Contract Address"
+                placeholder="Enter Contract Address"
+                type="text"
+                error={errors.contractAddress?.message}
+                {...register("contractAddress")}
+              />
 
               {verificationMode === "Observe Account Calls" && (
                 <CustomInput
@@ -754,15 +752,6 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                   </div>
                 </>
               )}
-
-              {/* <div className="flex items-center gap-2">
-                <p className="w-1/2 font-[300] text-[#525866]">
-                  Reward Per Winner
-                </p>
-                <p className="w-1/2 font-medium text-[#050215]">
-                  {step1Data.pointsPerWinner} XLM
-                </p>
-              </div> */}
             </div>
 
             <hr className="my-6 border border-[#F0F4FD]" />

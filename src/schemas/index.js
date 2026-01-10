@@ -410,7 +410,7 @@ export const CreateOnChainQuestSchema = z
     tokensPerWinner: numberOrNullSchema,
     pointsPerWinner: numberOrNullSchema,
     extraPoints: numberOrNullSchema,
-    contractAddress: z.string().nullish(),
+    contractAddress: z.string().nonempty("Contract address is required"),
     callerAccountId: z.string().nullish(),
     tasks: z.array(OnChainTaskSchema).min(1, "At least one task is required"),
   })
@@ -538,17 +538,6 @@ export const CreateOnChainQuestSchema = z
           code: "custom",
         });
       }
-    }
-
-    if (
-      data.verificationMode === "Contract Invocation" &&
-      !data.contractAddress
-    ) {
-      ctx.addIssue({
-        path: ["contractAddress"],
-        message: "Contract address is required",
-        code: "custom",
-      });
     }
 
     if (
