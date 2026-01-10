@@ -30,22 +30,10 @@ import {
   REWARD_MODES,
   REWARD_TYPES,
   TASK_TYPES,
+  VERIFICATION_MODES,
   WINNER_SELECTION_METHOD,
 } from "@/utils/constants";
 import { BsFillInfoCircleFill } from "react-icons/bs";
-
-const VERIFICATION_MODES = ["Contract Invocation", "Observe Account Calls"];
-
-const TASK_PREVIEW_CONFIG = {
-  follow_on_twitter: {
-    label: "Twitter Profile",
-    field: "twitterUrl",
-  },
-  comment_on_twitter: {
-    label: "Tweet URL",
-    field: "tweetUrl",
-  },
-};
 
 function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
   const isDesktop = useIsDesktop();
@@ -119,6 +107,7 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
   const runContinuously = watch("runContinuously");
   const rewardAllWithPoints = watch("rewardAllWithPoints");
   const extraPoints = watch("extraPoints");
+  const verificationMode = watch("verificationMode");
   const tasks = watch("tasks");
   const tasksLength = tasks.length;
 
@@ -205,8 +194,6 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const verificationMode = watch("verificationMode");
 
   console.log({ errors, step1Data });
 
@@ -389,10 +376,13 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     <RadioGroup
                       value={field.value}
                       onChange={field.onChange}
-                      className="flex w-[80%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+                      className="flex w-[100%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
                     >
                       {VERIFICATION_MODES.map((plan) => (
-                        <Field key={plan} className="flex items-center gap-2">
+                        <Field
+                          key={plan}
+                          className="flex w-[50%] items-center gap-2"
+                        >
                           <Radio
                             value={plan}
                             className="group flex size-5 items-center justify-center rounded-full border bg-white data-checked:bg-[#2F0FD1]"
@@ -446,10 +436,13 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     <RadioGroup
                       value={field.value}
                       onChange={field.onChange}
-                      className="flex w-[80%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+                      className="flex w-[100%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
                     >
                       {REWARD_MODES.map((plan) => (
-                        <Field key={plan} className="flex items-center gap-2">
+                        <Field
+                          key={plan}
+                          className="flex w-[50%] items-center gap-2"
+                        >
                           <Radio
                             value={plan}
                             className="group flex size-5 items-center justify-center rounded-full border bg-white data-checked:bg-[#2F0FD1]"

@@ -19,6 +19,11 @@ export const WINNER_SELECTION_METHOD = [
   { label: "FCFS", value: "FCFS" },
 ];
 
+export const SELECTION_METHOD = [
+  { label: "Manual Assignment Required", value: "Manual Assignment Required" },
+  { label: "First to Complete", value: "First to Complete" },
+];
+
 export const TASK_PREVIEW_CONFIG = {
   "Follow on Twitter": {
     label: "Twitter Profile",
@@ -45,3 +50,8 @@ export const TASK_PREVIEW_CONFIG = {
     field: "telegramGroupLink",
   },
 };
+
+export const VERIFICATION_MODES = [
+  "Contract Invocation",
+  "Observe Account Calls",
+];

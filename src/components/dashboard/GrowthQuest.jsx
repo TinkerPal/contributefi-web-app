@@ -394,10 +394,13 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     <RadioGroup
                       value={field.value}
                       onChange={field.onChange}
-                      className="flex w-[80%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+                      className="flex w-[100%] flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
                     >
                       {REWARD_MODES.map((plan) => (
-                        <Field key={plan} className="flex items-center gap-2">
+                        <Field
+                          key={plan}
+                          className="flex w-[50%] items-center gap-2"
+                        >
                           <Radio
                             value={plan}
                             className="group flex size-5 items-center justify-center rounded-full border bg-white data-checked:bg-[#2F0FD1]"
