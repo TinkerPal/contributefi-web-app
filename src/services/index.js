@@ -101,8 +101,6 @@ export const getCommunities = async ({
     `${import.meta.env.VITE_BASE_URL}/communities?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}&${communityOwnerId !== "" && `communityOwnerId=${communityOwnerId}`}`,
   );
 
-  console.log({ data });
-
   return data.content;
 };
 
@@ -110,6 +108,8 @@ export const getMemberCommunities = async ({ limit = 10, offset = 1 } = {}) => {
   const { data } = await api.get(
     `${import.meta.env.VITE_BASE_URL}/members/my-communities?includeRemoved=false&limit=${limit}&offset=${offset}`,
   );
+
+  console.log({ data });
 
   return data.content;
 };

@@ -84,6 +84,8 @@ function Communities() {
     keepPreviousData: true,
   });
 
+  console.log({ memberCommunitiesData, communitiesData });
+
   // let communities = communitiesData?.data ?? [];
   const totalPages = communitiesData?.totalPages ?? 1;
 
