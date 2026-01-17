@@ -44,7 +44,14 @@ const optionalUrlSchema = (message) =>
 
 export const CreateCommunitySchema = z.object({
   communityName: z.string().nonempty("Community name is required"),
-  communityUsername: z.string().nonempty("Community username is required"),
+  communityUsername: z
+    .string()
+    .nonempty("Community username is required")
+    .min(6, "Community must be at least 6 characters")
+    .regex(
+      /^[a-zA-Z0-9_.]+$/,
+      "Community username can only contain letters, numbers, underscores, and dots",
+    ),
   websitePage: urlSchema("Enter a valid Website URL"),
   githubPage: urlSchema("Enter a valid GitHub URL"),
   twitterPage: urlSchema("Enter a valid Twitter URL"),
