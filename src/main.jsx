@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import HomePage from "./pages/HomePage";
@@ -67,6 +66,7 @@ const router = createBrowserRouter([
       { index: true, Component: Dashboard },
       { path: "overview", Component: Overview },
       { path: "communities", Component: Communities },
+      { path: "communities/:communityAlias", Component: Communities },
       { path: "tasks", Component: Tasks },
       { path: "earnings", element: <></> },
       { path: "analytics", element: <></> },

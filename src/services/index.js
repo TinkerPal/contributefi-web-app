@@ -1,5 +1,4 @@
-import { getItemFromLocalStorage } from "@/lib/utils";
-import axios from "axios";
+import api from "@/lib/api";
 
 export function createAccount(data) {
   const requestPayload = {
@@ -7,7 +6,7 @@ export function createAccount(data) {
     password: data.password,
   };
 
-  return axios.post(
+  return api.post(
     `${import.meta.env.VITE_BASE_URL}/auth/signup`,
     requestPayload,
     {
@@ -24,17 +23,9 @@ export function resendOTP(data) {
     email: data.email,
   };
 
-  const accessToken = getItemFromLocalStorage("accessToken");
-
-  return axios.post(
+  return api.post(
     `${import.meta.env.VITE_BASE_URL}/auth/send-otp`,
     requestPayload,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
   );
 }
 
@@ -45,17 +36,9 @@ export function verifyEmail(data) {
     email: data.email,
   };
 
-  const accessToken = getItemFromLocalStorage("accessToken");
-
-  return axios.post(
+  return api.post(
     `${import.meta.env.VITE_BASE_URL}/auth/verify-otp`,
     requestPayload,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
   );
 }
 
@@ -64,30 +47,15 @@ export function createUsername(data) {
     username: data.username,
   };
 
-  const accessToken = getItemFromLocalStorage("accessToken");
-
-  return axios.post(
+  return api.post(
     `${import.meta.env.VITE_BASE_URL}/users/username`,
     requestPayload,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
   );
 }
 
 export function checkUsernameAvailability(username) {
-  const accessToken = getItemFromLocalStorage("accessToken");
-
-  return axios.get(
+  return api.get(
     `${import.meta.env.VITE_BASE_URL}/users/check-username?username=${username}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
   );
 }
 
@@ -97,14 +65,9 @@ export function loginUser(data) {
     password: data.password,
   };
 
-  return axios.post(
+  return api.post(
     `${import.meta.env.VITE_BASE_URL}/auth/login`,
     requestPayload,
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    },
   );
 }
 
@@ -122,17 +85,36 @@ export function createCommunity(data) {
     ],
   };
 
-  const accessToken = getItemFromLocalStorage("accessToken");
-
-  return axios.post(
+  return api.post(
     `${import.meta.env.VITE_BASE_URL}/communities`,
     requestPayload,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
+  );
+}
+
+export function createGrowthQuest(payload, communityId) {
+  console.log({ payload });
+
+  return api.post(
+    `${import.meta.env.VITE_BASE_URL}/quests/${communityId}/growth`,
+    payload,
+  );
+}
+
+export function createOnChainQuest(payload, communityId) {
+  console.log({ payload });
+
+  return api.post(
+    `${import.meta.env.VITE_BASE_URL}/quests/${communityId}/on-chain`,
+    payload,
+  );
+}
+
+export function createTechnicalQuest(payload, communityId) {
+  console.log({ payload });
+
+  return api.post(
+    `${import.meta.env.VITE_BASE_URL}/quests/${communityId}/technical`,
+    payload,
   );
 }
 
@@ -142,8 +124,36 @@ export const getCommunities = async ({
   sort = "DESC",
   communityOwnerId = "",
 } = {}) => {
-  const { data } = await axios.get(
+  const { data } = await api.get(
     `${import.meta.env.VITE_BASE_URL}/communities?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}&${communityOwnerId !== "" && `communityOwnerId=${communityOwnerId}`}`,
+  );
+
+  return data.content;
+};
+
+export const getQuests = async ({
+  limit = 10,
+  offset = 1,
+  sort = "DESC",
+} = {}) => {
+  const { data } = await api.get(
+    `${import.meta.env.VITE_BASE_URL}/quests?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}`,
+  );
+
+  console.log({ data });
+
+  return data.content;
+};
+
+export const getQuestsByCommunity = async ({
+  limit = 10,
+  offset = 1,
+  sort = "DESC",
+  communityId,
+} = {}) => {
+  console.log({ communityId });
+  const { data } = await api.get(
+    `${import.meta.env.VITE_BASE_URL}/quests/${communityId}?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}`,
   );
 
   console.log({ data });
@@ -152,30 +162,18 @@ export const getCommunities = async ({
 };
 
 export const getMemberCommunities = async ({ limit = 10, offset = 1 } = {}) => {
-  const accessToken = getItemFromLocalStorage("accessToken");
-
-  const { data } = await axios.get(
+  const { data } = await api.get(
     `${import.meta.env.VITE_BASE_URL}/members/my-communities?includeRemoved=false&limit=${limit}&offset=${offset}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
   );
+
+  console.log({ data });
 
   return data.content;
 };
 
 export const getCommunity = async (communityId) => {
-  const accessToken = getItemFromLocalStorage("accessToken");
-
-  const { data } = await axios.get(
+  const { data } = await api.get(
     `${import.meta.env.VITE_BASE_URL}/communities/${communityId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
   );
 
   return data.content;
@@ -186,17 +184,9 @@ export function joinCommunity(communityId) {
     communityId,
   };
 
-  const accessToken = getItemFromLocalStorage("accessToken");
-
-  return axios.post(
+  return api.post(
     `${import.meta.env.VITE_BASE_URL}/members/join`,
     requestPayload,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
   );
 }
 
@@ -205,16 +195,8 @@ export function leaveCommunity(communityId, memberId) {
     memberId,
   };
 
-  const accessToken = getItemFromLocalStorage("accessToken");
-
-  return axios.post(
+  return api.post(
     `${import.meta.env.VITE_BASE_URL}/members/leave/${communityId}`,
     requestPayload,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
   );
 }

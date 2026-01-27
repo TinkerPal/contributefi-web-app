@@ -7,32 +7,22 @@ import { toast } from "react-toastify";
 
 function CommunitiesCard({ community, tag }) {
   const navigate = useNavigate();
-
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const handleOpen = () => {
-    if (
-      tag === "overview" ||
-      tag === "home-page" ||
-      tag === "communities-page"
-    ) {
-      const params = new URLSearchParams(window.location.search);
-      params.set("community", community?.id);
-      navigate(`/dashboard/communities?${params.toString()}`, {
+    navigate(
+      `/dashboard/communities/${encodeURIComponent(community.communityAlias)}`,
+      {
         replace: false,
-      });
-      return;
-    }
-    const params = new URLSearchParams(window.location.search);
-    params.set("community", community?.id);
-    navigate(`?${params.toString()}`, { replace: false });
+      },
+    );
   };
 
   const { data } = useQuery({
     queryKey: ["community", community.id],
     queryFn: () => getCommunity(community.id),
-    enabled: !!community.id,
+    enabled: isAuthenticated && !!community.id,
     keepPreviousData: true,
   });
 
@@ -186,19 +176,19 @@ function CommunitiesCard({ community, tag }) {
         </div>
 
         <button
-          // onClick={handleJoinCommunity}
           disabled={joinCommunityPending || leaveCommunityPending}
           onClick={data?.isMember ? handleLeaveCommunity : handleJoinCommunity}
           className={`cursor-pointer font-medium ${data?.isMember ? "text-[#F31307]" : "text-[#2F0FD1]"} disabled:cursor-not-allowed`}
         >
-          {/* {joinCommunityPending ? "Joining..." : "+ Join"} */}
-          {joinCommunityPending
-            ? "Joining..."
-            : leaveCommunityPending
-              ? "Leaving..."
-              : data?.isMember
-                ? "Leave"
-                : "+ Join"}
+          {community?.communityOwnerId === user?.id
+            ? ""
+            : joinCommunityPending
+              ? "Joining..."
+              : leaveCommunityPending
+                ? "Leaving..."
+                : data?.isMember
+                  ? "Leave"
+                  : "+ Join"}
         </button>
       </div>
     </div>

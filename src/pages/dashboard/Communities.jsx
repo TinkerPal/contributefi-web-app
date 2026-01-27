@@ -6,10 +6,9 @@ import {
   COMMUNITIES_DETAILS,
   COMMUNITIES_OVERVIEW,
   COMMUNITIES_TAG,
-  TASKS,
 } from "@/lib/constants";
 import React, { Fragment, useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { useParams } from "react-router";
 import { FaLink } from "react-icons/fa6";
 import { RiTwitterXFill } from "react-icons/ri";
 import { RiInstagramFill } from "react-icons/ri";
@@ -27,6 +26,7 @@ import {
   getCommunities,
   getCommunity,
   getMemberCommunities,
+  getQuestsByCommunity,
   joinCommunity,
   leaveCommunity,
 } from "@/services";
@@ -36,11 +36,9 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
 import NewQuest from "@/components/dashboard/NewQuest";
 import QuestSuccess from "@/components/dashboard/QuestSuccess";
-
-const TASKS_PER_PAGE = 15;
+import Empty from "@/components/Empty";
 
 function Communities() {
-  const location = useLocation();
   const [sortOrder, setSortOrder] = useState("DESC");
   const [currentPage, setCurrentPage] = useState(1);
   const [communityView, setCommunityView] = useState("all");
@@ -85,8 +83,26 @@ function Communities() {
     keepPreviousData: true,
   });
 
-  // let communities = communitiesData?.data ?? [];
+  console.log({ memberCommunitiesData, communitiesData });
+
   const totalPages = communitiesData?.totalPages ?? 1;
+
+  const [questCurrentPage, setQuestCurrentPage] = useState(1);
+
+  // const {
+  //   data: questData,
+  //   isLoading: loadingQuests,
+  //   isError: errorLoadingQuests,
+  // } = useQuery({
+  //   queryKey: ["quests", LIMIT, OFFSET],
+  //   queryFn: () =>
+  //     getQuestsByCommunity({
+  //       limit: LIMIT,
+  //       offset: OFFSET,
+  //       communityId: community.id,
+  //     }),
+  //   keepPreviousData: false,
+  // });
 
   useEffect(() => {
     if (communityView === "all" || communityView === "created") {
@@ -127,19 +143,18 @@ function Communities() {
     setDetailView(view);
   };
 
-  const [taskCurrentPage, setTaskCurrentPage] = useState(1);
+  // const [taskCurrentPage, setTaskCurrentPage] = useState(1);
 
-  const totalTask = TASKS.length;
-  const taskTotalPages = Math.ceil(totalTask / TASKS_PER_PAGE);
+  // const totalTask = TASKS.length;
+  // const taskTotalPages = Math.ceil(totalTask / TASKS_PER_PAGE);
 
-  const taskStartIndex = (taskCurrentPage - 1) * TASKS_PER_PAGE;
-  const currentTask = TASKS.slice(
-    taskStartIndex,
-    taskStartIndex + TASKS_PER_PAGE,
-  );
+  // const taskStartIndex = (taskCurrentPage - 1) * TASKS_PER_PAGE;
+  // const currentTask = TASKS.slice(
+  //   taskStartIndex,
+  //   taskStartIndex + TASKS_PER_PAGE,
+  // );
 
-  const queryParams = new URLSearchParams(location.search);
-  const communityId = queryParams.get("community");
+  const { communityAlias: communityId } = useParams();
 
   const handleSort = (order) => {
     setSortOrder(order);
@@ -247,7 +262,27 @@ function Communities() {
     leaveCommunityMutation(communityId);
   };
 
+  const questOffset = (questCurrentPage - 1) * LIMIT;
 
+  const {
+    data: questData,
+    isLoading: loadingQuests,
+    isError: errorLoadingQuests,
+  } = useQuery({
+    queryKey: ["quests", community?.id, LIMIT, questCurrentPage],
+    queryFn: () =>
+      getQuestsByCommunity({
+        limit: LIMIT,
+        offset: questOffset,
+        communityId: community.id,
+      }),
+    enabled: !!community?.id,
+  });
+
+  const quests = questData?.data ?? [];
+  const questTotalPages = questData?.totalPages ?? 1;
+
+  console.log({ questData });
 
   return (
     <>
@@ -360,6 +395,7 @@ function Communities() {
                           sheetIsOpen={sheetIsOpen}
                           setSheetIsOpen={setSheetIsOpen}
                           setOpenQuestSuccess={setOpenQuestSuccess}
+                          communityId={community.id}
                         />
                       </div>
                     ) : (
@@ -456,7 +492,29 @@ function Communities() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                {loadingQuests ? (
+                  <Loader />
+                ) : errorLoadingQuests ? (
+                  <Error title="Failed to load quests..." />
+                ) : quests.length === 0 ? (
+                  <Empty title="No quests found..." />
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                      {quests.map((quest, i) => (
+                        <TasksCard task={quest} key={i} tag="task-page" />
+                      ))}
+                    </div>
+
+                    <CustomPagination
+                      currentPage={questCurrentPage}
+                      totalPages={questTotalPages}
+                      onPageChange={(page) => setQuestCurrentPage(page)}
+                    />
+                  </>
+                )}
+
+                {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                   {currentTask.map((task, i) => (
                     <TasksCard task={task} key={i} />
                   ))}
@@ -466,7 +524,7 @@ function Communities() {
                   currentPage={taskCurrentPage}
                   totalPages={taskTotalPages}
                   onPageChange={(page) => setTaskCurrentPage(page)}
-                />
+                /> */}
               </div>
             </>
           )}

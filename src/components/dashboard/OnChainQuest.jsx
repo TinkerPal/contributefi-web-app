@@ -24,7 +24,11 @@ import {
   setItemInLocalStorage,
 } from "@/lib/utils";
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { formatDateToYYYYMMDD, hydrateGrowthQuestData } from "@/utils";
+import {
+  formatDateToYYYYMMDD,
+  hydrateGrowthQuestData,
+  mapFormToCreateOnChainQuestPayload,
+} from "@/utils";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 import {
   REWARD_MODES,
@@ -34,8 +38,9 @@ import {
   WINNER_SELECTION_METHOD,
 } from "@/utils/constants";
 import { BsFillInfoCircleFill } from "react-icons/bs";
+import { createOnChainQuest } from "@/services";
 
-function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
+function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
   const isDesktop = useIsDesktop();
   const [open, setOpen] = useState(false);
   const side = isDesktop ? "right" : "bottom";
@@ -66,6 +71,7 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
     resolver: zodResolver(CreateOnChainQuestSchema),
     defaultValues: step1Data ?? {
       questTitle: "",
+      questDescription: "",
       rewardType: "Points",
       tokenContract: "",
       numberOfWinners: "",
@@ -197,6 +203,35 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
 
   console.log({ errors, step1Data });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  console.log({ errors, step1Data });
+
+  const handlePublishQuest = async () => {
+    console.log({ step1Data });
+    try {
+      const payload = JSON.parse(
+        JSON.stringify(mapFormToCreateOnChainQuestPayload(step1Data)),
+      );
+
+      console.log({ payload });
+
+      setIsSubmitting(true);
+      await createOnChainQuest(payload, communityId);
+
+      setIsSubmitting(false);
+
+      setSheetIsOpen(false);
+      setOpenQuestSuccess(true);
+
+      removeItemFromLocalStorage("growthQuestStep");
+      removeItemFromLocalStorage("growthQuestStep1Data");
+    } catch (error) {
+      console.error("Failed to create growth quest", error);
+      // TODO: toast / error UI
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -270,6 +305,14 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 type="text"
                 error={errors.questTitle?.message}
                 {...register("questTitle")}
+              />
+
+              <CustomInput
+                label="Quest Description"
+                placeholder="Enter Description"
+                type="text"
+                error={errors.questDescription?.message}
+                {...register("questDescription")}
               />
 
               <CustomSelect
@@ -405,15 +448,13 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                 )}
               />
 
-              {verificationMode === "Contract Invocation" && (
-                <CustomInput
-                  label="Contract Address"
-                  placeholder="Enter Contract Address"
-                  type="text"
-                  error={errors.contractAddress?.message}
-                  {...register("contractAddress")}
-                />
-              )}
+              <CustomInput
+                label="Contract Address"
+                placeholder="Enter Contract Address"
+                type="text"
+                error={errors.contractAddress?.message}
+                {...register("contractAddress")}
+              />
 
               {verificationMode === "Observe Account Calls" && (
                 <CustomInput
@@ -754,15 +795,6 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                   </div>
                 </>
               )}
-
-              {/* <div className="flex items-center gap-2">
-                <p className="w-1/2 font-[300] text-[#525866]">
-                  Reward Per Winner
-                </p>
-                <p className="w-1/2 font-medium text-[#050215]">
-                  {step1Data.pointsPerWinner} XLM
-                </p>
-              </div> */}
             </div>
 
             <hr className="my-6 border border-[#F0F4FD]" />
@@ -892,13 +924,14 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     type="submit"
                     className="mt-5 w-full"
                     onClick={() => {
-                      setSheetIsOpen(false);
-                      setOpenQuestSuccess(true);
-                      removeItemFromLocalStorage("onChainQuestStep");
-                      removeItemFromLocalStorage("onChainQuestStep1Data");
+                      // setSheetIsOpen(false);
+                      // setOpenQuestSuccess(true);
+                      // removeItemFromLocalStorage("onChainQuestStep");
+                      // removeItemFromLocalStorage("onChainQuestStep1Data");
+                      handlePublishQuest();
                     }}
                   >
-                    Publish Quest
+                    {isSubmitting ? "Publishing..." : "Publish Quest"}
                   </Button>
                 </>
               ) : onChainQuestStep === 2 &&
@@ -959,14 +992,15 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess }) {
                     type="submit"
                     className="mt-5 w-full"
                     onClick={() => {
-                      setSheetIsOpen(false);
-                      setOpenQuestSuccess(true);
-                      removeItemFromLocalStorage("onChainQuestStep");
-                      removeItemFromLocalStorage("onChainQuestStep1Data");
+                      // setSheetIsOpen(false);
+                      // setOpenQuestSuccess(true);
+                      // removeItemFromLocalStorage("onChainQuestStep");
+                      // removeItemFromLocalStorage("onChainQuestStep1Data");
+                      handlePublishQuest();
                     }}
                     disabled={rewardAllWithPoints && !extraPoints}
                   >
-                    Publish Quest
+                    {isSubmitting ? "Publishing..." : "Publish Quest"}
                   </Button>
                 </>
               )}

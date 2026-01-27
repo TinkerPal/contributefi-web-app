@@ -14,15 +14,34 @@ import FileUpload from "./FileUpload";
 import { CreateCommunitySchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { createCommunity } from "@/services";
+import { checkUsernameAvailability, createCommunity } from "@/services";
 import { useEffect, useState } from "react";
 
 function CreateCommunityForm() {
   const [open, setOpen] = useState(false);
 
   const queryClient = useQueryClient();
+
+  const [usernameInput, setUsernameInput] = useState("");
+  const [debouncedUsername, setDebouncedUsername] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedUsername(usernameInput);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [usernameInput]);
+
+  const { data: usernameCheckData, isFetching: checkingUsername } = useQuery({
+    queryKey: ["checkUsername", debouncedUsername],
+    queryFn: () => checkUsernameAvailability(debouncedUsername),
+    enabled: !!debouncedUsername,
+  });
 
   const {
     register,
@@ -62,6 +81,10 @@ function CreateCommunityForm() {
     }
   }, [open, reset]);
 
+  const handleUsernameChange = (e) => {
+    setUsernameInput(e.target.value);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -89,13 +112,38 @@ function CreateCommunityForm() {
             error={errors.communityName?.message}
             {...register("communityName")}
           />
-          <CustomInput
-            label="Community Username"
-            placeholder="Enter Text"
-            type="text"
-            error={errors.communityUsername?.message}
-            {...register("communityUsername")}
-          />
+
+          <div>
+            <CustomInput
+              label="Community Username"
+              placeholder="Enter Text"
+              type="text"
+              error={errors.communityUsername?.message}
+              {...register("communityUsername", {
+                onChange: handleUsernameChange,
+              })}
+              // {...register("communityUsername", {
+              //   onChange: (e) => {
+              //     e.target.value = e.target.value.replace(/[^a-zA-Z0-9_.]/g, "");
+              //   },
+              // })}
+            />
+
+            {checkingUsername ? (
+              <p className="text-left text-sm text-gray-500">...</p>
+            ) : usernameCheckData?.data.content.isAvailable === true ? (
+              <p className="text-left text-sm text-[#1082E4]">
+                Username available
+              </p>
+            ) : (
+              usernameCheckData?.data.content.isAvailable === false && (
+                <p className="text-left text-sm text-[#F31307]">
+                  Username taken
+                </p>
+              )
+            )}
+          </div>
+
           <CustomInput
             label="Website"
             placeholder="Paste URL"

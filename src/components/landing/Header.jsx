@@ -52,7 +52,7 @@ function Header() {
           variant="secondary"
           size="lg"
         >
-          Go to Dashboard
+          Launch App
         </Button>
       ) : (
         <AuthButtons device="desktop" tag="heading" />
@@ -102,7 +102,7 @@ function Header() {
               variant="secondary"
               size="lg"
             >
-              Go to Dashboard
+              Launch App
             </Button>
           ) : (
             <AuthButtons device="mobile" />

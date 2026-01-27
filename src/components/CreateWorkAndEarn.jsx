@@ -34,7 +34,7 @@ function CreateWorkAndEarn() {
             variant="secondary"
             size="lg"
           >
-            Go to Dashboard
+            Launch App
           </Button>
         ) : (
           <AuthButtons />

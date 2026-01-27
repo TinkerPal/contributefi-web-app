@@ -44,7 +44,14 @@ const optionalUrlSchema = (message) =>
 
 export const CreateCommunitySchema = z.object({
   communityName: z.string().nonempty("Community name is required"),
-  communityUsername: z.string().nonempty("Community username is required"),
+  communityUsername: z
+    .string()
+    .nonempty("Community username is required")
+    .min(6, "Community must be at least 6 characters")
+    .regex(
+      /^[a-zA-Z0-9_.]+$/,
+      "Community username can only contain letters, numbers, underscores, and dots",
+    ),
   websitePage: urlSchema("Enter a valid Website URL"),
   githubPage: urlSchema("Enter a valid GitHub URL"),
   twitterPage: urlSchema("Enter a valid Twitter URL"),
@@ -89,6 +96,7 @@ const GrowthTaskSchema = z.object({
 export const CreateGrowthQuestSchema = z
   .object({
     questTitle: z.string().nonempty("Quest title is required"),
+    questDescription: z.string().nonempty("Description is required"),
     rewardType: z
       .string()
       .nonempty("Reward type is required")
@@ -362,6 +370,7 @@ const OnChainTaskSchema = z.object({
 export const CreateOnChainQuestSchema = z
   .object({
     questTitle: z.string().nonempty("Quest title is required"),
+    questDescription: z.string().nonempty("Description is required"),
     rewardType: z
       .string()
       .nonempty("Reward type is required")
@@ -410,7 +419,7 @@ export const CreateOnChainQuestSchema = z
     tokensPerWinner: numberOrNullSchema,
     pointsPerWinner: numberOrNullSchema,
     extraPoints: numberOrNullSchema,
-    contractAddress: z.string().nullish(),
+    contractAddress: z.string().nonempty("Contract address is required"),
     callerAccountId: z.string().nullish(),
     tasks: z.array(OnChainTaskSchema).min(1, "At least one task is required"),
   })
@@ -541,17 +550,6 @@ export const CreateOnChainQuestSchema = z
     }
 
     if (
-      data.verificationMode === "Contract Invocation" &&
-      !data.contractAddress
-    ) {
-      ctx.addIssue({
-        path: ["contractAddress"],
-        message: "Contract address is required",
-        code: "custom",
-      });
-    }
-
-    if (
       data.verificationMode === "Observe Account Calls" &&
       !data.callerAccountId
     ) {
@@ -617,6 +615,7 @@ const TechnicalTaskSchema = z.object({
 export const CreateTechnicalQuestSchema = z
   .object({
     questTitle: z.string().nonempty("Quest title is required"),
+    questDescription: z.string().nonempty("Description is required"),
     questType: z
       .string()
       .nonempty("Quest type is required")

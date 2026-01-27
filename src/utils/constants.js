@@ -16,7 +16,7 @@ export const TASK_TYPES = [
 
 export const WINNER_SELECTION_METHOD = [
   { label: "Random", value: "Random" },
-  { label: "FCFS", value: "FCFS" },
+  { label: "FCFS", value: "fcfs" },
 ];
 
 export const SELECTION_METHOD = [

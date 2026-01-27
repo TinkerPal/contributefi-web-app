@@ -23,7 +23,7 @@ export default function CustomInput({
           <Input
             type={type}
             placeholder={placeholder}
-            className={`rounded-[12px] border-none bg-[#F7F9FD] px-4 pl-24 placeholder:text-sm placeholder:text-[#8791A7] focus:border-none focus:outline-0 focus:outline-none focus-visible:border-none focus-visible:ring-0 ${className}`}
+            className={`rounded-[12px] border-none bg-[#F7F9FD] px-4 pl-24 placeholder:text-sm placeholder:text-[#8791A7] focus:border-none focus:outline-0 focus:outline-none focus-visible:border-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:bg-[#aab1c1] ${className}`}
             {...props}
           />
           {icon && (
@@ -41,7 +41,7 @@ export default function CustomInput({
             <Input
               type={type}
               placeholder={placeholder}
-              className={`rounded-[12px] border-none bg-[#F7F9FD] px-4 placeholder:text-sm placeholder:text-[#8791A7] focus:border-none focus:outline-0 focus:outline-none focus-visible:border-none focus-visible:ring-0 ${className}`}
+              className={`rounded-[12px] border-none bg-[#F7F9FD] px-4 placeholder:text-sm placeholder:text-[#8791A7] focus:border-none focus:outline-0 focus:outline-none focus-visible:border-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:bg-[#ebedf0] ${className}`}
               {...props}
             />
             {icon && (

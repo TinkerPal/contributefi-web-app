@@ -5,7 +5,7 @@ import DashboardNavigation from "./DashboardNavigation";
 import { useState } from "react";
 import DashboardSidebarContainer from "./DashboardSidebarContainer";
 import DashboardDesktopHeader from "./DashboardDesktopHeader";
-import { Outlet, useLocation } from "react-router";
+import { Outlet, useLocation, useParams } from "react-router";
 import DashboardContainer from "./DashboardContainer";
 import BackButton from "../BackButton";
 import CustomSearch from "../Search";
@@ -27,8 +27,9 @@ function DashboardLayout() {
   const currentPath = pathSegments[pathSegments.length - 1];
 
   const queryParams = new URLSearchParams(location.search);
-  const communityId = queryParams.get("community");
   const taskTitle = queryParams.get("task");
+
+  const { communityAlias: communityId } = useParams();
 
   console.log({ communityId, currentPath, taskTitle });
 
