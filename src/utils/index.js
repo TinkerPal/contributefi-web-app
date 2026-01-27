@@ -165,14 +165,20 @@ export const mapFormToCreateGrowthQuestPayload = (data) => {
       type: task.type,
     };
 
-    if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Token") {
+    // if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Token") {
+    //   taskPayload.tokensPerTask = task.tokensPerTask;
+    // }
+
+    // if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Points") {
+    //   taskPayload.pointsPerTask = task.pointsPerTask;
+    // }
+
+    if (task.tokensPerTask) {
       taskPayload.tokensPerTask = task.tokensPerTask;
     }
-
-    if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Points") {
+    if (task.pointsPerTask) {
       taskPayload.pointsPerTask = task.pointsPerTask;
     }
-
     if (task.twitterUrl) taskPayload.twitterUrl = task.twitterUrl;
     if (task.tweetUrl) taskPayload.tweetUrl = task.tweetUrl;
     if (task.discordLink) taskPayload.discordLink = task.discordLink;
@@ -252,11 +258,18 @@ export const mapFormToCreateOnChainQuestPayload = (data) => {
       type: task.type,
     };
 
-    if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Token") {
+    // if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Token") {
+    //   taskPayload.tokensPerTask = task.tokensPerTask;
+    // }
+
+    // if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Points") {
+    //   taskPayload.pointsPerTask = task.pointsPerTask;
+    // }
+
+    if (task.tokensPerTask) {
       taskPayload.tokensPerTask = task.tokensPerTask;
     }
-
-    if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Points") {
+    if (task.pointsPerTask) {
       taskPayload.pointsPerTask = task.pointsPerTask;
     }
 
@@ -347,11 +360,18 @@ export const mapFormToCreateTechnicalQuestPayload = (data) => {
       type: task.type,
     };
 
-    if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Token") {
+    // if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Token") {
+    //   taskPayload.tokensPerTask = task.tokensPerTask;
+    // }
+
+    // if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Points") {
+    //   taskPayload.pointsPerTask = task.pointsPerTask;
+    // }
+
+    if (task.tokensPerTask) {
       taskPayload.tokensPerTask = task.tokensPerTask;
     }
-
-    if (data.rewardMode === "INDIVIDUAL" && data.rewardType === "Points") {
+    if (task.pointsPerTask) {
       taskPayload.pointsPerTask = task.pointsPerTask;
     }
 

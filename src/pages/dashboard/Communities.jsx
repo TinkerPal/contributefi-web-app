@@ -89,21 +89,6 @@ function Communities() {
 
   const [questCurrentPage, setQuestCurrentPage] = useState(1);
 
-  // const {
-  //   data: questData,
-  //   isLoading: loadingQuests,
-  //   isError: errorLoadingQuests,
-  // } = useQuery({
-  //   queryKey: ["quests", LIMIT, OFFSET],
-  //   queryFn: () =>
-  //     getQuestsByCommunity({
-  //       limit: LIMIT,
-  //       offset: OFFSET,
-  //       communityId: community.id,
-  //     }),
-  //   keepPreviousData: false,
-  // });
-
   useEffect(() => {
     if (communityView === "all" || communityView === "created") {
       setDisplayedCommunities(communitiesData?.data ?? []);

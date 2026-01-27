@@ -39,6 +39,7 @@ import {
 } from "@/utils/constants";
 import { BsFillInfoCircleFill } from "react-icons/bs";
 import { createGrowthQuest } from "@/services";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
   const isDesktop = useIsDesktop();
@@ -202,6 +203,29 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
 
   console.log({ errors, step1Data });
 
+  const useCreateGrowthQuest = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+      mutationFn: ({ payload, communityId }) =>
+        createGrowthQuest(payload, communityId),
+
+      onSuccess: (_, variables) => {
+        // 🔥 THIS is the magic
+        queryClient.invalidateQueries({
+          queryKey: ["quests", variables.communityId],
+        });
+
+        // Optional: update community stats
+        queryClient.invalidateQueries({
+          queryKey: ["community", variables.communityId],
+        });
+      },
+    });
+  };
+
+  const { mutateAsync: createQuest } = useCreateGrowthQuest();
+
   const handlePublishQuest = async () => {
     console.log({ step1Data });
     try {
@@ -212,7 +236,11 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
       console.log({ payload });
 
       setIsSubmitting(true);
-      await createGrowthQuest(payload, communityId);
+      // await createGrowthQuest(payload, communityId);
+      await createQuest({
+        payload,
+        communityId,
+      });
 
       setIsSubmitting(false);
 
@@ -620,7 +648,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
                         )}
 
                         {watch(`tasks.${index}.type`) ===
-                          "Comment on Tweet" && (
+                          "Comment on Twitter" && (
                           <div className="space-y-5">
                             <CustomInput
                               label="Tweet URL"
@@ -857,7 +885,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
                             )}
 
                             {task["keywordValidation"] &&
-                              task.type === "Comment on Tweet" && (
+                              task.type === "Comment on Twitter" && (
                                 <div className="space-y-2">
                                   <p className="font-[300] text-[#525866]">
                                     Keyword Validation
