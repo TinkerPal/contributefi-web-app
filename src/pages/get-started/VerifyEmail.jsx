@@ -1,18 +1,39 @@
 import CustomInput from "@/components/CustomInput";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useSendOtp } from "@/hooks/useSendOtp";
 import { maskEmail } from "@/lib/utils";
 import { VerifyEmailSchema } from "@/schemas";
-import { resendOTP, verifyEmail } from "@/services";
+import { verifyEmail } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 
 function VerifyEmail() {
   const { login, token, email } = useAuth();
+
+  const RESEND_OTP_TIME = 60;
+
+  const [secondsLeft, setSecondsLeft] = useState(RESEND_OTP_TIME);
+  const [canResend, setCanResend] = useState(false);
+
+  useEffect(() => {
+    if (canResend) return;
+
+    if (secondsLeft === 0) {
+      setCanResend(true);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setSecondsLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [secondsLeft, canResend]);
 
   const navigate = useNavigate();
 
@@ -57,26 +78,20 @@ function VerifyEmail() {
       },
     });
 
-  const { mutate: resendOTPMutation, isPending: resendOTPPending } =
-    useMutation({
-      mutationFn: (data) => resendOTP(data),
-      onSuccess: async (data) => {
-        console.log({ data });
-        if (data.status === 200) {
-          toast.success("OTP sent successfully");
-        } else {
-          toast.error("Something went wrong");
-        }
-      },
-      onError: (error) => {
-        console.error("Error:", error.response.data.message);
-        toast.error(error.response.data.message);
-      },
-    });
+  const { resendOTPMutation, resendOTPPending } = useSendOtp();
+
+  // const handleResendOTP = () => {
+  //   const data = { email };
+  //   resendOTPMutation(data);
+  // };
 
   const handleResendOTP = () => {
-    const data = { email };
-    resendOTPMutation(data);
+    if (!email || resendOTPPending) return;
+
+    resendOTPMutation({ email });
+
+    setCanResend(false);
+    setSecondsLeft(RESEND_OTP_TIME);
   };
 
   const onSubmit = (data) => {
@@ -134,15 +149,27 @@ function VerifyEmail() {
           </Button>
 
           <div className="text-base text-[#09032A]">
-            <span>You missed it? </span>
-            <button
-              onClick={handleResendOTP}
-              disabled={resendOTPPending}
-              type="button"
-              className="cursor-pointer text-[#2F0FD1] disabled:cursor-not-allowed disabled:text-[#2F0FD150]"
-            >
-              {resendOTPPending ? "Resending OTP..." : "Resend OTP"}
-            </button>
+            {!canResend ? (
+              <span className="text-[#525866]">
+                Resend OTP in{" "}
+                <span className="font-semibold">
+                  {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:
+                  {String(secondsLeft % 60).padStart(2, "0")}
+                </span>
+              </span>
+            ) : (
+              <>
+                <span>You missed it? </span>
+                <button
+                  onClick={handleResendOTP}
+                  disabled={resendOTPPending}
+                  type="button"
+                  className="cursor-pointer text-[#2F0FD1] disabled:cursor-not-allowed disabled:text-[#2F0FD150]"
+                >
+                  {resendOTPPending ? "Resending OTP..." : "Resend OTP"}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </form>

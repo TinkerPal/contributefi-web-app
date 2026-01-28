@@ -25,7 +25,10 @@ export const VerifyEmailSchema = z.object({
 });
 
 export const UsernameSchema = z.object({
-  username: z.string().nonempty("Username is required"),
+  username: z
+    .string()
+    .nonempty("Username is required")
+    .regex(/^[a-zA-Z0-9_]+$/, "Only letters and numbers allowed"),
 });
 
 const urlSchema = (message) =>
