@@ -25,7 +25,10 @@ export const VerifyEmailSchema = z.object({
 });
 
 export const UsernameSchema = z.object({
-  username: z.string().nonempty("Username is required"),
+  username: z
+    .string()
+    .nonempty("Username is required")
+    .regex(/^[a-zA-Z0-9_]+$/, "Only letters and numbers allowed"),
 });
 
 const urlSchema = (message) =>
@@ -73,7 +76,7 @@ const GrowthTaskSchema = z.object({
       (val) =>
         [
           "Follow on Twitter",
-          "Comment on Tweet",
+          "Comment on Twitter",
           "Like Tweet",
           "Post on Discord",
           "Join Telegram Channel",
@@ -309,7 +312,7 @@ export const CreateGrowthQuestSchema = z
           break;
 
         case "Like Tweet":
-        case "Comment on Tweet":
+        case "Comment on Twitter":
           if (!task.tweetUrl) {
             ctx.addIssue({
               path: [...taskPath, "tweetUrl"],

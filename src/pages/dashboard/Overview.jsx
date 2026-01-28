@@ -8,8 +8,11 @@ import MetricCard from "@/components/dashboard/MetricCard";
 import Heading from "@/components/dashboard/Heading";
 import { useNavigate } from "react-router";
 import CreateCommunityForm from "@/components/CreateCommunityForm";
-import { getCommunities } from "@/services";
+import { getCommunities, getQuests } from "@/services";
 import { useQuery } from "@tanstack/react-query";
+import Loader from "@/components/Loader";
+import Error from "@/components/Error";
+import Empty from "@/components/Empty";
 
 function Overview() {
   const navigate = useNavigate();
@@ -28,6 +31,18 @@ function Overview() {
   });
 
   const communities = communitiesData?.data || [];
+
+  const {
+    data: questsData,
+    isLoading: loadingQuests,
+    isError: errorLoadingQuests,
+  } = useQuery({
+    queryKey: ["quests", LIMIT],
+    queryFn: () => getQuests({ limit: LIMIT }),
+    keepPreviousData: true,
+  });
+
+  const quests = questsData?.data ?? [];
 
   return (
     <div className="space-y-8">
@@ -75,11 +90,21 @@ function Overview() {
           </Button>
         </OverviewHeading>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {TASKS.slice(0, 6).map((task, i) => (
-            <TasksCard task={task} key={i} tag="overview" />
-          ))}
-        </div>
+        {loadingQuests ? (
+          <Loader />
+        ) : errorLoadingQuests ? (
+          <Error title="Failed to load quests..." />
+        ) : quests.length === 0 ? (
+          <Empty title="No quests found..." />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              {quests.map((quest, i) => (
+                <TasksCard task={quest} key={i} tag="task-page" />
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="space-y-5">

@@ -7,7 +7,7 @@ export const REWARD_TYPES = [
 
 export const TASK_TYPES = [
   { label: "Follow on Twitter", value: "Follow on Twitter" },
-  { label: "Comment on Tweet", value: "Comment on Tweet" },
+  { label: "Comment on Twitter", value: "Comment on Twitter" },
   { label: "Like Tweet", value: "Like Tweet" },
   { label: "Post on Discord", value: "Post on Discord" },
   { label: "Join Telegram Channel", value: "Join Telegram Channel" },
@@ -29,7 +29,7 @@ export const TASK_PREVIEW_CONFIG = {
     label: "Twitter Profile",
     field: "twitterUrl",
   },
-  "Comment on Tweet": {
+  "Comment on Twitter": {
     label: "Tweet URL",
     field: "tweetUrl",
   },

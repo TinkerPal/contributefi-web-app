@@ -80,7 +80,12 @@ function Username() {
     enabled: !!debouncedUsername,
   });
 
+  // const handleUsernameChange = (e) => {
+  //   setUsernameInput(e.target.value);
+  // };
+
   const handleUsernameChange = (e) => {
+    e.target.value = e.target.value.replace(/[^a-zA-Z0-9_]/g, "");
     setUsernameInput(e.target.value);
   };
 
@@ -106,6 +111,24 @@ function Username() {
             {...register("username", {
               onChange: handleUsernameChange,
             })}
+            onKeyDown={(e) => {
+              const isAllowed = /^[a-zA-Z0-9_]$/.test(e.key);
+
+              const allowedKeys = [
+                "Backspace",
+                "Tab",
+                "ArrowLeft",
+                "ArrowRight",
+                "Delete",
+              ];
+
+              if (
+                e.key === " " ||
+                (!isAllowed && !allowedKeys.includes(e.key))
+              ) {
+                e.preventDefault();
+              }
+            }}
           />
 
           {checkingUsername ? (

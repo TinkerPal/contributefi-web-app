@@ -7,7 +7,7 @@ export function createAccount(data) {
   };
 
   return api.post(
-    `${import.meta.env.VITE_BASE_URL}/auth/signup`,
+    `${import.meta.env.VITE_BASE_URL}/auth/email`,
     requestPayload,
     {
       headers: {
@@ -66,7 +66,7 @@ export function loginUser(data) {
   };
 
   return api.post(
-    `${import.meta.env.VITE_BASE_URL}/auth/login`,
+    `${import.meta.env.VITE_BASE_URL}/auth/email`,
     requestPayload,
   );
 }

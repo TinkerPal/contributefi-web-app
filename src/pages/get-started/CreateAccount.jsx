@@ -14,6 +14,7 @@ import { createAccount } from "@/services";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
 import { WalletContext } from "@/contexts/WalletContext";
+// import { useSendOtp } from "@/hooks/useSendOtp";
 
 function CreateAccount() {
   const { login } = useAuth();
@@ -34,21 +35,56 @@ function CreateAccount() {
     resolver: zodResolver(SignUpSchema),
   });
 
+  // const { resendOTPMutation, resendOTPPending } = useSendOtp();
+
   const { mutate: createAccountMutation, isPending: createAccountPending } =
     useMutation({
       mutationFn: (data) => createAccount(data),
       onSuccess: async (data, variable) => {
-        if (data.status === 201) {
-          login({
-            token: data.data.content.accessToken.token,
-            email: variable.email,
-            user: null,
-            otp: null,
-            username: null,
-          });
-          navigate("/get-started/verify-email");
-          toast.success("OTP sent successfully");
-          reset();
+        if (data.status === 200) {
+          if (!data.data.content.isVerified) {
+            login({
+              token: data.data.content.accessToken.token,
+              email: variable.email,
+              user: null,
+              otp: null,
+              username: null,
+            });
+            // resendOTPMutation({ email: variable.email });
+            navigate("/get-started/verify-email");
+            toast.error("Kindly verify your email address");
+          } else if (!data.data.content.username) {
+            login({
+              token: data.data.content.accessToken.token,
+              email: variable.email,
+              user: null,
+              otp: "123456",
+              username: null,
+            });
+            navigate("/get-started/username");
+            toast.error("Kindly select a username");
+          } else {
+            login({
+              token: data.data.content.accessToken.token,
+              email: null,
+              user: data.data.content,
+              otp: variable.otp,
+              username: null,
+            });
+            navigate("/");
+            toast.success("Login successful");
+            reset();
+          }
+          // login({
+          //   token: data.data.content.accessToken.token,
+          //   email: variable.email,
+          //   user: null,
+          //   otp: null,
+          //   username: null,
+          // });
+          // navigate("/get-started/verify-email");
+          // toast.success("OTP sent successfully");
+          // reset();
         } else {
           toast.error("Something went wrong");
         }
@@ -111,6 +147,7 @@ function CreateAccount() {
             type="email"
             error={errors.email?.message}
             {...register("email")}
+            disabled={createAccountPending}
           />
 
           <CustomInput
@@ -122,6 +159,7 @@ function CreateAccount() {
             handleRevealPassword={handleRevealPassword}
             error={errors.password?.message}
             {...register("password")}
+            disabled={createAccountPending}
           />
 
           <div className="flex flex-col gap-2">

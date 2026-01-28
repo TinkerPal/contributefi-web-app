@@ -14,6 +14,7 @@ import { loginUser } from "@/services";
 import { useAuth } from "@/hooks/useAuth";
 import { PiPlugsConnectedFill } from "react-icons/pi";
 import { WalletContext } from "@/contexts/WalletContext";
+// import { useSendOtp } from "@/hooks/useSendOtp";
 
 function Login() {
   const { login } = useAuth();
@@ -34,11 +35,12 @@ function Login() {
     resolver: zodResolver(LoginSchema),
   });
 
+  // const { resendOTPMutation, resendOTPPending } = useSendOtp();
+
   const { mutate: loginMutation, isPending: loginPending } = useMutation({
     mutationFn: (data) => loginUser(data),
     onSuccess: async (data, variable) => {
-      console.log({ data });
-      if (data.status === 201) {
+      if (data.status === 200) {
         if (!data.data.content.isVerified) {
           login({
             token: data.data.content.accessToken.token,
@@ -47,6 +49,7 @@ function Login() {
             otp: null,
             username: null,
           });
+          // resendOTPMutation({ email: variable.email });
           navigate("/get-started/verify-email");
           toast.error("Kindly verify your email address");
         } else if (!data.data.content.username) {
@@ -133,6 +136,7 @@ function Login() {
             type="text"
             error={errors.email?.message}
             {...register("email")}
+            disabled={loginPending}
           />
 
           <CustomInput
@@ -144,6 +148,7 @@ function Login() {
             handleRevealPassword={handleRevealPassword}
             error={errors.password?.message}
             {...register("password")}
+            disabled={loginPending}
           />
 
           <div className="flex flex-col gap-2">
@@ -156,17 +161,6 @@ function Login() {
             >
               {loginPending ? "Processing" : "Log In"}
             </Button>
-            {/* 
-            <Button
-              className="w-full border-none bg-white shadow-none"
-              variant="outline"
-              size="lg"
-              type="button"
-              disabled={loginPending}
-              onClick={() => navigate("/get-started")}
-            >
-              Create Account
-            </Button> */}
           </div>
         </form>
       </div>
