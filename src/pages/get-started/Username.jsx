@@ -49,7 +49,7 @@ function Username() {
       onSuccess: async (data, variable) => {
         console.log({ data });
         if (data.status === 200) {
-          setItemInLocalStorage("users", data.data.content);
+          setItemInLocalStorage("user", data.data.content);
           login({
             token: token,
             email: email,

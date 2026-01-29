@@ -13,9 +13,17 @@ import Heading from "./Heading";
 import CreateCommunityForm from "../CreateCommunityForm";
 import DashboardLogo from "./DashboardLogo";
 import { useAuth } from "@/hooks/useAuth";
+import { Label } from "../ui/label";
+import { setItemInLocalStorage } from "@/lib/utils";
+import { uploadProfilePicture } from "@/services";
+import { toast } from "react-toastify";
+import { FaUserLarge } from "react-icons/fa6";
+import { Input } from "../ui/input";
+import { FaPlus } from "react-icons/fa";
+import { ImSpinner5 } from "react-icons/im";
 
 function DashboardLayout() {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading, setUser } = useAuth();
 
   console.log({ user, isAuthenticated, loading });
 
@@ -32,6 +40,52 @@ function DashboardLayout() {
   const { communityAlias: communityId } = useParams();
 
   console.log({ communityId, currentPath, taskTitle });
+
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      const response = await uploadProfilePicture(file);
+
+      if (response?.data?.content?.profileImageUrl) {
+        setUser((prevUser) => {
+          const updatedUser = {
+            ...prevUser,
+            profileImageUrl: response.data.content.profileImageUrl,
+          };
+          setItemInLocalStorage("user", updatedUser);
+          return updatedUser;
+        });
+      } else {
+        toast.error("Failed to upload profile picture");
+        return;
+      }
+
+      toast.success("Profile picture updated");
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message || "Failed to upload profile picture",
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <DashboardLayoutContainer>
@@ -51,14 +105,39 @@ function DashboardLayout() {
         <DashboardLogo />
 
         {isAuthenticated && (
-          <img
-            src={
-              !user?.profileImageUrl
-                ? "/Frame 43596.svg"
-                : user?.profileImageUrl
-            }
-            alt=""
-          />
+          <>
+            <div className="flex flex-col items-center gap-4 sm:flex-row">
+              <Label
+                htmlFor="image"
+                className="relative flex h-[60px] w-[60px] shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#F7F9FD]"
+              >
+                {user?.profileImageUrl ? (
+                  <img
+                    src={user?.profileImageUrl}
+                    alt="Selected avatar"
+                    className="h-[50px] w-[50px] rounded-full"
+                  />
+                ) : (
+                  <FaUserLarge className="text-[40px] text-[#B2B9C7]" />
+                )}
+                <Input
+                  onChange={handleImageSelect}
+                  type="file"
+                  id="image"
+                  className="hidden"
+                  disabled={uploading}
+                />
+
+                <div className="absolute right-0 bottom-0 rounded-full bg-[#F7F9FD] p-2 shadow">
+                  {uploading ? (
+                    <ImSpinner5 className="animate-spin" />
+                  ) : (
+                    <FaPlus className="text-[#2F0FD1]" />
+                  )}
+                </div>
+              </Label>
+            </div>
+          </>
         )}
       </DashboardMobileHeader>
 
@@ -92,14 +171,39 @@ function DashboardLayout() {
           )}
 
           {isAuthenticated && (
-            <img
-              src={
-                !user?.profileImageUrl
-                  ? "/Frame 43596.svg"
-                  : user?.profileImageUrl
-              }
-              alt=""
-            />
+            <>
+              <div className="flex flex-col items-center gap-4 sm:flex-row">
+                <Label
+                  htmlFor="image"
+                  className="relative flex h-[60px] w-[60px] shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#F7F9FD]"
+                >
+                  {user?.profileImageUrl ? (
+                    <img
+                      src={user?.profileImageUrl}
+                      alt="Selected avatar"
+                      className="h-[50px] w-[50px] rounded-full"
+                    />
+                  ) : (
+                    <FaUserLarge className="text-[40px] text-[#B2B9C7]" />
+                  )}
+                  <Input
+                    onChange={handleImageSelect}
+                    type="file"
+                    id="image"
+                    className="hidden"
+                    disabled={uploading}
+                  />
+
+                  <div className="absolute right-0 bottom-0 rounded-full bg-[#F7F9FD] p-2 shadow">
+                    {uploading ? (
+                      <ImSpinner5 className="animate-spin" />
+                    ) : (
+                      <FaPlus className="text-[#2F0FD1]" />
+                    )}
+                  </div>
+                </Label>
+              </div>
+            </>
           )}
         </div>
       </DashboardDesktopHeader>

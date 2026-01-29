@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
     setOtp(null);
     setUsername(null);
     removeItemFromLocalStorage("accessToken");
-    removeItemFromLocalStorage("user");
+    removeItemFromLocalStorage("users");
     removeItemFromLocalStorage("email");
     removeItemFromLocalStorage("otp");
     removeItemFromLocalStorage("username");
@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         token,
         user,
+        setUser,
         isAuthenticated,
         login,
         logout,

@@ -47,7 +47,7 @@ export function createUsername(data) {
     username: data.username,
   };
 
-  return api.post(
+  return api.patch(
     `${import.meta.env.VITE_BASE_URL}/users/username`,
     requestPayload,
   );
@@ -200,3 +200,19 @@ export function leaveCommunity(communityId, memberId) {
     requestPayload,
   );
 }
+
+export const uploadProfilePicture = (file) => {
+  const formData = new FormData();
+
+  formData.append("image", file);
+
+  return api.patch(
+    `${import.meta.env.VITE_BASE_URL}/users/upload-profile-picture`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+};
