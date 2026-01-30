@@ -112,7 +112,6 @@ function AccountConfiguration() {
       try {
         const res = await updateBio(bio);
 
-        console.log({ res });
         if (res?.data?.content?.bio) {
           setUser((prevUser) => {
             const updatedUser = {
@@ -141,8 +140,6 @@ function AccountConfiguration() {
 
     // Save user details logic here
   };
-
-  console.log({ bio: bio.length });
 
   return (
     <div>

@@ -29,8 +29,6 @@ function TaskPage() {
   const quests = questData?.data ?? [];
   const totalPages = questData?.totalPages ?? 1;
 
-  console.log({ questData });
-
   return (
     <div className="bg-white pt-40">
       <div className="mx-auto w-full max-w-[1200px] space-y-8 px-5 pb-10 lg:px-10">

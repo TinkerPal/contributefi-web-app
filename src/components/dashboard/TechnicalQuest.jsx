@@ -111,7 +111,6 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
   });
 
   const onSubmit = (data) => {
-    console.log(data);
     setItemInLocalStorage("technicalQuestStep1Data", data);
     setTechnicalQuestStep(2);
     setStep1Data(data);
@@ -155,18 +154,13 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  console.log({ errors, step1Data });
-
   const { mutateAsync: createQuest } = useCreateTechnicalQuest();
 
   const handlePublishQuest = async () => {
-    console.log({ step1Data });
     try {
       const payload = JSON.parse(
         JSON.stringify(mapFormToCreateTechnicalQuestPayload(step1Data)),
       );
-
-      console.log({ payload });
 
       setIsSubmitting(true);
       // await createTechnicalQuest(payload, communityId);
@@ -220,7 +214,6 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
                     if (technicalQuestStep === 2) {
                       setItemInLocalStorage("technicalQuestStep", 1);
                       if (!extraPoints) {
-                        console.log({ extraPoints });
                         setValue("rewardAllWithPoints", false);
                       }
                     } else {

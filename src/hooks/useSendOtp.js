@@ -7,7 +7,6 @@ export const useSendOtp = () => {
     useMutation({
       mutationFn: (data) => resendOTP(data),
       onSuccess: async (data) => {
-        console.log({ data });
         if (data.status === 200) {
           toast.success("OTP sent successfully");
         } else {

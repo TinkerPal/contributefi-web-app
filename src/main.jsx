@@ -24,6 +24,7 @@ import ReactQueryProviders from "./components/providers";
 import { AuthProvider } from "./contexts/AuthContext";
 import { WalletContextProvider } from "./contexts/WalletContext";
 import Wagmi from "./components/Wagmi";
+import CommunityDetailsPage from "./pages/dashboard/CommunityDetailsPage";
 
 const router = createBrowserRouter([
   {
@@ -82,7 +83,7 @@ const router = createBrowserRouter([
       { index: true, Component: Dashboard },
       { path: "overview", Component: Overview },
       { path: "communities", Component: Communities },
-      { path: "communities/:communityAlias", Component: Communities },
+      { path: "communities/:communityAlias", Component: CommunityDetailsPage },
       { path: "tasks", Component: Tasks },
       { path: "earnings", element: <></> },
       { path: "analytics", element: <></> },

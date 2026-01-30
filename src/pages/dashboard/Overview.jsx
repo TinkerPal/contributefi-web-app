@@ -144,7 +144,7 @@ function Overview() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {communities.map((community, i) => (
-              <CommunitiesCard community={community} key={i} tag="overview" />
+              <CommunitiesCard community={community} key={i} />
             ))}
           </div>
         )}

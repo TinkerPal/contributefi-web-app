@@ -4,11 +4,10 @@ import CustomPagination from "@/components/CustomPagination";
 import React, { useState } from "react";
 import BackButton from "@/components/BackButton";
 import CustomSearch from "@/components/Search";
-import { useQuery } from "@tanstack/react-query";
-import { getCommunities } from "@/services";
 import Loader from "@/components/Loader";
 import Error from "@/components/Error";
 import Empty from "@/components/Empty";
+import { useGetCommunities } from "@/hooks/useGetCommunities";
 
 function CommunitiesPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,19 +16,12 @@ function CommunitiesPage() {
   const OFFSET = (currentPage - 1) * LIMIT;
 
   const {
-    data: communitiesData,
-    isLoading: loadingCommunities,
-    isError: errorLoadingCommunities,
-  } = useQuery({
-    queryKey: ["communities", LIMIT, OFFSET],
-    queryFn: () => getCommunities({ limit: LIMIT, offset: OFFSET }),
-    keepPreviousData: true,
-  });
-
-  const communities = communitiesData?.data ?? [];
-  const totalPages = communitiesData?.totalPages ?? 1;
-
-  console.log({ communitiesData });
+    communities,
+    communitiesData,
+    loadingCommunities,
+    errorLoadingCommunities,
+    totalPages,
+  } = useGetCommunities(LIMIT, OFFSET);
 
   return (
     <div className="bg-white pt-40">
@@ -63,11 +55,7 @@ function CommunitiesPage() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {communities.map((community, i) => (
-                <CommunitiesCard
-                  community={community}
-                  key={i}
-                  tag="communities-page"
-                />
+                <CommunitiesCard community={community} key={i} />
               ))}
             </div>
 

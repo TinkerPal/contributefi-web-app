@@ -47,7 +47,6 @@ function Username() {
     useMutation({
       mutationFn: (data) => createUsername(data),
       onSuccess: async (data, variable) => {
-        console.log({ data });
         if (data.status === 200) {
           setItemInLocalStorage("user", data.data.content);
           login({

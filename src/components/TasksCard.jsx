@@ -4,8 +4,6 @@ import { useNavigate } from "react-router";
 function TasksCard({ task, tag }) {
   const navigate = useNavigate();
 
-  console.log(task);
-
   const handleOpen = () => {
     const params = new URLSearchParams(window.location.search);
     params.set("task", task.questTitle);

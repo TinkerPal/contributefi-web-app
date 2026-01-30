@@ -1,28 +1,18 @@
 import { useNavigate } from "react-router";
 import CommunitiesCard from "./CommunitiesCard";
 import { Button } from "./ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { getCommunities } from "@/services";
 import Loader from "./Loader";
 import Error from "./Error";
 import Empty from "./Empty";
+import { useGetCommunities } from "@/hooks/useGetCommunities";
 
 function FeaturedCommunities() {
   const navigate = useNavigate();
 
   const LIMIT = 6;
 
-  const {
-    data: communitiesData,
-    isLoading: loadingCommunities,
-    isError: errorLoadingCommunities,
-  } = useQuery({
-    queryKey: ["communities", LIMIT],
-    queryFn: () => getCommunities({ limit: LIMIT }),
-    keepPreviousData: true,
-  });
-
-  const communities = communitiesData?.data ?? [];
+  const { communities, loadingCommunities, errorLoadingCommunities } =
+    useGetCommunities(LIMIT);
 
   return (
     <div className="bg-[#F7F9FD]">
@@ -47,7 +37,7 @@ function FeaturedCommunities() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:px-10">
             {communities.map((community, i) => (
-              <CommunitiesCard community={community} key={i} tag="home-page" />
+              <CommunitiesCard community={community} key={i} />
             ))}
           </div>
         )}

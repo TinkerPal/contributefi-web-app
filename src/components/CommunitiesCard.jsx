@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 
-function CommunitiesCard({ community, tag }) {
+function CommunitiesCard({ community }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, isAuthenticated } = useAuth();
@@ -70,6 +70,10 @@ function CommunitiesCard({ community, tag }) {
 
   const handleJoinCommunity = (e) => {
     e.stopPropagation();
+    if (!user) {
+      toast.error("You must be logged in to join a community.");
+      return;
+    }
     joinCommunityMutation(community.id);
   };
 
@@ -117,8 +121,6 @@ function CommunitiesCard({ community, tag }) {
     leaveCommunityMutation(community.id);
   };
 
-  console.log({ data });
-
   return (
     <div
       onClick={handleOpen}
@@ -137,10 +139,13 @@ function CommunitiesCard({ community, tag }) {
               <p className="font-semibold text-[#050215]">
                 {community?.communityName}
               </p>
+
               <p className="flex gap-1 text-[14px] text-[#2F0FD1]">
                 <img src="/UsersThree (1).svg" alt="" />{" "}
                 <span className="shrink-0">
-                  {community?.totalMembers} members
+                  {community?.members > 1
+                    ? `${community?.members} members`
+                    : `${community?.members} member`}
                 </span>
               </p>
             </div>

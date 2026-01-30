@@ -26,7 +26,7 @@ import ScrollToTop from "../ScrollToTop";
 function DashboardLayout() {
   const { user, isAuthenticated, loading, setUser } = useAuth();
 
-  console.log({ user, isAuthenticated, loading });
+  console.log({ loading });
 
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
 
@@ -39,8 +39,6 @@ function DashboardLayout() {
   const taskTitle = queryParams.get("task");
 
   const { communityAlias: communityId } = useParams();
-
-  console.log({ communityId, currentPath, taskTitle });
 
   const [uploading, setUploading] = useState(false);
 

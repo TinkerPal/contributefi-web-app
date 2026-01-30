@@ -31,8 +31,6 @@ function Tasks() {
     setTaskView(view);
   };
 
-  console.log({ taskView });
-
   const [currentPage, setCurrentPage] = useState(1);
 
   const LIMIT = 10;
@@ -51,15 +49,10 @@ function Tasks() {
   const quests = questData?.data ?? [];
   const totalPages = questData?.totalPages ?? 1;
 
-  console.log({ questData });
-
   const queryParams = new URLSearchParams(location.search);
   const taskTitle = queryParams.get("task");
 
-  console.log({ taskTitle });
-
   const handleSort = (order) => {
-    console.log("Sort by:", order);
     setSortOrder(order);
   };
 

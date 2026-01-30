@@ -92,8 +92,6 @@ export function createCommunity(data) {
 }
 
 export function createGrowthQuest(payload, communityId) {
-  console.log({ payload });
-
   return api.post(
     `${import.meta.env.VITE_BASE_URL}/quests/${communityId}/growth`,
     payload,
@@ -101,8 +99,6 @@ export function createGrowthQuest(payload, communityId) {
 }
 
 export function createOnChainQuest(payload, communityId) {
-  console.log({ payload });
-
   return api.post(
     `${import.meta.env.VITE_BASE_URL}/quests/${communityId}/on-chain`,
     payload,
@@ -110,8 +106,6 @@ export function createOnChainQuest(payload, communityId) {
 }
 
 export function createTechnicalQuest(payload, communityId) {
-  console.log({ payload });
-
   return api.post(
     `${import.meta.env.VITE_BASE_URL}/quests/${communityId}/technical`,
     payload,
@@ -140,8 +134,6 @@ export const getQuests = async ({
     `${import.meta.env.VITE_BASE_URL}/quests?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}`,
   );
 
-  console.log({ data });
-
   return data.content;
 };
 
@@ -151,12 +143,9 @@ export const getQuestsByCommunity = async ({
   sort = "DESC",
   communityId,
 } = {}) => {
-  console.log({ communityId });
   const { data } = await api.get(
     `${import.meta.env.VITE_BASE_URL}/quests/${communityId}?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}`,
   );
-
-  console.log({ data });
 
   return data.content;
 };
@@ -165,8 +154,6 @@ export const getMemberCommunities = async ({ limit = 10, offset = 1 } = {}) => {
   const { data } = await api.get(
     `${import.meta.env.VITE_BASE_URL}/members/my-communities?includeRemoved=false&limit=${limit}&offset=${offset}`,
   );
-
-  console.log({ data });
 
   return data.content;
 };
