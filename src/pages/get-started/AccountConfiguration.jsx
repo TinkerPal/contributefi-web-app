@@ -119,6 +119,8 @@ function AccountConfiguration() {
               bio: res.data.content.bio,
             };
             setItemInLocalStorage("user", updatedUser);
+
+            console.log("Updated user:", updatedUser);
             return updatedUser;
           });
           toast.success("Bio updated successfully");

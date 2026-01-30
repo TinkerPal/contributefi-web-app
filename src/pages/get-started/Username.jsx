@@ -47,12 +47,13 @@ function Username() {
     useMutation({
       mutationFn: (data) => createUsername(data),
       onSuccess: async (data, variable) => {
+        console.log({ data });
         if (data.status === 200) {
           setItemInLocalStorage("user", data.data.content);
           login({
             token: token,
             email: email,
-            user: null,
+            user: data.data.content,
             otp: otp,
             username: variable.username,
           });
@@ -78,10 +79,6 @@ function Username() {
     queryFn: () => checkUsernameAvailability(debouncedUsername),
     enabled: !!debouncedUsername,
   });
-
-  // const handleUsernameChange = (e) => {
-  //   setUsernameInput(e.target.value);
-  // };
 
   const handleUsernameChange = (e) => {
     e.target.value = e.target.value.replace(/[^a-zA-Z0-9_]/g, "");

@@ -24,9 +24,7 @@ import { ImSpinner5 } from "react-icons/im";
 import ScrollToTop from "../ScrollToTop";
 
 function DashboardLayout() {
-  const { user, isAuthenticated, loading, setUser } = useAuth();
-
-  console.log({ loading });
+  const { user, isAuthenticated, setUser } = useAuth();
 
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
 

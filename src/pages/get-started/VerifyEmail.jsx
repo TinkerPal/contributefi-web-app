@@ -79,11 +79,6 @@ function VerifyEmail() {
 
   const { resendOTPMutation, resendOTPPending } = useSendOtp();
 
-  // const handleResendOTP = () => {
-  //   const data = { email };
-  //   resendOTPMutation(data);
-  // };
-
   const handleResendOTP = () => {
     if (!email || resendOTPPending) return;
 

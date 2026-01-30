@@ -29,6 +29,7 @@ export const useGetCommunities = (
 
   return {
     communities,
+    communitiesData,
     loadingCommunities,
     errorLoadingCommunities,
     totalPages,
