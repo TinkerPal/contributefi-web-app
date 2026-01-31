@@ -5,8 +5,6 @@ function TasksCard({ task, tag, communityAlias }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log({ location });
-
   const handleOpen = () => {
     if (location.pathname.startsWith("/dashboard/communities/")) {
       navigate(

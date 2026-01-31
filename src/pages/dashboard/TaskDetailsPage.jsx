@@ -1,5 +1,5 @@
 import BackButton from "@/components/BackButton";
-import { getQuests } from "@/services";
+import { getQuest, getQuests } from "@/services";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import { FaLink, FaUsers } from "react-icons/fa";
@@ -11,11 +11,23 @@ import TasksCard from "@/components/TasksCard";
 import Loader from "@/components/Loader";
 import Error from "@/components/Error";
 import Empty from "@/components/Empty";
-
-const TAG = ["GROWTH", "ON_CHAIN", "TECHNICAL"];
+import { Fragment } from "react";
+import { timeAgo } from "@/utils";
 
 function TaskDetailsPage() {
   const { taskId } = useParams();
+
+  const {
+    data: quest,
+    isLoading: loadingQuest,
+    isError: errorLoadingQuest,
+  } = useQuery({
+    queryKey: ["quest", taskId],
+    queryFn: () => getQuest(taskId),
+    enabled: !!taskId,
+  });
+
+  console.log({ quest });
 
   const LIMIT = 3;
 
@@ -38,98 +50,120 @@ function TaskDetailsPage() {
           <BackButton />
         </div>
         <div className="space-y-16 rounded-[4px] bg-white p-4">
-          <div className="max-w-[700px] space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-start gap-3">
-                <img src="/ChartPolar.svg" alt="" />
-                <div className="space-y-1">
-                  <p className="font-semibold text-[#050215]">
-                    {/* {community?.name} */} The Unifier
-                  </p>
-                  <p className="flex items-center gap-1 text-[14px] text-[#777F90]">
-                    <FaUsers />
-                    <span className="shrink-0">
-                      {/* {community?.numberOfMembers} members */} 64 members
-                    </span>
-                  </p>
+          {loadingQuest ? (
+            <Loader />
+          ) : errorLoadingQuest ? (
+            <Error title="Failed to load community details." />
+          ) : (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-start gap-3">
+                  <img src="/ChartPolar.svg" alt="" />
+                  <div className="space-y-1">
+                    <p className="font-semibold text-[#050215]">
+                      {quest?.community?.communityName}
+                    </p>
+                    <p className="flex items-center gap-1 text-[14px] text-[#777F90]">
+                      <FaUsers />
+                      <span className="shrink-0">
+                        {quest?.community?.totalMembers > 1
+                          ? `${quest?.community?.totalMembers} members`
+                          : `${quest?.community?.totalMembers} member`}
+                      </span>
+                    </p>
+                  </div>
                 </div>
+
+                <button className="shrink-0 cursor-pointer text-[#2F0FD1]">
+                  + <span>Join</span>{" "}
+                  <span className="hidden sm:inline">Community</span>
+                </button>
               </div>
 
-              <button className="shrink-0 cursor-pointer text-[#2F0FD1]">
-                + <span>Join</span>{" "}
-                <span className="hidden sm:inline">Community</span>
-              </button>
-            </div>
-
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <div>
-                  <div className="space-y-4">
-                    <h2 className="text-[20px] font-bold text-[#050215]">
-                      {taskId}
-                    </h2>
-                    <div className="flex flex-wrap gap-2">
-                      {TAG.map((t, i) => (
+              <div className="space-y-8">
+                <div className="space-y-6">
+                  <div>
+                    <div className="space-y-4">
+                      <h2 className="text-[20px] font-bold text-[#050215]">
+                        {quest?.questTitle}
+                      </h2>
+                      <div className="flex flex-wrap gap-2">
                         <div
-                          className={`rounded-[4px] px-[12px] py-[5px] text-sm font-normal text-[#313131] ${TASK_TAG_BG[t]}`}
-                          key={i}
+                          className={`rounded-[4px] px-[12px] py-[5px] text-sm font-normal text-[#313131] ${TASK_TAG_BG[quest.category]}`}
                         >
-                          {t}
+                          {quest.category}
                         </div>
-                      ))}
-                    </div>
+                      </div>
 
-                    <div className="flex items-center gap-2">
-                      <p className="flex shrink-0 gap-1.5 font-semibold text-[#2F0FD1]">
-                        <img src="/Gift.svg" alt="" />
-                        {/* {task.amount} XLM */} 80 XLM
-                      </p>
-                      <div className="flex shrink-0 items-center gap-1">
-                        <div className="h-1 w-1 rounded-full bg-[#636366]" />
-                        <p className="flex gap-1.5 font-semibold text-[#8791A7]">
-                          {/* <img src="/UsersThree.svg" alt="" />{" "} */}
-                          {/* {task.numberOfMembers} */}2 hours ago
+                      <div className="flex items-center gap-2">
+                        <p className="flex shrink-0 gap-1.5 font-semibold text-[#2F0FD1]">
+                          <img src="/Gift.svg" alt="" />
+                          {/* {task.amount} XLM */} 80 XLM
                         </p>
+                        <div className="flex shrink-0 items-center gap-1">
+                          <div className="h-1 w-1 rounded-full bg-[#636366]" />
+                          <p className="flex gap-1.5 font-semibold text-[#8791A7]">
+                            {timeAgo(quest?.createdAt)}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  <p className="font-normal text-[#525866]">
+                    {quest?.questDescription}
+                  </p>
                 </div>
 
-                <p className="font-normal text-[#525866]">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Tempore repudiandae laudantium consequatur labore iure neque
-                  cumque quasi provident magnam mollitia quas sapiente
-                  cupiditate, qui officiis repellat laboriosam asperiores
-                  consequuntur eveniet. Lorem ipsum dolor sit amet consectetur
-                  adipisicing elit. Iste deserunt fuga explicabo eligendi
-                  corporis earum magni! Minima, laborum quod magnam quas
-                  quisquam, provident exercitationem voluptate nihil, explicabo
-                  ratione nulla eligendi.
-                </p>
-              </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    {quest?.community?.communityLinks.map((link, i) => {
+                      return (
+                        <Fragment key={i}>
+                          {link.title === "Website" && (
+                            <div className="bg-white p-2">
+                              <a href={link.url} target="_blank">
+                                <FaLink className="rounded-[4px] text-[24px] text-[#777F90]" />
+                              </a>
+                            </div>
+                          )}
 
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap gap-2">
-                  <div className="bg-white p-2">
-                    <FaLink className="rounded-[4px] text-[24px] text-[#777F90]" />
+                          {link.title === "GitHub" && (
+                            <div className="bg-white p-2">
+                              <a href={link.url} target="_blank">
+                                <RiTwitterXFill className="rounded-[4px] text-[24px] text-[#777F90]" />
+                              </a>
+                            </div>
+                          )}
+
+                          {link.title === "Twitter" && (
+                            <div className="bg-white p-2">
+                              <a href={link.url} target="_blank">
+                                <RiInstagramFill className="rounded-[4px] text-[24px] text-[#777F90]" />
+                              </a>
+                            </div>
+                          )}
+
+                          {link.title === "Instagram" && (
+                            <div className="bg-white p-2">
+                              <a href={link.url} target="_blank">
+                                <LuGithub className="rounded-[4px] text-[24px] text-[#777F90]" />
+                              </a>
+                            </div>
+                          )}
+                        </Fragment>
+                      );
+                    })}
                   </div>
-                  <div className="bg-white p-2">
-                    <RiTwitterXFill className="rounded-[4px] text-[24px] text-[#777F90]" />
-                  </div>
-                  <div className="bg-white p-2">
-                    <RiInstagramFill className="rounded-[4px] text-[24px] text-[#777F90]" />
-                  </div>
-                  <div className="bg-white p-2">
-                    <LuGithub className="rounded-[4px] text-[24px] text-[#777F90]" />
-                  </div>
+
+                  <Button className="cursor-pointer rounded-md bg-[#2F0FD1] px-8 py-5 hover:bg-[#2F0FD1]/70">
+                    Claim Task
+                  </Button>
                 </div>
-
-                <Button className="cursor-pointer rounded-md bg-[#2F0FD1] px-8 py-5 hover:bg-[#2F0FD1]/70">
-                  Claim Task
-                </Button>
               </div>
             </div>
-          </div>
+          )}
+
           <div className="space-y-3">
             <h2 className="text-[20px] font-semibold text-[#050215]">
               Similar Tasks

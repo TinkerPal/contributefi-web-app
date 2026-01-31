@@ -144,7 +144,15 @@ export const getQuestsByCommunity = async ({
   communityId,
 } = {}) => {
   const { data } = await api.get(
-    `${import.meta.env.VITE_BASE_URL}/quests/${communityId}?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}`,
+    `${import.meta.env.VITE_BASE_URL}/quests/community/${communityId}?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}`,
+  );
+
+  return data.content;
+};
+
+export const getQuest = async (taskId) => {
+  const { data } = await api.get(
+    `${import.meta.env.VITE_BASE_URL}/quests/${taskId}`,
   );
 
   return data.content;
