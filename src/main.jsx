@@ -24,6 +24,8 @@ import ReactQueryProviders from "./components/providers";
 import { AuthProvider } from "./contexts/AuthContext";
 import { WalletContextProvider } from "./contexts/WalletContext";
 import Wagmi from "./components/Wagmi";
+import CommunityDetailsPage from "./pages/dashboard/CommunityDetailsPage";
+import TaskDetailsPage from "./pages/dashboard/TaskDetailsPage";
 
 const router = createBrowserRouter([
   {
@@ -33,6 +35,22 @@ const router = createBrowserRouter([
       { index: true, Component: HomePage },
       {
         path: "learn-more",
+        element: (
+          <div className="flex h-screen items-center justify-center font-extrabold">
+            In Development...
+          </div>
+        ),
+      },
+      {
+        path: "terms-of-use",
+        element: (
+          <div className="flex h-screen items-center justify-center font-extrabold">
+            In Development...
+          </div>
+        ),
+      },
+      {
+        path: "privacy-policy",
         element: (
           <div className="flex h-screen items-center justify-center font-extrabold">
             In Development...
@@ -66,8 +84,13 @@ const router = createBrowserRouter([
       { index: true, Component: Dashboard },
       { path: "overview", Component: Overview },
       { path: "communities", Component: Communities },
-      { path: "communities/:communityAlias", Component: Communities },
+      { path: "communities/:communityAlias", Component: CommunityDetailsPage },
+      {
+        path: "communities/:communityAlias/:taskId",
+        Component: TaskDetailsPage,
+      },
       { path: "tasks", Component: Tasks },
+      { path: "tasks/:taskId", Component: TaskDetailsPage },
       { path: "earnings", element: <></> },
       { path: "analytics", element: <></> },
       { path: "profile", element: <></> },

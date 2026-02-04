@@ -13,9 +13,13 @@ import { Button } from "@/components/ui/button";
 import {
   getItemFromLocalStorage,
   removeItemFromLocalStorage,
+  setItemInLocalStorage,
 } from "@/lib/utils";
 import { FaEnvelope } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "react-toastify";
+import { updateBio, uploadProfilePicture } from "@/services";
+import { ImSpinner5 } from "react-icons/im";
 
 const ACCOUNTS_TO_LINK = [
   {
@@ -41,8 +45,11 @@ const ACCOUNTS_TO_LINK = [
 ];
 
 function AccountConfiguration() {
-  const { login, token, email, otp, username } = useAuth();
+  const { login, token, email, otp, username, setUser, user } = useAuth();
   const navigate = useNavigate();
+  const [uploading, setUploading] = useState(false);
+
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!username) {
@@ -50,14 +57,89 @@ function AccountConfiguration() {
     }
   }, [navigate, username]);
 
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [bio, setBio] = useState("");
 
-  const handleImageSelect = (e) => {
+  const handleImageSelect = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setPreviewUrl(imageUrl);
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image");
+      return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      const response = await uploadProfilePicture(file);
+
+      if (response?.data?.content?.profileImageUrl) {
+        setUser((prevUser) => {
+          const updatedUser = {
+            ...prevUser,
+            profileImageUrl: response.data.content.profileImageUrl,
+          };
+          setItemInLocalStorage("user", updatedUser);
+          return updatedUser;
+        });
+      } else {
+        toast.error("Failed to upload profile picture");
+        return;
+      }
+
+      toast.success("Profile picture updated");
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message || "Failed to upload profile picture",
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSaveDetails = async (e) => {
+    e.preventDefault();
+    if (!bio) {
+      navigate("/dashboard");
+    } else {
+      setSaving(true);
+      try {
+        const res = await updateBio(bio);
+
+        if (res?.data?.content?.bio) {
+          setUser((prevUser) => {
+            const updatedUser = {
+              ...prevUser,
+              bio: res.data.content.bio,
+            };
+            setItemInLocalStorage("user", updatedUser);
+
+            return updatedUser;
+          });
+          toast.success("Bio updated successfully");
+        } else {
+          toast.error("Failed to save bio");
+          setSaving(false);
+          return;
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to save bio");
+        return;
+      } finally {
+        setSaving(false);
+      }
+
+      navigate("/dashboard");
+    }
+
+    // Save user details logic here
   };
 
   return (
@@ -75,7 +157,7 @@ function AccountConfiguration() {
             login({
               token: token,
               email: email,
-              user: getItemFromLocalStorage("users"),
+              user: getItemFromLocalStorage("user"),
               otp: otp,
               username: username,
             });
@@ -94,11 +176,11 @@ function AccountConfiguration() {
             htmlFor="image"
             className="relative flex h-[80px] w-[80px] shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#F7F9FD]"
           >
-            {previewUrl ? (
+            {user?.profileImageUrl ? (
               <img
-                src={previewUrl}
+                src={user.profileImageUrl}
                 alt="Selected avatar"
-                className="h-auto w-[40px]"
+                className="h-[50px] w-[50px] rounded-full"
               />
             ) : (
               <FaUserLarge className="text-[40px] text-[#B2B9C7]" />
@@ -108,14 +190,21 @@ function AccountConfiguration() {
               type="file"
               id="image"
               className="hidden"
+              disabled={uploading}
             />
             <div className="absolute right-0 bottom-0 rounded-full bg-[#F7F9FD] p-2">
-              <FaPlus className="text-[#2F0FD1]" />
+              {uploading ? (
+                <ImSpinner5 className="animate-spin" />
+              ) : (
+                <FaPlus className="text-[#2F0FD1]" />
+              )}
             </div>
           </Label>
           <Textarea
             className="h-[80px] rounded-[12px] border-none bg-[#F7F9FD] px-4 placeholder:text-sm placeholder:text-[#8791A7] focus:border-none focus:outline-0 focus:outline-none focus-visible:border-none focus-visible:ring-0"
             placeholder="Briefly tell us about you"
+            onChange={(e) => setBio(e.target.value)}
+            value={bio}
           />
         </div>
 
@@ -150,12 +239,17 @@ function AccountConfiguration() {
 
           <Button
             className="ml-auto w-full sm:w-fit"
-            disabled
+            disabled={
+              uploading ||
+              (!user?.profileImageUrl && bio.trim().length === 0) ||
+              saving
+            }
             variant="secondary"
             size="lg"
             type="button"
+            onClick={handleSaveDetails}
           >
-            Save Details
+            {saving ? "Saving..." : "Save Details"}
           </Button>
         </div>
       </div>

@@ -1,28 +1,17 @@
 import { useNavigate } from "react-router";
 import TasksCard from "./TasksCard";
 import { Button } from "./ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { getQuests } from "@/services";
 import Loader from "./Loader";
 import Error from "./Error";
 import Empty from "./Empty";
+import { useGetQuest } from "@/hooks/useGetQuest";
 
 function ExploreTask() {
   const navigate = useNavigate();
 
   const LIMIT = 6;
 
-  const {
-    data: questsData,
-    isLoading: loadingQuests,
-    isError: errorLoadingQuests,
-  } = useQuery({
-    queryKey: ["quests", LIMIT],
-    queryFn: () => getQuests({ limit: LIMIT }),
-    keepPreviousData: true,
-  });
-
-  const quests = questsData?.data ?? [];
+  const { quests, loadingQuests, errorLoadingQuests } = useGetQuest(LIMIT);
 
   return (
     <div className="bg-[#F7F9FD]">

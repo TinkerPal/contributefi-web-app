@@ -14,7 +14,6 @@ import { createAccount } from "@/services";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
 import { WalletContext } from "@/contexts/WalletContext";
-// import { useSendOtp } from "@/hooks/useSendOtp";
 
 function CreateAccount() {
   const { login } = useAuth();
@@ -35,8 +34,6 @@ function CreateAccount() {
     resolver: zodResolver(SignUpSchema),
   });
 
-  // const { resendOTPMutation, resendOTPPending } = useSendOtp();
-
   const { mutate: createAccountMutation, isPending: createAccountPending } =
     useMutation({
       mutationFn: (data) => createAccount(data),
@@ -52,7 +49,7 @@ function CreateAccount() {
             });
             // resendOTPMutation({ email: variable.email });
             navigate("/get-started/verify-email");
-            toast.error("Kindly verify your email address");
+            toast.success("Kindly verify your email address");
           } else if (!data.data.content.username) {
             login({
               token: data.data.content.accessToken.token,

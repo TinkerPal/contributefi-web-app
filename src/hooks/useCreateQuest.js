@@ -13,6 +13,7 @@ export const useCreateGrowthQuest = () => {
       createGrowthQuest(payload, communityId),
 
     onSuccess: (_, variables) => {
+      queryClient.clear();
       // 🔥 THIS is the magic
       queryClient.invalidateQueries({
         queryKey: ["quests", variables.communityId],
@@ -34,6 +35,7 @@ export const useCreateOnChainQuest = () => {
       createOnChainQuest(payload, communityId),
 
     onSuccess: (_, variables) => {
+      queryClient.clear();
       // 🔥 THIS is the magic
       queryClient.invalidateQueries({
         queryKey: ["quests", variables.communityId],
@@ -55,6 +57,7 @@ export const useCreateTechnicalQuest = () => {
       createTechnicalQuest(payload, communityId),
 
     onSuccess: (_, variables) => {
+      queryClient.clear();
       // 🔥 THIS is the magic
       queryClient.invalidateQueries({
         queryKey: ["quests", variables.communityId],

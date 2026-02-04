@@ -56,7 +56,6 @@ function VerifyEmail() {
     useMutation({
       mutationFn: (data) => verifyEmail(data),
       onSuccess: async (data, variable) => {
-        console.log({ data });
         if (data.status === 200) {
           login({
             token: token,
@@ -79,11 +78,6 @@ function VerifyEmail() {
     });
 
   const { resendOTPMutation, resendOTPPending } = useSendOtp();
-
-  // const handleResendOTP = () => {
-  //   const data = { email };
-  //   resendOTPMutation(data);
-  // };
 
   const handleResendOTP = () => {
     if (!email || resendOTPPending) return;

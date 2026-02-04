@@ -5,6 +5,7 @@ import {
   setItemInLocalStorage,
 } from "@/lib/utils";
 import { AuthContext } from "@/hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -13,6 +14,7 @@ export const AuthProvider = ({ children }) => {
   const [otp, setOtp] = useState(getItemFromLocalStorage("otp"));
   const [username, setUsername] = useState(getItemFromLocalStorage("username"));
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const savedToken = getItemFromLocalStorage("accessToken");
@@ -40,6 +42,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    queryClient.clear();
     setToken(null);
     setUser(null);
     setEmail(null);
@@ -59,6 +62,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         token,
         user,
+        setUser,
         isAuthenticated,
         login,
         logout,

@@ -101,7 +101,6 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
   });
 
   const onSubmit = (data) => {
-    console.log(data);
     setItemInLocalStorage("onChainQuestStep1Data", data);
     setOnChainQuestStep(2);
     setStep1Data(data);
@@ -201,22 +200,15 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log({ errors, step1Data });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  console.log({ errors, step1Data });
 
   const { mutateAsync: createQuest } = useCreateOnChainQuest();
 
   const handlePublishQuest = async () => {
-    console.log({ step1Data });
     try {
       const payload = JSON.parse(
         JSON.stringify(mapFormToCreateOnChainQuestPayload(step1Data)),
       );
-
-      console.log({ payload });
 
       setIsSubmitting(true);
       // await createOnChainQuest(payload, communityId);
@@ -269,7 +261,6 @@ function OnChainQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
                     if (onChainQuestStep === 2) {
                       setItemInLocalStorage("onChainQuestStep", 1);
                       if (!extraPoints) {
-                        console.log({ extraPoints });
                         setValue("rewardAllWithPoints", false);
                       }
                     } else {

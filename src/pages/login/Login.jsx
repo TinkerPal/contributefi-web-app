@@ -51,7 +51,7 @@ function Login() {
           });
           // resendOTPMutation({ email: variable.email });
           navigate("/get-started/verify-email");
-          toast.error("Kindly verify your email address");
+          toast.success("Kindly verify your email address");
         } else if (!data.data.content.username) {
           login({
             token: data.data.content.accessToken.token,
@@ -63,6 +63,7 @@ function Login() {
           navigate("/get-started/username");
           toast.error("Kindly select a username");
         } else {
+          
           login({
             token: data.data.content.accessToken.token,
             email: null,

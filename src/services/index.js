@@ -47,7 +47,7 @@ export function createUsername(data) {
     username: data.username,
   };
 
-  return api.post(
+  return api.patch(
     `${import.meta.env.VITE_BASE_URL}/users/username`,
     requestPayload,
   );
@@ -92,8 +92,6 @@ export function createCommunity(data) {
 }
 
 export function createGrowthQuest(payload, communityId) {
-  console.log({ payload });
-
   return api.post(
     `${import.meta.env.VITE_BASE_URL}/quests/${communityId}/growth`,
     payload,
@@ -101,8 +99,6 @@ export function createGrowthQuest(payload, communityId) {
 }
 
 export function createOnChainQuest(payload, communityId) {
-  console.log({ payload });
-
   return api.post(
     `${import.meta.env.VITE_BASE_URL}/quests/${communityId}/on-chain`,
     payload,
@@ -110,8 +106,6 @@ export function createOnChainQuest(payload, communityId) {
 }
 
 export function createTechnicalQuest(payload, communityId) {
-  console.log({ payload });
-
   return api.post(
     `${import.meta.env.VITE_BASE_URL}/quests/${communityId}/technical`,
     payload,
@@ -140,8 +134,6 @@ export const getQuests = async ({
     `${import.meta.env.VITE_BASE_URL}/quests?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}`,
   );
 
-  console.log({ data });
-
   return data.content;
 };
 
@@ -151,12 +143,17 @@ export const getQuestsByCommunity = async ({
   sort = "DESC",
   communityId,
 } = {}) => {
-  console.log({ communityId });
   const { data } = await api.get(
-    `${import.meta.env.VITE_BASE_URL}/quests/${communityId}?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}`,
+    `${import.meta.env.VITE_BASE_URL}/quests/community/${communityId}?sortBy=createdAt:${sort}&limit=${limit}&offset=${offset}`,
   );
 
-  console.log({ data });
+  return data.content;
+};
+
+export const getQuest = async (taskId) => {
+  const { data } = await api.get(
+    `${import.meta.env.VITE_BASE_URL}/quests/${taskId}`,
+  );
 
   return data.content;
 };
@@ -165,8 +162,6 @@ export const getMemberCommunities = async ({ limit = 10, offset = 1 } = {}) => {
   const { data } = await api.get(
     `${import.meta.env.VITE_BASE_URL}/members/my-communities?includeRemoved=false&limit=${limit}&offset=${offset}`,
   );
-
-  console.log({ data });
 
   return data.content;
 };
@@ -200,3 +195,41 @@ export function leaveCommunity(communityId, memberId) {
     requestPayload,
   );
 }
+
+export const uploadProfilePicture = (file) => {
+  const formData = new FormData();
+
+  formData.append("image", file);
+
+  return api.patch(
+    `${import.meta.env.VITE_BASE_URL}/users/upload-profile-picture`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+};
+
+export const uploadCommunityCover = (file, communityId) => {
+  const formData = new FormData();
+
+  formData.append("image", file);
+
+  return api.post(
+    `${import.meta.env.VITE_BASE_URL}/communities/upload-logo-cover/${communityId}`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+};
+
+export const updateBio = (bio) => {
+  return api.patch(`${import.meta.env.VITE_BASE_URL}/users/update-profile`, {
+    bio,
+  });
+};

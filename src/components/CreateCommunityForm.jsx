@@ -4,13 +4,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import CustomInput from "./CustomInput";
 import { Textarea } from "./ui/textarea";
-import FileUpload from "./FileUpload";
 import { CreateCommunitySchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -18,9 +16,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { checkUsernameAvailability, createCommunity } from "@/services";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 function CreateCommunityForm() {
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
 
   const queryClient = useQueryClient();
 
@@ -82,16 +82,26 @@ function CreateCommunityForm() {
   }, [open, reset]);
 
   const handleUsernameChange = (e) => {
+    e.target.value = e.target.value.replace(/[^a-zA-Z0-9_]/g, "");
     setUsernameInput(e.target.value);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="secondary" size="lg" className="w-full">
-          Create Community
-        </Button>
-      </DialogTrigger>
+      <Button
+        variant="secondary"
+        size="lg"
+        className="w-full"
+        onClick={() => {
+          if (!user) {
+            toast.error("You need to be logged in to create a community");
+            return;
+          }
+          setOpen(true);
+        }}
+      >
+        Create Community
+      </Button>
       <DialogContent className="scrollbar-hidden max-h-[calc(100vh-150px)] overflow-scroll bg-white sm:max-w-[668px]">
         <DialogHeader>
           <DialogTitle className="text-left text-[18px] text-[#050215] sm:text-[24px]">
@@ -122,6 +132,24 @@ function CreateCommunityForm() {
               {...register("communityUsername", {
                 onChange: handleUsernameChange,
               })}
+              onKeyDown={(e) => {
+                const isAllowed = /^[a-zA-Z0-9_]$/.test(e.key);
+
+                const allowedKeys = [
+                  "Backspace",
+                  "Tab",
+                  "ArrowLeft",
+                  "ArrowRight",
+                  "Delete",
+                ];
+
+                if (
+                  e.key === " " ||
+                  (!isAllowed && !allowedKeys.includes(e.key))
+                ) {
+                  e.preventDefault();
+                }
+              }}
               // {...register("communityUsername", {
               //   onChange: (e) => {
               //     e.target.value = e.target.value.replace(/[^a-zA-Z0-9_.]/g, "");

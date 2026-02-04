@@ -98,8 +98,6 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
   });
 
   const onSubmit = (data) => {
-    console.log(data);
-
     setItemInLocalStorage("growthQuestStep1Data", data);
     setStep(2);
     setStep1Data(data);
@@ -200,18 +198,13 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  console.log({ errors, step1Data });
-
   const { mutateAsync: createQuest } = useCreateGrowthQuest();
 
   const handlePublishQuest = async () => {
-    console.log({ step1Data });
     try {
       const payload = JSON.parse(
         JSON.stringify(mapFormToCreateGrowthQuestPayload(step1Data)),
       );
-
-      console.log({ payload });
 
       setIsSubmitting(true);
       // await createGrowthQuest(payload, communityId);
@@ -264,7 +257,6 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
                     if (step === 2) {
                       setItemInLocalStorage("growthQuestStep", 1);
                       if (!extraPoints) {
-                        console.log({ extraPoints });
                         setValue("rewardAllWithPoints", false);
                       }
                     } else {

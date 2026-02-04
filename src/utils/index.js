@@ -99,7 +99,6 @@ export const hydrateGrowthQuestData = (data) => {
 };
 
 export const mapFormToCreateGrowthQuestPayload = (data) => {
-  console.log({ data });
   const payload = {
     questTitle: data.questTitle,
     questDescription: data.questDescription,
@@ -206,7 +205,6 @@ export const mapFormToCreateGrowthQuestPayload = (data) => {
 };
 
 export const mapFormToCreateOnChainQuestPayload = (data) => {
-  console.log({ data });
   const payload = {
     questTitle: data.questTitle,
     questDescription: data.questDescription,
@@ -293,7 +291,6 @@ export const mapFormToCreateOnChainQuestPayload = (data) => {
 };
 
 export const mapFormToCreateTechnicalQuestPayload = (data) => {
-  console.log({ data });
   const payload = {
     questTitle: data.questTitle,
     questDescription: data.questDescription,
