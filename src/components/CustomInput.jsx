@@ -18,9 +18,10 @@ export default function CustomInput({
       {label}
       {prefix ? (
         <div className="relative w-full rounded-sm">
-          <span className="absolute top-0 bottom-0 flex h-full items-center rounded-l-sm bg-[#EDF2FF] px-4 pt-2 text-sm text-[#8791A7]">
+          <span className="absolute top-0 bottom-0 left-0 flex h-full items-center rounded-l-sm bg-[#EDF2FF] px-4 pt-2 text-sm text-[#8791A7]">
             {prefix}
           </span>
+
           <Input
             type={type}
             placeholder={placeholder}
@@ -30,7 +31,7 @@ export default function CustomInput({
           {icon && (
             <span
               onClick={() => handleRevealPassword()}
-              className="absolute top-0 bottom-0 flex h-full items-center rounded-l-sm bg-[#EDF2FF] px-4 pt-2 text-sm text-[#8791A7]"
+              className="absolute top-0 right-0 bottom-0 flex h-full items-center rounded-l-sm bg-[#EDF2FF] px-4 pt-2 text-sm text-[#8791A7]"
             >
               {icon}
             </span>
@@ -54,7 +55,7 @@ export default function CustomInput({
               </span>
             )}
             {token && (
-              <span className="absolute top-0 right-0 bottom-0 flex cursor-pointer items-center px-4 text-2xl text-[#B2B9C7]">
+              <span className="absolute top-0 bottom-0 left-0 flex h-full w-[25%] items-center rounded-l-sm bg-[#EDF2FF] px-4 pt-2 text-sm text-[#8791A7]">
                 {token}
               </span>
             )}

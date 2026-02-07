@@ -40,6 +40,7 @@ import {
 import { BsFillInfoCircleFill } from "react-icons/bs";
 import { useCreateGrowthQuest } from "@/hooks/useCreateQuest";
 import TokenSelectorModal from "./TokenSelectorModal";
+import { RxCaretDown } from "react-icons/rx";
 
 function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
   const isDesktop = useIsDesktop();
@@ -235,7 +236,14 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
   };
 
   useEffect(() => {
-    setValue("tokenContract", rewardToken?.contract);
+    setValue(
+      "tokenContract",
+      rewardToken?.contract
+        ? `Contract: ${rewardToken.contract.slice(0, 10)}...${rewardToken.contract.slice(-8)}`
+        : rewardToken?.issuer
+          ? `Issuer: ${rewardToken.issuer.slice(0, 10)}...${rewardToken.issuer.slice(-8)}`
+          : "",
+    );
   }, [rewardToken, setValue]);
 
   console.log({ rewardToken });
@@ -338,23 +346,26 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
 
               {rewardType === "Token" && (
                 <CustomInput
-                  label="Token Contract"
-                  placeholder="000000000000000000000"
+                  label="Asset / Token"
+                  placeholder="Select or enter an asset or token"
                   type="text"
                   error={errors.tokenContract?.message}
                   {...register("tokenContract")}
-                  className={rewardType !== "Token" ? "hidden" : ""}
-                  defaultValue={rewardToken?.contract.slice(0, 20)}
+                  className={rewardType !== "Token" ? "hidden" : "pl-[30%]"}
                   onFocus={handleChangeToken}
+                  handleRevealPassword={() => {}}
+                  icon={<RxCaretDown />}
                   token={
                     rewardToken && (
-                      <div className="flex items-center gap-2 rounded-sm border bg-white px-2 py-1 text-sm text-black shadow">
-                        <img
-                          src={rewardToken?.icon}
-                          alt={rewardToken?.code}
-                          className="h-3 w-3"
-                        />
-                        {rewardToken?.name}
+                      <div className="flex w-full items-center gap-2 text-sm text-black">
+                        <span>
+                          {rewardToken?.contract
+                            ? "Sym:"
+                            : rewardToken?.issuer
+                              ? "Asset:"
+                              : ""}
+                        </span>
+                        <span className="font-bold">{rewardToken?.code}</span>
                       </div>
                     )
                   }
