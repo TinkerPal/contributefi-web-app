@@ -25,7 +25,6 @@ function CommunitiesPage() {
   } = useGetCommunities(LIMIT, OFFSET, searchValue);
 
   const handleSearch = (e) => {
-    console.log(e.target.value);
     setSearchValue(e.target.value);
   };
 

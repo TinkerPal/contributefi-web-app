@@ -1,127 +1,21 @@
-import { useAuth } from "@/hooks/useAuth";
 import { COMMUNITY_TAG_BG } from "@/lib/constants";
-import { getCommunity, joinCommunity, leaveCommunity } from "@/services";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImSpinner5 } from "react-icons/im";
-import { useNavigate } from "react-router";
-import { toast } from "react-toastify";
 
 function CommunitiesCard({ community }) {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { user, isAuthenticated } = useAuth();
-
   const handleOpen = () => {
-    navigate(
-      `/dashboard/communities/${encodeURIComponent(community.communityAlias)}`,
-      {
-        replace: false,
-      },
+    window.open(
+      `https://app.contribute.fi/communities/${encodeURIComponent(community.communityAlias)}`,
+      "_blank",
+      "noopener,noreferrer",
     );
   };
 
-  const { data } = useQuery({
-    queryKey: ["community", community.id],
-    queryFn: () => getCommunity(community.id),
-    enabled: isAuthenticated && !!community.id,
-    keepPreviousData: true,
-    staleTime: 0,
-    cacheTime: 0,
-  });
-
-  const { mutate: joinCommunityMutation, isPending: joinCommunityPending } =
-    useMutation({
-      mutationFn: () => joinCommunity(community.id),
-      onMutate: async () => {
-        await queryClient.cancelQueries(["community", community.id]);
-
-        const previousCommunity = queryClient.getQueryData([
-          "community",
-          community.id,
-        ]);
-
-        queryClient.setQueryData(["community", community.id], (old) => ({
-          ...old,
-          isMember: true,
-          totalMembers: (old?.totalMembers ?? 0) + 1,
-        }));
-
-        return { previousCommunity };
-      },
-
-      onError: (error, _, context) => {
-        // Rollback on error
-        queryClient.setQueryData(
-          ["community", community.id],
-          context.previousCommunity,
-        );
-        toast.error(
-          error?.response?.data?.message || "Failed to join community",
-        );
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(["community", community.id]);
-      },
-      onSuccess: (data) => {
-        if (data.status === 201) {
-          toast.success("Community joined successfully");
-        } else {
-          toast.error("Something went wrong");
-        }
-      },
-    });
-
   const handleJoinCommunity = (e) => {
     e.stopPropagation();
-    if (!user) {
-      toast.error("You must be logged in to join a community.");
-      return;
-    }
-    joinCommunityMutation(community.id);
-  };
-
-  const { mutate: leaveCommunityMutation, isPending: leaveCommunityPending } =
-    useMutation({
-      mutationFn: () => leaveCommunity(community.id, user?.id),
-      onMutate: async () => {
-        await queryClient.cancelQueries(["community", community.id]);
-        const previousCommunity = queryClient.getQueryData([
-          "community",
-          community.id,
-        ]);
-
-        queryClient.setQueryData(["community", community.id], (old) => ({
-          ...old,
-          isMember: false,
-          totalMembers: Math.max((old?.totalMembers ?? 1) - 1, 0),
-        }));
-
-        return { previousCommunity };
-      },
-      onError: (error, _, context) => {
-        queryClient.setQueryData(
-          ["community", community.id],
-          context.previousCommunity,
-        );
-        toast.error(
-          error?.response?.data?.message || "Failed to leave community",
-        );
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(["community", community.id]);
-      },
-      onSuccess: (data) => {
-        if (data.status === 201) {
-          toast.success("Successfully left the community");
-        } else {
-          toast.error("Something went wrong");
-        }
-      },
-    });
-
-  const handleLeaveCommunity = (e) => {
-    e.stopPropagation();
-    leaveCommunityMutation(community.id);
+    window.open(
+      `https://app.contribute.fi/login`,
+      "_blank",
+      "noopener,noreferrer",
+    );
   };
 
   return (
@@ -184,19 +78,10 @@ function CommunitiesCard({ community }) {
         </div>
 
         <button
-          disabled={joinCommunityPending || leaveCommunityPending}
-          onClick={data?.isMember ? handleLeaveCommunity : handleJoinCommunity}
-          className={`cursor-pointer font-medium ${data?.isMember ? "text-[#F31307]" : "text-[#2F0FD1]"} disabled:cursor-not-allowed`}
+          onClick={handleJoinCommunity}
+          className={`cursor-pointer font-medium text-[#2F0FD1] disabled:cursor-not-allowed`}
         >
-          {community?.communityOwnerId === user?.id ? (
-            ""
-          ) : joinCommunityPending || leaveCommunityPending ? (
-            <ImSpinner5 className="animate-spin" />
-          ) : data?.isMember ? (
-            "Leave"
-          ) : (
-            "+ Join"
-          )}
+          + Join
         </button>
       </div>
     </div>

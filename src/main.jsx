@@ -7,25 +7,9 @@ import HomePage from "./pages/HomePage";
 import RootLayout from "./components/RootLayout";
 import TaskPage from "./pages/TaskPage";
 import CommunitiesPage from "./pages/CommunitiesPage";
-import DashboardLayout from "./components/dashboard/DashboardLayout";
-import Overview from "./pages/dashboard/Overview";
-import Communities from "./pages/dashboard/Communities";
-import Tasks from "./pages/dashboard/Tasks";
 import NotFound from "./components/NotFound";
-import GetStartedLayout from "./components/get-started/GetStartedLayout";
-import CreateAccount from "./pages/get-started/CreateAccount";
-import VerifyEmail from "./pages/get-started/VerifyEmail";
-import Username from "./pages/get-started/Username";
-import Login from "./pages/login/Login";
-import AccountConfiguration from "./pages/get-started/AccountConfiguration";
-import Dashboard from "./pages/dashboard/Dashboard";
 import { ToastContainer } from "react-toastify";
-import ReactQueryProviders from "./components/providers";
-import { AuthProvider } from "./contexts/AuthContext";
-import { WalletContextProvider } from "./contexts/WalletContext";
-import Wagmi from "./components/Wagmi";
-import CommunityDetailsPage from "./pages/dashboard/CommunityDetailsPage";
-import TaskDetailsPage from "./pages/dashboard/TaskDetailsPage";
+import ReactQueryProviders from "./components/ReactQueryProviders";
 
 const router = createBrowserRouter([
   {
@@ -62,60 +46,13 @@ const router = createBrowserRouter([
       { path: "*", Component: NotFound },
     ],
   },
-  {
-    path: "get-started",
-    Component: GetStartedLayout,
-    children: [
-      { index: true, Component: CreateAccount },
-      { path: "verify-email", Component: VerifyEmail },
-      { path: "username", Component: Username },
-      { path: "account-configuration", Component: AccountConfiguration },
-    ],
-  },
-  {
-    path: "login",
-    Component: GetStartedLayout,
-    children: [{ index: true, Component: Login }],
-  },
-  {
-    path: "dashboard",
-    Component: DashboardLayout,
-    children: [
-      { index: true, Component: Dashboard },
-      { path: "overview", Component: Overview },
-      { path: "communities", Component: Communities },
-      { path: "communities/:communityAlias", Component: CommunityDetailsPage },
-      {
-        path: "communities/:communityAlias/:taskId",
-        Component: TaskDetailsPage,
-      },
-      { path: "tasks", Component: Tasks },
-      { path: "tasks/:taskId", Component: TaskDetailsPage },
-      { path: "earnings", element: <></> },
-      { path: "analytics", element: <></> },
-      { path: "profile", element: <></> },
-      { path: "notifications", element: <></> },
-      { path: "help", element: <></> },
-      { path: "*", Component: NotFound },
-    ],
-  },
-  {
-    path: "*",
-    Component: NotFound,
-  },
 ]);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <Wagmi>
-      <ReactQueryProviders>
-        <AuthProvider>
-          <WalletContextProvider>
-            <RouterProvider router={router} />
-            <ToastContainer />
-          </WalletContextProvider>
-        </AuthProvider>
-      </ReactQueryProviders>
-    </Wagmi>
+    <ReactQueryProviders>
+      <RouterProvider router={router} />
+      <ToastContainer />
+    </ReactQueryProviders>
   </StrictMode>,
 );

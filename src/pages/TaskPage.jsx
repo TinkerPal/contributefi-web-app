@@ -6,28 +6,27 @@ import Filter from "@/components/Filter";
 import Loader from "@/components/Loader";
 import CustomSearch from "@/components/Search";
 import TasksCard from "@/components/TasksCard";
-import { getQuests } from "@/services";
-import { useQuery } from "@tanstack/react-query";
+import { useGetQuest } from "@/hooks/useGetQuest";
 import React, { useState } from "react";
 
 function TaskPage() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchValue, setSearchValue] = useState("");
 
   const LIMIT = 10;
   const OFFSET = (currentPage - 1) * LIMIT;
 
-  const {
-    data: questData,
-    isLoading: loadingQuests,
-    isError: errorLoadingQuests,
-  } = useQuery({
-    queryKey: ["quests", LIMIT, OFFSET],
-    queryFn: () => getQuests({ limit: LIMIT, offset: OFFSET }),
-    keepPreviousData: true,
-  });
+  const { questsData, quests, loadingQuests, errorLoadingQuests } = useGetQuest(
+    LIMIT,
+    OFFSET,
+    searchValue,
+  );
 
-  const quests = questData?.data ?? [];
-  const totalPages = questData?.totalPages ?? 1;
+  const totalPages = questsData?.totalPages ?? 1;
+
+  const handleSearch = (e) => {
+    setSearchValue(e.target.value);
+  };
 
   return (
     <div className="bg-white pt-40">
@@ -45,7 +44,7 @@ function TaskPage() {
             <div className="flex flex-wrap items-end justify-between gap-4 lg:items-end">
               <div className="text-[#050215]">
                 <h2 className="text-[24px] font-extrabold md:text-[44px]">
-                  Available Tasks ({questData.totalElements})
+                  Available Tasks ({questsData.totalElements})
                 </h2>
                 <p className="font-light md:text-[20px]">
                   Explore list of available tasks
@@ -56,7 +55,10 @@ function TaskPage() {
                 <Filter tag="landing" />
               </div>
 
-              <CustomSearch placeholder="Search task" />
+              <CustomSearch
+                placeholder="Search task"
+                onSearchChange={handleSearch}
+              />
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -1,4 +1,4 @@
-import { getCommunities, getMemberCommunities } from "@/services";
+import { getCommunities } from "@/services/communities";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetCommunities = (
@@ -43,32 +43,5 @@ export const useGetCommunities = (
     errorLoadingCommunities,
     totalPages,
     refetch,
-  };
-};
-
-export const useGetMemberCommunities = (LIMIT, OFFSET = 1, communityView) => {
-  const {
-    data: memberCommunitiesData,
-    isLoading: loadingMemberCommunities,
-    isError: errorLoadingMemberCommunities,
-  } = useQuery({
-    queryKey: ["communities", LIMIT, OFFSET],
-    queryFn: () =>
-      getMemberCommunities({
-        limit: LIMIT,
-        offset: OFFSET,
-      }),
-    enabled: communityView === "joined",
-    keepPreviousData: true,
-  });
-
-  const memberCommunities = memberCommunitiesData?.data ?? [];
-  const totalPages = memberCommunitiesData?.totalPages ?? 1;
-
-  return {
-    memberCommunities,
-    loadingMemberCommunities,
-    errorLoadingMemberCommunities,
-    totalPages,
   };
 };

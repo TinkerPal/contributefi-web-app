@@ -1,44 +1,52 @@
 import { TASK_TAG_BG } from "@/lib/constants";
-import { useLocation, useNavigate } from "react-router";
-import { toast } from "react-toastify";
+// import { useLocation, useNavigate } from "react-router";
+// import { toast } from "react-toastify";
 
 function TasksCard({ task, tag }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  // const navigate = useNavigate();
+  // const location = useLocation();
 
-  const pathLength = location.pathname.split("/").length;
-  let pathname = location.pathname.split("/");
+  // const pathLength = location.pathname.split("/").length;
+  // let pathname = location.pathname.split("/");
 
-  pathname = pathname[1] + "/" + pathname[2] + "/" + pathname[3];
+  // pathname = pathname[1] + "/" + pathname[2] + "/" + pathname[3];
 
   const handleOpen = () => {
-    if (!task.isActive) {
-      toast.error("Task is no longer active");
-      return;
-    }
-    if (
-      pathLength === 4 &&
-      location.pathname.startsWith("/dashboard/communities")
-    ) {
-      navigate(
-        `/${location.pathname.slice(1, location.pathname.length)}/${encodeURIComponent(task.id)}`,
-        {
-          replace: false,
-        },
-      );
-      return;
-    } else if (pathLength === 5) {
-      navigate(`/${pathname}/${encodeURIComponent(task.id)}`, {
-        replace: false,
-      });
-      return;
-    } else {
-      navigate(`/dashboard/tasks/${encodeURIComponent(task.id)}`, {
-        replace: false,
-      });
-      return;
-    }
+    window.open(
+      `https://app.contribute.fi/tasks/${encodeURIComponent(task.id)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
   };
+
+  // const handleOpen = () => {
+  //   if (!task.isActive) {
+  //     toast.error("Task is no longer active");
+  //     return;
+  //   }
+  //   if (
+  //     pathLength === 4 &&
+  //     location.pathname.startsWith("/dashboard/communities")
+  //   ) {
+  //     navigate(
+  //       `/${location.pathname.slice(1, location.pathname.length)}/${encodeURIComponent(task.id)}`,
+  //       {
+  //         replace: false,
+  //       },
+  //     );
+  //     return;
+  //   } else if (pathLength === 5) {
+  //     navigate(`/${pathname}/${encodeURIComponent(task.id)}`, {
+  //       replace: false,
+  //     });
+  //     return;
+  //   } else {
+  //     navigate(`/dashboard/tasks/${encodeURIComponent(task.id)}`, {
+  //       replace: false,
+  //     });
+  //     return;
+  //   }
+  // };
 
   return (
     <div
