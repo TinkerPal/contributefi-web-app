@@ -106,9 +106,17 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
   });
 
   const onSubmit = (data) => {
-    setItemInLocalStorage("growthQuestStep1Data", data);
+    setItemInLocalStorage("growthQuestStep1Data", {
+      ...data,
+      tokenContract: rewardToken?.contract,
+      symbol: rewardToken?.code,
+    });
     setStep(2);
-    setStep1Data(data);
+    setStep1Data({
+      ...data,
+      tokenContract: rewardToken?.contract,
+      symbol: rewardToken?.code,
+    });
     setItemInLocalStorage("growthQuestStep", 2);
   };
 
@@ -346,12 +354,18 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
 
               {rewardType === "Token" && (
                 <CustomInput
-                  label="Asset / Token"
+                  label="Contract"
                   placeholder="Select or enter an asset or token"
                   type="text"
                   error={errors.tokenContract?.message}
                   {...register("tokenContract")}
-                  className={rewardType !== "Token" ? "hidden" : "pl-[30%]"}
+                  className={
+                    rewardType !== "Token"
+                      ? "hidden"
+                      : rewardToken
+                        ? "pl-[30%]"
+                        : ""
+                  }
                   onFocus={handleChangeToken}
                   handleRevealPassword={() => {}}
                   icon={<RxCaretDown />}
@@ -775,7 +789,8 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
                     Token Contract
                   </p>
                   <p className="w-1/2 font-medium text-[#050215]">
-                    {step1Data.tokenContract}
+                    {step1Data.tokenContract.slice(0, 6)}...
+                    {step1Data.tokenContract.slice(-6)}
                   </p>
                 </div>
               )}
@@ -829,7 +844,7 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
                     </p>
                     <p className="w-1/2 font-medium text-[#050215]">
                       {step1Data?.tokensPerWinner
-                        ? `${step1Data?.tokensPerWinner} XLM`
+                        ? `${step1Data?.tokensPerWinner} ${step1Data?.symbol}`
                         : `${step1Data?.pointsPerWinner} Points`}
                     </p>
                   </div>
@@ -883,7 +898,9 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
                                 </p>
                                 <p className="font-medium text-[#050215]">
                                   {task.pointsPerTask || task?.tokensPerTask}{" "}
-                                  {task?.tokensPerTask ? "XLM" : "Points"}
+                                  {task?.tokensPerTask
+                                    ? step1Data?.symbol
+                                    : "Points"}
                                 </p>
                               </div>
                             )}
@@ -1002,16 +1019,18 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
                     </p>
                     <p className="text-2xl font-bold text-[#050215]">
                       {step1Data.rewardMode === "Overall Reward" &&
-                        `${step1Data.tokensPerWinner * step1Data.numberOfWinners} XLM`}
+                        `${step1Data.tokensPerWinner * step1Data.numberOfWinners} ${step1Data?.symbol}`}
 
                       {step1Data.rewardMode === "Individual Task Reward" &&
-                        `${step1Data.tasks.reduce((total, task) => total + task.tokensPerTask, 0) * step1Data.numberOfWinners} XLM`}
+                        `${step1Data.tasks.reduce((total, task) => total + task.tokensPerTask, 0) * step1Data.numberOfWinners} ${step1Data?.symbol}`}
                     </p>
                   </div>
 
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-[300] text-[#09032A]">Fees to Charge</p>
-                    <p className="text-2xl font-bold text-[#050215]">100 XLM</p>
+                    <p className="text-2xl font-bold text-[#050215]">
+                      100 {step1Data?.symbol}
+                    </p>
                   </div>
 
                   <Button
@@ -1038,10 +1057,10 @@ function GrowthQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
                     </p>
                     <p className="text-2xl font-bold text-[#050215]">
                       {step1Data.rewardMode === "Overall Reward" &&
-                        `${step1Data.tokensPerWinner * step1Data.numberOfWinners} XLM`}
+                        `${step1Data.tokensPerWinner * step1Data.numberOfWinners} ${step1Data?.symbol}`}
 
                       {step1Data.rewardMode === "Individual Task Reward" &&
-                        `${step1Data.tasks.reduce((total, task) => total + task.tokensPerTask, 0) * step1Data.numberOfWinners} XLM`}
+                        `${step1Data.tasks.reduce((total, task) => total + task.tokensPerTask, 0) * step1Data.numberOfWinners} ${step1Data?.symbol}`}
                     </p>
                   </div>
 

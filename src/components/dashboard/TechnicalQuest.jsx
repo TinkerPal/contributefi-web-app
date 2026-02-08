@@ -310,12 +310,18 @@ function TechnicalQuest({ setSheetIsOpen, setOpenQuestSuccess, communityId }) {
 
               {rewardType === "Token" && (
                 <CustomInput
-                  label="Asset / Token"
+                  label="Contract"
                   placeholder="Select or enter an asset or token"
                   type="text"
                   error={errors.tokenContract?.message}
                   {...register("tokenContract")}
-                  className={rewardType !== "Token" ? "hidden" : "pl-[30%]"}
+                  className={
+                    rewardType !== "Token"
+                      ? "hidden"
+                      : rewardToken
+                        ? "pl-[30%]"
+                        : ""
+                  }
                   onFocus={handleChangeToken}
                   handleRevealPassword={() => {}}
                   icon={<RxCaretDown />}
