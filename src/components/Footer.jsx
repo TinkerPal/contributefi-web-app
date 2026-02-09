@@ -1,7 +1,7 @@
 import { FOOTER_LINKS } from "@/lib/constants";
 import { Link } from "react-router";
 import { Fragment } from "react";
-import ExploreButtons from "../ExploreButtons";
+import ExploreButtons from "./ExploreButtons";
 
 function Footer() {
   return (
@@ -33,7 +33,7 @@ function Footer() {
           </div>
         </div>
         <p className="text-center font-medium text-[#1C097D]">
-          © 2025 Contribute.fi. All rights reserved{" "}
+          © {new Date().getFullYear()} Contribute.fi. All rights reserved{" "}
         </p>
       </footer>
     </div>

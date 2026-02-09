@@ -1,9 +1,9 @@
 import { LANDING_NAV_LINKS } from "@/lib/constants";
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router";
-import MobileNavigation from "../MobileNavigation";
-import Logo from "../Logo";
-import { Button } from "../ui/button";
+import MobileNavigation from "./MobileNavigation";
+import { Button } from "./ui/button";
+import Logo from "./Logo";
 
 function Header() {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
