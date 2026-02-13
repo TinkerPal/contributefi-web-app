@@ -41,7 +41,7 @@ const router = createBrowserRouter([
           </div>
         ),
       },
-      { path: "tasks", Component: TaskPage },
+      { path: "quests", Component: TaskPage },
       { path: "communities", Component: CommunitiesPage },
       { path: "*", Component: NotFound },
     ],

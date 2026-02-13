@@ -19,13 +19,13 @@ function ExploreButtons({ tag }) {
       </Button>
       <Button
         onClick={() => {
-          navigate("/tasks");
+          navigate("/quests");
         }}
         variant="outline"
         size="lg"
         className={tag === "footer" && "bg-white"}
       >
-        View Tasks
+        View Quests
       </Button>
     </div>
   );

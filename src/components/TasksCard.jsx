@@ -1,4 +1,5 @@
 import { TASK_TAG_BG } from "@/lib/constants";
+import { toast } from "react-toastify";
 // import { useLocation, useNavigate } from "react-router";
 // import { toast } from "react-toastify";
 
@@ -12,6 +13,10 @@ function TasksCard({ task, tag }) {
   // pathname = pathname[1] + "/" + pathname[2] + "/" + pathname[3];
 
   const handleOpen = () => {
+    if (!task.isActive) {
+      toast.error("Quest is no longer available");
+      return;
+    }
     window.open(
       `https://app.contribute.fi/tasks/${encodeURIComponent(task.id)}`,
       "_blank",

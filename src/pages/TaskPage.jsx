@@ -44,10 +44,10 @@ function TaskPage() {
             <div className="flex flex-wrap items-end justify-between gap-4 lg:items-end">
               <div className="text-[#050215]">
                 <h2 className="text-[24px] font-extrabold md:text-[44px]">
-                  Available Tasks ({questsData.totalElements})
+                  Available Quest ({questsData.totalElements})
                 </h2>
                 <p className="font-light md:text-[20px]">
-                  Explore list of available tasks
+                  Explore list of available Quest
                 </p>
               </div>
 
