@@ -5,7 +5,7 @@ import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import HomePage from "./pages/HomePage";
 import RootLayout from "./components/RootLayout";
-import TaskPage from "./pages/TaskPage";
+import QuestPage from "./pages/QuestPage";
 import CommunitiesPage from "./pages/CommunitiesPage";
 import NotFound from "./components/NotFound";
 import { ToastContainer } from "react-toastify";
@@ -41,7 +41,7 @@ const router = createBrowserRouter([
           </div>
         ),
       },
-      { path: "quests", Component: TaskPage },
+      { path: "quests", Component: QuestPage },
       { path: "communities", Component: CommunitiesPage },
       { path: "*", Component: NotFound },
     ],

@@ -41,6 +41,8 @@ function CreateWorkAndEarn() {
         className="mx-auto h-auto w-full bg-radial from-blue-100 from-40% to-white sm:w-1/2 lg:order-1 lg:w-full"
         src="/Blue Harmony and Balance 1.svg"
         alt=""
+        height="314"
+        width="372"
       />
     </div>
   );

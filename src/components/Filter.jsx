@@ -18,20 +18,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const frameworks = [
-  // {
-  //   value: "DeFi",
-  //   label: "DeFi",
-  // },
-  // {
-  //   value: "Dex",
-  //   label: "Dex",
-  // },
-];
-
-function Filter({ tag }) {
+function Filter({ tag, filters, filterValue, setFilterValue }) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  // const [value, setValue] = React.useState("");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -48,8 +37,9 @@ function Filter({ tag }) {
           <span
             className={`hidden sm:block ${tag === "landing" ? "text-[#F7F9FD] group-hover:text-[#2F0FD1]" : "text-[#2F0FD1] group-hover:text-[#F7F9FD]"}`}
           >
-            {value
-              ? frameworks.find((framework) => framework.value === value)?.label
+            {filterValue
+              ? filters.find((framework) => framework.value === filterValue)
+                  ?.label
               : "Filter"}
           </span>
         </Button>
@@ -60,12 +50,14 @@ function Filter({ tag }) {
           <CommandList>
             <CommandEmpty>No filter found.</CommandEmpty>
             <CommandGroup>
-              {frameworks.map((framework) => (
+              {filters.map((framework) => (
                 <CommandItem
                   key={framework.value}
                   value={framework.value}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                    setFilterValue(
+                      currentValue === filterValue ? "" : currentValue,
+                    );
                     setOpen(false);
                   }}
                 >
@@ -73,7 +65,9 @@ function Filter({ tag }) {
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === framework.value ? "opacity-100" : "opacity-0",
+                      filterValue === framework.value
+                        ? "opacity-100"
+                        : "opacity-0",
                     )}
                   />
                 </CommandItem>

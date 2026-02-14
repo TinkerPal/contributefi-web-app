@@ -12,12 +12,12 @@ import CreateWorkAndEarn from "@/components/CreateWorkAndEarn";
 function HomePage() {
   const location = useLocation();
 
+  // Scroll into view for testimonials
   useEffect(() => {
     if (location.hash) {
       const id = location.hash.replace("#", "");
       const el = document.getElementById(id);
       if (el) {
-        // Delay to ensure element is mounted
         setTimeout(() => {
           el.scrollIntoView({ behavior: "smooth" });
         }, 200);

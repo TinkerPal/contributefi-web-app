@@ -26,6 +26,8 @@ function About() {
         className="mx-auto h-auto w-full sm:w-1/2 lg:w-full"
         src="/Frame (1).svg"
         alt=""
+        height="314"
+        width="372"
       />
     </div>
   );
