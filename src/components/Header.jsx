@@ -1,16 +1,12 @@
 import { LANDING_NAV_LINKS } from "@/lib/constants";
 import { useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router";
-import AuthButtons from "../AuthButtons";
-import MobileNavigation from "../MobileNavigation";
-import Logo from "../Logo";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "../ui/button";
+import { NavLink, useLocation } from "react-router";
+import MobileNavigation from "./MobileNavigation";
+import { Button } from "./ui/button";
+import Logo from "./Logo";
 
 function Header() {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
 
   return (
@@ -46,18 +42,20 @@ function Header() {
         </ul>
       </nav>
 
-      {isAuthenticated ? (
-        <Button
-          className="hidden lg:flex"
-          onClick={() => navigate("/dashboard")}
-          variant="secondary"
-          size="lg"
-        >
-          Launch App
-        </Button>
-      ) : (
-        <AuthButtons device="desktop" tag="heading" />
-      )}
+      <Button
+        className="hidden lg:flex"
+        onClick={() => {
+          window.open(
+            "https://app.contribute.fi",
+            "_blank",
+            "noopener,noreferrer",
+          );
+        }}
+        variant="secondary"
+        size="lg"
+      >
+        Launch App
+      </Button>
 
       {/* MOBILE NAV */}
       <MobileNavigation
@@ -97,17 +95,20 @@ function Header() {
             </ul>
           </nav>
 
-          {isAuthenticated ? (
-            <Button
-              onClick={() => navigate("/dashboard")}
-              variant="secondary"
-              size="lg"
-            >
-              Launch App
-            </Button>
-          ) : (
-            <AuthButtons device="mobile" />
-          )}
+          <Button
+            onClick={() => {
+              window.open(
+                "https://app.contribute.fi",
+                "_blank",
+                "noopener,noreferrer",
+              );
+              setSheetIsOpen(false);
+            }}
+            variant="secondary"
+            size="lg"
+          >
+            Launch App
+          </Button>
         </div>
       </MobileNavigation>
     </header>

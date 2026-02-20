@@ -6,9 +6,6 @@ import svgr from "vite-plugin-svgr";
 
 // https://vite.dev/config/
 export default defineConfig({
-  // define: {
-  //   global: "window",
-  // },
   plugins: [
     react(),
     tailwindcss(),

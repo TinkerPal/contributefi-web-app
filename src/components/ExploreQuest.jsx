@@ -6,7 +6,7 @@ import Error from "./Error";
 import Empty from "./Empty";
 import { useGetQuest } from "@/hooks/useGetQuest";
 
-function ExploreTask() {
+function ExploreQuest() {
   const navigate = useNavigate();
 
   const LIMIT = 6;
@@ -18,7 +18,7 @@ function ExploreTask() {
       <div className="mx-auto w-full max-w-[1200px] space-y-8 px-5 py-10 md:py-[104px]">
         <div className="mx-auto max-w-[1200px] space-y-8 text-center text-[#050215]">
           <h2 className="text-[32px] font-extrabold md:text-[44px]">
-            Explore Available Tasks
+            Explore Available Quest
           </h2>
 
           <p className="mx-auto max-w-[800px] text-[18px] font-light md:text-[20px]">
@@ -44,12 +44,12 @@ function ExploreTask() {
         <div className="flex justify-center">
           <Button
             onClick={() => {
-              navigate("/tasks");
+              navigate("/quests");
             }}
             size="lg"
             variant="secondary"
           >
-            See all Tasks
+            See all Quests
           </Button>
         </div>
       </div>
@@ -57,4 +57,4 @@ function ExploreTask() {
   );
 }
 
-export default ExploreTask;
+export default ExploreQuest;

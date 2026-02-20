@@ -1,33 +1,18 @@
-import { getCommunities, getMemberCommunities } from "@/services";
+import { getCommunities } from "@/services/communities";
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetCommunities = (
-  LIMIT,
-  OFFSET = 1,
-  sortOrder = "DESC",
-  communityOwnerId = "",
-  searchValue = "",
-) => {
+export const useGetCommunities = (LIMIT, OFFSET = 1, searchValue = "") => {
   const {
     data: communitiesData,
     isLoading: loadingCommunities,
     isError: errorLoadingCommunities,
     refetch,
   } = useQuery({
-    queryKey: [
-      "communities",
-      LIMIT,
-      OFFSET,
-      sortOrder,
-      communityOwnerId,
-      searchValue,
-    ],
+    queryKey: ["communities", LIMIT, OFFSET, searchValue],
     queryFn: () =>
       getCommunities({
         limit: LIMIT,
         offset: OFFSET,
-        sort: sortOrder,
-        communityOwnerId,
         searchValue,
       }),
     keepPreviousData: true,
@@ -43,32 +28,5 @@ export const useGetCommunities = (
     errorLoadingCommunities,
     totalPages,
     refetch,
-  };
-};
-
-export const useGetMemberCommunities = (LIMIT, OFFSET = 1, communityView) => {
-  const {
-    data: memberCommunitiesData,
-    isLoading: loadingMemberCommunities,
-    isError: errorLoadingMemberCommunities,
-  } = useQuery({
-    queryKey: ["communities", LIMIT, OFFSET],
-    queryFn: () =>
-      getMemberCommunities({
-        limit: LIMIT,
-        offset: OFFSET,
-      }),
-    enabled: communityView === "joined",
-    keepPreviousData: true,
-  });
-
-  const memberCommunities = memberCommunitiesData?.data ?? [];
-  const totalPages = memberCommunitiesData?.totalPages ?? 1;
-
-  return {
-    memberCommunities,
-    loadingMemberCommunities,
-    errorLoadingMemberCommunities,
-    totalPages,
   };
 };
