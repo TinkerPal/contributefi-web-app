@@ -6,7 +6,7 @@ export const getCommunities = async ({
   searchValue = "",
 } = {}) => {
   const { data } = await api.get(
-    `${import.meta.env.VITE_BASE_URL}/communities?&limit=${limit}&offset=${offset}&${searchValue !== "" && `communityName=${searchValue}`}`,
+    `${import.meta.env.VITE_BASE_URL}/communities?&limit=${limit}&offset=${offset}&${searchValue !== "" ? `communityName=${searchValue}` : ""}`,
   );
 
   return data.content;

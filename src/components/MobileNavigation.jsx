@@ -33,14 +33,17 @@ function MobileNavigation({
   return (
     <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
       <SheetTrigger asChild>
-        <button className="cursor-pointer rounded-[4px] bg-[#2F0FD1] p-0.5 opacity-100 ring-offset-background transition-opacity hover:opacity-70 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary lg:hidden">
+        <button className="cursor-pointer rounded-lg bg-[#2F0FD1] p-0.5 opacity-100 ring-offset-background transition-opacity hover:opacity-70 focus:ring-0 focus:ring-ring focus:ring-offset-0 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary lg:hidden">
           <Menu className="size-8 text-white" />
           <span className="sr-only">Open mobile navigation</span>
         </button>
       </SheetTrigger>
-      <SheetContent side={side} className="bg-white">
+      <SheetContent
+        side={side}
+        className="rounded-tl-2xl rounded-bl-2xl bg-white"
+      >
         <SheetHeader className="relative">
-          <SheetTitle className="absolute top-5 left-4 text-[32px] font-extrabold text-[#2F0FD1]">
+          <SheetTitle className="absolute top-6 left-4 text-[32px] font-extrabold text-[#2F0FD1]">
             {tag === "home-page" ? (
               <Link
                 onClick={() => {

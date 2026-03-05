@@ -21,7 +21,7 @@ function CommunitiesCard({ community }) {
   return (
     <div
       onClick={handleOpen}
-      className={`flex cursor-pointer flex-col justify-center gap-8 rounded-[8px] border-2 border-[#F0F4FD] bg-white px-[24px] py-[28px]`}
+      className={`flex cursor-pointer flex-col justify-center gap-8 rounded-xl border-2 border-[#F0F4FD] bg-white px-6 py-7`}
     >
       <div className="space-y-4">
         <div className="flex items-start justify-between">
@@ -65,7 +65,7 @@ function CommunitiesCard({ community }) {
         </p>
       </div>
 
-      <div className="flex items-end justify-between rounded-[4px] border-[0.5px] border-[#F0F4FD] bg-[#F7F9FD] p-4">
+      <div className="flex items-end justify-between rounded-lg border-[0.5px] border-[#F0F4FD] bg-[#F7F9FD] p-4">
         <div className="space-y-2 text-sm font-normal text-[#525866]">
           <div className="flex gap-1.5">
             <img src="/Briefcase.svg" alt="" />

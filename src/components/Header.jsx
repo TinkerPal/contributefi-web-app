@@ -1,26 +1,24 @@
 import { LANDING_NAV_LINKS } from "@/lib/constants";
-import { useState } from "react";
 import { NavLink, useLocation } from "react-router";
 import MobileNavigation from "./MobileNavigation";
 import { Button } from "./ui/button";
 import Logo from "./Logo";
 
-function Header() {
-  const [sheetIsOpen, setSheetIsOpen] = useState(false);
+function Header({ sheetIsOpen, setSheetIsOpen }) {
   const location = useLocation();
 
   return (
-    <header className="mx-auto flex w-full max-w-[1200px] items-center justify-between rounded-[360px] bg-[#F0F4FD] px-6 py-4 lg:py-6">
+    <header className="mx-auto flex w-full max-w-300 items-center justify-between rounded-[360px] bg-[#F0F4FD] px-6 py-4 lg:px-20 lg:py-6">
       <Logo />
 
       {/* DESKTOP NAV */}
-      <nav className="hidden lg:block">
+      <nav className="hidden text-base font-normal text-[#1C1C1E] lg:block">
         <ul className="flex gap-5 lg:gap-10">
           {LANDING_NAV_LINKS.map((link) => (
             <li key={link.title}>
               {link.title === "Testimonials" ? (
                 <NavLink
-                  className={`text-[#0D0516] hover:text-[#2F0FD1] hover:underline ${location.hash === link.href.slice(1) && "font-extrabold text-[#2F0FD1]"}`}
+                  className={`hover:text-[#2F0FD1] hover:underline ${location.hash === link.href.slice(1) && "font-extrabold text-[#2F0FD1]"}`}
                   to={link.href}
                 >
                   {link.title}
@@ -30,7 +28,7 @@ function Header() {
                   className={({ isActive }) =>
                     isActive
                       ? "font-extrabold text-[#2F0FD1] hover:underline"
-                      : "text-[#0D0516] hover:text-[#2F0FD1] hover:underline"
+                      : "hover:text-[#2F0FD1] hover:underline"
                   }
                   to={link.href}
                 >
@@ -43,7 +41,7 @@ function Header() {
       </nav>
 
       <Button
-        className="hidden lg:flex"
+        className="hidden  lg:flex"
         onClick={() => {
           window.open(
             "https://app.contribute.fi",
@@ -64,14 +62,14 @@ function Header() {
         setSheetIsOpen={setSheetIsOpen}
         tag="home-page"
       >
-        <div className="flex min-h-1/2 flex-col items-center justify-center gap-14 px-4 pt-24">
+        <div className="flex min-h-1/2 flex-col items-center justify-center gap-14 px-4 pt-10 text-base text-[#0D0516]">
           <nav>
             <ul className="flex flex-col items-center gap-6">
               {LANDING_NAV_LINKS.map((link) => (
                 <li key={link.title}>
                   {link.title === "Testimonials" ? (
                     <NavLink
-                      className={`text-[#0D0516] hover:text-[#2F0FD1] hover:underline ${location.hash === link.href.slice(1) && "font-extrabold text-[#2F0FD1]"}`}
+                      className={`hover:text-[#2F0FD1] hover:underline ${location.hash === link.href.slice(1) && "font-extrabold text-[#2F0FD1]"}`}
                       to={link.href}
                       onClick={() => setSheetIsOpen(false)}
                     >
@@ -82,7 +80,7 @@ function Header() {
                       className={({ isActive }) =>
                         isActive
                           ? "font-extrabold text-[#2F0FD1] hover:underline"
-                          : "text-[#0D0516] hover:text-[#2F0FD1] hover:underline"
+                          : "hover:text-[#2F0FD1] hover:underline"
                       }
                       to={link.href}
                       onClick={() => setSheetIsOpen(false)}
@@ -96,6 +94,7 @@ function Header() {
           </nav>
 
           <Button
+            className="w-full"
             onClick={() => {
               window.open(
                 "https://app.contribute.fi",

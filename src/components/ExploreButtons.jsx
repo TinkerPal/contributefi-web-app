@@ -9,6 +9,7 @@ function ExploreButtons({ tag }) {
       className={`${tag === "footer" ? "flex flex-col justify-center gap-4 sm:flex-row sm:justify-start" : "flex flex-col items-center justify-center gap-4 sm:flex-row"}`}
     >
       <Button
+        className="w-full sm:w-fit"
         onClick={() => {
           navigate("/communities");
         }}
@@ -23,7 +24,7 @@ function ExploreButtons({ tag }) {
         }}
         variant="outline"
         size="lg"
-        className={tag === "footer" && "bg-white"}
+        className={`${tag === "footer" && "bg-white"} w-full sm:w-fit`}
       >
         View Quests
       </Button>

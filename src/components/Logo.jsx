@@ -12,10 +12,9 @@ function Logo() {
         navigate("/");
         window.scrollTo({
           top: 0,
-          
         });
       }}
-      className="text-[32px] font-extrabold text-[#2F0FD1]"
+      className="text-[32px] font-extrabold text-[#2F0FD1] lg:text-[40px]"
     >
       CF
     </Link>

@@ -5,7 +5,7 @@ import Error from "@/components/Error";
 import Filter from "@/components/Filter";
 import Loader from "@/components/Loader";
 import CustomSearch from "@/components/Search";
-import TasksCard from "@/components/TasksCard";
+import QuestCard from "@/components/QuestCard";
 import { useGetQuest } from "@/hooks/useGetQuest";
 import React, { useEffect, useState } from "react";
 
@@ -41,8 +41,8 @@ function QuestPage() {
   };
 
   return (
-    <div className="bg-white pt-40">
-      <div className="mx-auto w-full max-w-[1200px] space-y-8 px-5 pb-10 lg:px-10">
+    <div className="bg-white">
+      <div className="mx-auto w-full max-w-300 space-y-8 px-5 pb-10 pt-4">
         <BackButton />
 
         <div className="flex flex-wrap items-end justify-between gap-4 lg:items-end">
@@ -90,7 +90,7 @@ function QuestPage() {
           <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {quests.map((quest, i) => (
-                <TasksCard task={quest} key={i} tag="task-page" />
+                <QuestCard task={quest} key={i} />
               ))}
             </div>
 

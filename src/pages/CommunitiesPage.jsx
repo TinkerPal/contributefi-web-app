@@ -41,8 +41,8 @@ function CommunitiesPage() {
   };
 
   return (
-    <div className="bg-white pt-40">
-      <div className="mx-auto w-full max-w-[1200px] space-y-8 px-5 pb-10 lg:px-10">
+    <div className="bg-white">
+      <div className="mx-auto w-full max-w-300 space-y-8 px-5 pb-10 pt-4">
         <BackButton />
 
         <div className="flex flex-wrap items-end justify-between gap-4 lg:items-end">
